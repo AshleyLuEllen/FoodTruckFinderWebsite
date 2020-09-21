@@ -1,6 +1,10 @@
+# Project and Dependency Folders
 .idea
 .gradle
 /out
 /build
 /target
 /node_modules
+
+# IntelliJ Gradle Auto-Import
+*.iml

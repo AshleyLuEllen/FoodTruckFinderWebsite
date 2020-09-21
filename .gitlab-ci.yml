@@ -1,0 +1,26 @@
+image: docker:latest
+services:
+    - docker:dind
+
+variables:
+    DOCKER_DRIVER: overlay
+    HEROKU_APP_NAME_FRONTEND: se2-group-1
+    HEROKU_APP_NAME_BACKEND: floating-escarpment-03719
+    HEROKU_REGISTRY_IMAGE_FRONTEND: registry.heroku.com/${HEROKU_APP_NAME_FRONTEND}/web
+    HEROKU_REGISTRY_IMAGE_BACKEND: registry.heroku.com/${HEROKU_APP_NAME_BACKEND}/web 
+
+stages:
+    - build
+
+docker-build:
+    stage: build
+    script:
+        - apk add --no-cache curl
+        - docker build --tag $HEROKU_REGISTRY_IMAGE_FRONTEND --file ./docker/food-truck-frontend.Dockerfile ./food-truck-frontend/
+        - docker login -u _ -p $HEROKU_AUTH_TOKEN registry.heroku.com
+        - docker push $HEROKU_REGISTRY_IMAGE_FRONTEND
+        - ./heroku/release-frontend.sh
+        - docker build --tag $HEROKU_REGISTRY_IMAGE_BACKEND --file ./docker/food-truck-backend.Dockerfile ./food-truck-api/
+        - docker login -u _ -p $HEROKU_AUTH_TOKEN registry.heroku.com
+        - docker push $HEROKU_REGISTRY_IMAGE_BACKEND
+        - ./heroku/release-backend.sh

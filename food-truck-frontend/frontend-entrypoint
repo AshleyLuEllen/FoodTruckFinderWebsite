@@ -5,4 +5,4 @@
 # Bash equivalent of ENV_NAME = !StringUtils.isEmpty(ENV_NAME) ? {"."+ENV_NAME} : ENV_NAME;
 [[ -n $ENV_NAME ]] && ENV_NAME=".${ENV_NAME}"
 
-exec ./node_modules/.bin/env-cmd -f "./.env${ENV_NAME}" yarn start
+exec ./node_modules/.bin/env-cmd -f "./.env${ENV_NAME}" yarn entrypoint

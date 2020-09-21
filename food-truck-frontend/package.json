@@ -4,6 +4,7 @@
     "build": "next build",
     "start": "next start",
     "docker-start": "next start -p 80",
+    "entrypoint": "next start -p $PORT",
     "test": "jest"
   },
   "dependencies": {

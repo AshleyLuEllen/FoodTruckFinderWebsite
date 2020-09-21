@@ -10,6 +10,9 @@ RUN ./gradlew build --no-daemon -p .
 FROM openjdk:14
 WORKDIR /app
 COPY --from=build /build/build/libs/food-truck-api-*.jar app.jar
+COPY ./backend-entrypoint .
+
+RUN chmod +x ./backend-entrypoint
 
 # Running the app
-ENTRYPOINT exec java $JAVA_OPTS -jar app.jar
+ENTRYPOINT ./backend-entrypoint
