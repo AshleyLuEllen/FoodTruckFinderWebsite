@@ -17,7 +17,7 @@ deploy-frontend:
     stage: deploy
     script:
         - apk add --no-cache curl
-        - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         - docker pull $CACHE_IMAGE:frontend || true
         - docker build --cache-from $CACHE_IMAGE:frontend --tag $CACHE_IMAGE:frontend --tag $HEROKU_REGISTRY_IMAGE_FRONTEND --file ./docker/food-truck-frontend.Dockerfile ./food-truck-frontend/
         - docker push $CACHE_IMAGE:frontend
@@ -30,7 +30,7 @@ deploy-backend:
     stage: deploy
     script: 
         - apk add --no-cache curl
-        - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         - docker pull $CACHE_IMAGE:backend || true
         - docker build --cache-from $CACHE_IMAGE:backend --tag $CACHE_IMAGE:backend --tag $HEROKU_REGISTRY_IMAGE_BACKEND --file ./docker/food-truck-api.Dockerfile ./food-truck-api/
         - docker push $CACHE_IMAGE:backend
