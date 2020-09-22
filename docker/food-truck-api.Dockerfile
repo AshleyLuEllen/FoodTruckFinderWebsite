@@ -6,6 +6,7 @@ WORKDIR /build
 
 COPY . .
 RUN ./gradlew build --no-daemon -p .
+RUN ls /build/build/libs/
 
 FROM openjdk:14
 WORKDIR /app
