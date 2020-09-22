@@ -1,0 +1,14 @@
+.login-form {
+    margin: 0 auto;
+    display: block;
+    text-align: center;
+}
+
+.login-form-details {
+    text-align: right;
+    margin: 0 auto;
+}
+
+.login-submit-button {
+    margin: 5px;
+}

@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.log4j.Log4j2;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+
 @Log4j2
 @RestController
 public class PingEndpoint {
@@ -21,5 +24,10 @@ public class PingEndpoint {
             (Runtime.getRuntime().freeMemory() / (1024.0 * 1024.0))
         );
     }
-    
+
+    @GetMapping("/uptime")
+    public double uptime() {
+        RuntimeMXBean rb = ManagementFactory.getRuntimeMXBean();
+        return rb.getUptime() / 1000.0;
+    }
 }

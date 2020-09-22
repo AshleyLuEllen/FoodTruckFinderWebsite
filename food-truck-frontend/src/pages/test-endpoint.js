@@ -11,9 +11,9 @@ class TestEndpoint extends Component {
     }
 
     componentDidMount() {
-        axios.get(process.env.FOOD_TRUCK_API_URL + "/ping")
+        axios.get(process.env.FOOD_TRUCK_API_URL + "/uptime")
         .then( (res) => {
-            this.setState({result: res});
+            this.setState({result: res.data});
         })
         .catch((err) => {
             this.setState({result: err.response});
@@ -23,7 +23,7 @@ class TestEndpoint extends Component {
         return (
             <div>
                 <h1>Test Endpoint</h1>
-                <h2>{this.state.result}</h2>
+                <h2>Uptime: {this.state.result} seconds</h2>
             </div>
         );
     }

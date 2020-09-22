@@ -18,25 +18,40 @@ class Login extends Component {
     }
     componentDidMount() {
     }
+    createAccount() {
+        console.log("create account!");
+    }
     render() {
         return (
-            <div>
+            <div className="login-form">
                 <h2>Login</h2>
                 <form onSubmit={this.handleSubmit}>
-                    <div className="form-group">
-                        <label>
-                            Email:
-                        </label>
-                        <input email = "email" type="text" onChange={this.handleInputChange} />
-                    </div>
-
-                    <div>
-                        <label>
-                            Password:
-                        </label>
-                        <input password = "password" type="text" onChange={this.handleInputChange} />
-                    </div>
-                    <input type="submit" value="Submit" />
+                    <table className="login-form-details">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <label for="email">
+                                        Email:
+                                    </label>
+                                </td>
+                                <td>
+                                    <input name="email" email="email" type="text" onChange={this.handleInputChange} />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="pass">
+                                        Password:
+                                    </label>
+                                </td>
+                                <td>
+                                    <input name="pass" password = "password" type="text" onChange={this.handleInputChange} />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <input className="login-submit-button" type="submit" value="Sign In" />
+                    <button className="login-submit-button" onClick={this.createAccount}>Create Account</button>
                 </form>
                 <br />
                 <label>{this.state.message}</label>
