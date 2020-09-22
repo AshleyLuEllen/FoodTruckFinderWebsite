@@ -19,7 +19,7 @@ public class FoodTruckApplication {
     // TODO: refractor to environment variable
     private static final String[] allowedOrigins = {
         "http://localhost:3000",
-        "https://se2-group-1.herokuapp.com/"
+        "https://se2-group-1.herokuapp.com"
     };
 
     @Bean
