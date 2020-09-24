@@ -19,6 +19,7 @@ class TestEndpoint extends Component {
             this.setState({result: err.response});
         });
     }
+    
     render() {
         return (
             <div>

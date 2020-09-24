@@ -5,7 +5,7 @@ require('dotenv').config();
 function HomePage() {
     return (
         <ul>
-            <h1>Home Page (Food Truck Finder)</h1>
+            <h1>Home Page (Food Truck Finder - Group 1)</h1>
             <li>
                 <Link href="/login">
                     <a>Login</a>
