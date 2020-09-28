@@ -4,7 +4,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${CLEARDB_DATABASE_USERNAME:root}
     password: ${CLEARDB_DATABASE_PASSWORD:password}
-    url: jdbc:${CLEARDB_DATABASE_URL:mysql://localhost:3307/food_truck_finder}?createDatabaseIfNotExist=true&useSSL=false
+    url: jdbc:${CLEARDB_DATABASE_URL:mysql://localhost:3306/food_truck_finder}?createDatabaseIfNotExist=true&useSSL=false
   # Log JPA queries
   # Comment this in production
   jpa:

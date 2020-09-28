@@ -1,5 +1,7 @@
 package food.truck.api.endpoint;
 
+import food.truck.api.endpoint.error.ResourceNotFoundException;
+import food.truck.api.endpoint.error.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -7,9 +9,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import food.truck.api.user.User;
-import food.truck.api.user.UserService;
+import food.truck.api.data.user.User;
+import food.truck.api.data.user.UserService;
 import lombok.extern.log4j.Log4j2;
+
+import java.security.Principal;
+import java.security.Provider;
+import java.util.Objects;
 
 @Log4j2
 @RestController
@@ -17,14 +23,23 @@ public class UserEndpoint {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/user/{id}")
-    public User findUserById(@PathVariable Long id) {
-        var user = userService.findUser(id);
-        return user.orElse(null);
+    @GetMapping("/user")
+    public User findMeUser(Principal principal) {
+        log.info(principal.getName());
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+        if (!Objects.equals(principal.getName(), user.getEmailAddress())) {
+            throw new UnauthorizedException();
+        }
+        return user;
     }
 
-    @PostMapping("/user")
-    public User saveUser(@RequestBody User user) {
-        return userService.saveUser(user);
+    @GetMapping("/user/{id}")
+    public User findUserById(@PathVariable Long id) {
+        return userService.findUser(id).orElseThrow(ResourceNotFoundException::new);
+    }
+
+    @PostMapping("/createuser")
+    public User createUser(@RequestBody User user) {
+        return userService.createUser(user);
     }
 }
