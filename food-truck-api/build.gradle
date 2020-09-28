@@ -99,6 +99,8 @@ dependencies {
     testCompileOnly group: 'org.projectlombok', name: 'lombok'
     annotationProcessor group: 'org.projectlombok', name: 'lombok'
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok'
+
+    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.21'
 }
 
 configurations.all {
