@@ -1,29 +1,57 @@
 import React, { Component } from 'react';
 import Link from "next/link";
+import axios from "axios";
 
 class CreateAccount extends Component {
+
     constructor(props) {
         super(props);
-        this.state = {email: '', password: '', firstName:'', lastName:''};
+        this.state = {email: '', password: '', passConf:'', firstName:'', lastName:''};
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleChangeStatus = this.handleChangeStatus.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.createAccount = this.createAccount.bind(this);
     }
+
     handleChangeStatus(event) {
     }
+
     handleInputChange(event) {
+        this.setState(
+            {
+                [event.target.name]: event.target.value
+            }
+        )
     }
+
     handleSubmit(event) {
-        this.props.history.push('/')
+
     }
+
     componentDidMount() {
     }
-    createAccount() {
 
+    createAccount(){
+        const user = {
+            emailAddress: this.state.email,
+            firstName: this.state.firstName,
+            lastName: this.state.lastName,
+            password: this.state.password
+        }
+
+        axios.post(process.env.FOOD_TRUCK_API_URL + "/createuser", user)
+            .then( (res) => {
+                this.props.router('/login')
+            })
+            .catch((err) => {
+                alert("errE")
+                console.log(err);
+            });
 
 
         console.log("create account!");
     }
+
     render() {
         return (
             <div className="create-account-form">
@@ -38,47 +66,47 @@ class CreateAccount extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="email" email="email" type="text" onChange={this.handleInputChange} />
+                                <input name="email" email="email" type="text" value={this.state.email} onChange={this.handleInputChange} />
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <label htmlFor="firstname">
+                                <label htmlFor="firstName">
                                     First Name:
                                 </label>
                             </td>
                             <td>
-                                <input name="firstname" firstname="firstname" type="text" onChange={this.handleInputChange}/>
+                                <input name="firstName" type="text" value={this.state.firstName} onChange={this.handleInputChange}/>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <label htmlFor="lastname">
+                                <label htmlFor="lastName">
                                     Last Name:
                                 </label>
                             </td>
                             <td>
-                                <input name="lastname" lastname="lastname" type="text" onChange={this.handleInputChange}/>
+                                <input name="lastName" type="text" value={this.state.lastName} onChange={this.handleInputChange}/>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <label for="pass">
+                                <label for="password">
                                     Password:
                                 </label>
                             </td>
                             <td>
-                                <input name="pass" password = "password" type="text" onChange={this.handleInputChange} />
+                                <input name="password" type="text" value={this.state.password} onChange={this.handleInputChange} />
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <label htmlFor="pass-conf">
+                                <label htmlFor="passConf">
                                     Re-enter Password:
                                 </label>
                             </td>
                             <td>
-                                <input name="pass-conf" conf-password="pass-conf" type="text" onChange={this.handleInputChange}/>
+                                <input name="passConf" type="text" value={this.state.passConf} onChange={this.handleInputChange}/>
                             </td>
                         </tr>
                         </tbody>
