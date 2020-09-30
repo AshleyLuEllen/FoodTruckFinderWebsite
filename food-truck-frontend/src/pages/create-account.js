@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Link from "next/link";
 import axios from "axios";
+import withRouter from "next/dist/client/with-router";
 
 class CreateAccount extends Component {
 
@@ -25,7 +26,7 @@ class CreateAccount extends Component {
     }
 
     handleSubmit(event) {
-
+        event.preventDefault();
     }
 
     componentDidMount() {
@@ -39,15 +40,19 @@ class CreateAccount extends Component {
             password: this.state.password
         }
 
-        axios.post(process.env.FOOD_TRUCK_API_URL + "/createuser", user)
-            .then( (res) => {
-                this.props.router('/login')
-            })
-            .catch((err) => {
-                alert("errE")
-                console.log(err);
-            });
-
+        if (this.state.password === this.state.passConf) {
+            axios.post(process.env.FOOD_TRUCK_API_URL + "/createuser", user)
+                .then((res) => {
+                    this.props.router.push('/login')
+                })
+                .catch((err) => {
+                    alert("Email already exists.")
+                    console.log(err);
+                });
+        }
+        else {
+            alert("Passwords do no match.")
+        }
 
         console.log("create account!");
     }
@@ -56,7 +61,7 @@ class CreateAccount extends Component {
         return (
             <div className="create-account-form">
                 <h2>Create Account</h2>
-                <form onSubmit={this.handleSubmit}>
+                <form onSubmit={this.handleSubmit} method="post">
                     <table className="login-form-details">
                         <tbody>
                         <tr>
@@ -96,7 +101,7 @@ class CreateAccount extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="password" type="text" value={this.state.password} onChange={this.handleInputChange} />
+                                <input name="password" type="password" value={this.state.password} onChange={this.handleInputChange} />
                             </td>
                         </tr>
                         <tr>
@@ -106,7 +111,7 @@ class CreateAccount extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="passConf" type="text" value={this.state.passConf} onChange={this.handleInputChange}/>
+                                <input name="passConf" type="password" value={this.state.passConf} onChange={this.handleInputChange}/>
                             </td>
                         </tr>
                         </tbody>
@@ -124,4 +129,4 @@ class CreateAccount extends Component {
         );
     }
 }
-export default CreateAccount;
+export default withRouter(CreateAccount);

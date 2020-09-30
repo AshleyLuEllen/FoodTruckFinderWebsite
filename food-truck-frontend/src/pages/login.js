@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import Link from "next/link";
 import { withRouter } from 'next/router'
+import axios from "axios";
 
 class Login extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {email: '', password: ''};
+        this.state = {email: '', password: '', loginFailed:false};
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleChangeStatus = this.handleChangeStatus.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -14,8 +15,33 @@ class Login extends Component {
     handleChangeStatus(event) {
     }
     handleInputChange(event) {
+        this.setState(
+            {
+                [event.target.name]: event.target.value
+            }
+        )
+        console.log(this.state)
     }
     handleSubmit(event) {
+        event.preventDefault()
+
+        console.log(this.state)
+        axios
+            .get(`${process.env.FOOD_TRUCK_API_URL}/basicauth`, {
+                auth: {
+                    username: this.state.email,
+                    password: this.state.password
+                }
+            })
+            .then(res => {
+                this.props.router.push('/')
+            })
+            .catch(err => {
+                this.setState({
+                    loginFailed: true
+                });
+                console.log(err)
+            });
     }
     componentDidMount() {
     }
@@ -43,12 +69,12 @@ class Login extends Component {
                             </tr>
                             <tr>
                                 <td>
-                                    <label for="pass">
+                                    <label for="password">
                                         Password:
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="pass" password = "password" type="text" onChange={this.handleInputChange} />
+                                    <input name="password" password = "password" type="password" onChange={this.handleInputChange} />
                                 </td>
                             </tr>
                         </tbody>
@@ -57,7 +83,7 @@ class Login extends Component {
                     <button className="login-submit-button" onClick={this.createAccount}>Create Account</button>
                 </form>
                 <br />
-                <label>{this.state.message}</label>
+                {this.state.loginFailed && <span>Login failed. Re-enter your username and password.</span>}
                 <li>
                     <Link href="/">
                         <a>Home</a>
