@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-import { useRouter } from 'next/router'
 import Link from "next/link";
+import { withRouter } from 'next/router'
 
 class Login extends Component {
-    router;
 
     constructor(props) {
         super(props);
@@ -17,16 +16,12 @@ class Login extends Component {
     handleInputChange(event) {
     }
     handleSubmit(event) {
-        this.router.push('/')
     }
     componentDidMount() {
     }
 
-    createAccount(e) {
-        const router=useRouter();
-        e.preventDefault()
-        router.push('/create-account')
-        console.log("create account!");
+    createAccount = (e) => {
+        this.props.router.push('/create-account');
     }
 
     render() {
@@ -59,7 +54,7 @@ class Login extends Component {
                         </tbody>
                     </table>
                     <input className="login-submit-button" type="submit" value="Sign In" />
-                    <button className="login-submit-button" onClick={() => this.router.push('/create-account')}>Create Account</button>
+                    <button className="login-submit-button" onClick={this.createAccount}>Create Account</button>
                 </form>
                 <br />
                 <label>{this.state.message}</label>
@@ -72,4 +67,4 @@ class Login extends Component {
         );
     }
 }
-export default Login;
+export default withRouter(Login);

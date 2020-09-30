@@ -19,6 +19,9 @@ class CreateAccount extends Component {
     componentDidMount() {
     }
     createAccount() {
+
+
+
         console.log("create account!");
     }
     render() {
