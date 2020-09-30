@@ -4,7 +4,7 @@ import Link from "next/link";
 class CreateAccount extends Component {
     constructor(props) {
         super(props);
-        this.state = {email: '', password: ''};
+        this.state = {email: '', password: '', firstName:'', lastName:''};
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleChangeStatus = this.handleChangeStatus.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -40,6 +40,26 @@ class CreateAccount extends Component {
                         </tr>
                         <tr>
                             <td>
+                                <label htmlFor="firstname">
+                                    First Name:
+                                </label>
+                            </td>
+                            <td>
+                                <input name="firstname" firstname="firstname" type="text" onChange={this.handleInputChange}/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label htmlFor="lastname">
+                                    Last Name:
+                                </label>
+                            </td>
+                            <td>
+                                <input name="lastname" lastname="lastname" type="text" onChange={this.handleInputChange}/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
                                 <label for="pass">
                                     Password:
                                 </label>
@@ -48,16 +68,25 @@ class CreateAccount extends Component {
                                 <input name="pass" password = "password" type="text" onChange={this.handleInputChange} />
                             </td>
                         </tr>
+                        <tr>
+                            <td>
+                                <label htmlFor="pass-conf">
+                                    Re-enter Password:
+                                </label>
+                            </td>
+                            <td>
+                                <input name="pass-conf" conf-password="pass-conf" type="text" onChange={this.handleInputChange}/>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
-                    <input className="login-submit-button" type="submit" value="Sign In" />
                     <button className="login-submit-button" onClick={this.createAccount}>Create Account</button>
                 </form>
                 <br />
                 <label>{this.state.message}</label>
                 <li>
                     <Link href="/">
-                        <a>Home</a>
+                        <a>Cancel</a>
                     </Link>
                 </li>
             </div>
