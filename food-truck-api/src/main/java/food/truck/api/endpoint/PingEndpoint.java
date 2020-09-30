@@ -16,7 +16,7 @@ public class PingEndpoint {
         return "pong!";
     }
 
-    @GetMapping("/memory-ping")
+    @GetMapping("/memory-ping") 
     public String memoryPing() {
         return String.format("Max available memory: %.3f MB (total: %.3f, free: %.3f)", 
             (Runtime.getRuntime().maxMemory() / (1024.0 * 1024.0)),
