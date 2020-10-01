@@ -18,12 +18,12 @@ stages:
 test-frontend:
     stage: test
     script:
-        - echo TODO: implement tests
+        - "echo TODO: implement tests"
 
 test-backend:
     stage: test
     script:
-        - echo TODO: implement tests
+        - "echo TODO: implement tests"
 
 deploy-frontend:
     stage: deploy
