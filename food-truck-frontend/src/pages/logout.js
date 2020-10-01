@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import Link from "next/link";
+import { connect, useDispatch } from 'react-redux';
+import { logout as authLogout } from '../redux/actions/auth';
 
 class Logout extends Component {
     constructor(props) {
@@ -16,6 +18,7 @@ class Logout extends Component {
     handleSubmit(event) {
     }
     componentDidMount() {
+        this.props.authLogout();
     }
     render() {
         return (
@@ -30,4 +33,14 @@ class Logout extends Component {
         );
     }
 }
-export default Logout;
+
+function mapStateToProps(state) {
+    const { auth } = state
+    return { auth }
+  }
+  
+const mapDispatchToProps = {
+    authLogout
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Logout);
