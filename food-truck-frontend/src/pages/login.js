@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import Link from "next/link";
 import { withRouter } from 'next/router'
 import axios from "axios";
+import { connect, useDispatch } from 'react-redux';
+import { login as authLogin, logout as authLogout } from '../redux/actions/auth';
 
 class Login extends Component {
 
@@ -15,12 +17,9 @@ class Login extends Component {
     handleChangeStatus(event) {
     }
     handleInputChange(event) {
-        this.setState(
-            {
+        this.setState({
                 [event.target.name]: event.target.value
-            }
-        )
-        console.log(this.state)
+        });
     }
     handleSubmit(event) {
         event.preventDefault()
@@ -34,12 +33,14 @@ class Login extends Component {
                 }
             })
             .then(res => {
+                this.props.authLogin(this.state.email, this.state.password);
                 this.props.router.push('/')
             })
             .catch(err => {
                 this.setState({
                     loginFailed: true
                 });
+                this.props.authLogout();
                 console.log(err)
             });
     }
@@ -93,4 +94,15 @@ class Login extends Component {
         );
     }
 }
-export default withRouter(Login);
+
+function mapStateToProps(state) {
+    const { auth } = state
+    return { auth }
+  }
+  
+const mapDispatchToProps = {
+    authLogin,
+    authLogout
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Login));

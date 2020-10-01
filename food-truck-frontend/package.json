@@ -24,7 +24,9 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-final-form": "6.5.1",
-    "react-redux": "7.2.1"
+    "react-redux": "7.2.1",
+    "redux-persist": "6.0.0",
+    "date-fns": "2.16.1"
   },
   "devDependencies": {
     "@babel/core": "^7.11.1",
