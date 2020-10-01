@@ -12,7 +12,18 @@ variables:
     CACHE_IMAGE: registry.gitlab.com/fall20-group1/food-truck-finder-2
 
 stages:
+    - test
     - deploy
+
+test-frontend:
+    stage: test
+    script:
+        - "echo TODO: implement tests"
+
+test-backend:
+    stage: test
+    script:
+        - "echo TODO: implement tests"
 
 deploy-frontend:
     stage: deploy
@@ -26,6 +37,9 @@ deploy-frontend:
         - docker push $HEROKU_REGISTRY_IMAGE_FRONTEND
         - chmod +x ./heroku/release-frontend.sh
         - ./heroku/release-frontend.sh
+    only:
+        - master
+        - web
 
 deploy-backend:
     stage: deploy
@@ -39,3 +53,6 @@ deploy-backend:
         - docker push $HEROKU_REGISTRY_IMAGE_BACKEND
         - chmod +x ./heroku/release-backend.sh
         - ./heroku/release-backend.sh
+    only:
+        - master
+        - web
