@@ -2,12 +2,9 @@ package food.truck.api.endpoint;
 
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
+import food.truck.api.security.WebSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
@@ -36,6 +33,42 @@ public class UserEndpoint {
     @GetMapping("/user/{id}")
     public User findUserById(@PathVariable Long id) {
         return userService.findUser(id).orElseThrow(ResourceNotFoundException::new);
+    }
+
+    @PatchMapping("/user")
+    public User updateMeUser(Principal principal, @RequestBody User user) {
+        User dbUser = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+        if (!Objects.equals(principal.getName(), dbUser.getEmailAddress())) {
+            throw new UnauthorizedException();
+        }
+
+        // Create the result user
+        User resultUser = new User();
+        resultUser.setId(dbUser.getId());
+        resultUser.setAuthority(dbUser.getAuthority());
+        resultUser.setEnabled(dbUser.isEnabled());
+
+        // Update password
+        if (user.getPassword() != null) {
+            resultUser.setPasswordHash(WebSecurityConfig.PASSWORD_ENCODER.encode(user.getPassword()));
+        }
+
+        // Update email
+        if (user.getEmailAddress() != null) {
+            resultUser.setEmailAddress(user.getEmailAddress());
+        }
+
+        // Update first name
+        if (user.getFirstName() != null) {
+            resultUser.setFirstName(user.getFirstName());
+        }
+
+        // Update last name
+        if (user.getLastName() != null) {
+            resultUser.setLastName(user.getLastName());
+        }
+
+        return userService.saveUser(resultUser);
     }
 
     @PostMapping("/createuser")
