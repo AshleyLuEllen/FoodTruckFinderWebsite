@@ -89,6 +89,11 @@ public class UserService {
             throw new ResourceConflictException("Email address is taken.");
         });
 
+        // Check password security
+        if (!UserValidator.isPasswordValid(user.getPassword())) {
+            throw new BadRequestException("Invalid password");
+        }
+
         // Create user
         user.setPasswordHash(WebSecurityConfig.PASSWORD_ENCODER.encode(user.getPassword()));
         user.setEnabled(true);
