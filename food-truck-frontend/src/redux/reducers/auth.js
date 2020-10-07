@@ -1,4 +1,4 @@
-import { ACTION_LOGIN, ACTION_LOGOUT } from '../actions/auth';
+import { ACTION_LOGIN, ACTION_LOGOUT, ACTION_UPDATE } from '../actions/auth';
 
 const initialState = {
     email: '',
@@ -9,6 +9,7 @@ const initialState = {
 export function reducer(state = initialState, action) {
     switch(action.type) {
         case ACTION_LOGIN:
+        case ACTION_UPDATE:
             return {
                 ...state,
                 email: action.email,

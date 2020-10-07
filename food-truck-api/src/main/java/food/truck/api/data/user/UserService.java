@@ -46,6 +46,8 @@ public class UserService {
                 throw new BadRequestException("Invalid password");
             }
             resultUser.setPasswordHash(WebSecurityConfig.PASSWORD_ENCODER.encode(user.getPassword()));
+        } else {
+            resultUser.setPasswordHash(dbUser.getPasswordHash());
         }
 
         // Update email
@@ -54,6 +56,8 @@ public class UserService {
                 throw new BadRequestException("Invalid email address");
             }
             resultUser.setEmailAddress(user.getEmailAddress().strip());
+        } else {
+            resultUser.setEmailAddress(dbUser.getEmailAddress());
         }
 
         // Update first name
@@ -62,6 +66,8 @@ public class UserService {
                 throw new BadRequestException("Invalid first name");
             }
             resultUser.setFirstName(user.getFirstName().strip());
+        } else {
+            resultUser.setFirstName(dbUser.getFirstName());
         }
 
         // Update last name
@@ -70,6 +76,8 @@ public class UserService {
                 throw new BadRequestException("Invalid last name");
             }
             resultUser.setLastName(user.getLastName().strip());
+        } else {
+            resultUser.setLastName(dbUser.getLastName());
         }
 
         return userRepository.save(resultUser);
