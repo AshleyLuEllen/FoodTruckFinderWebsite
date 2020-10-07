@@ -1,4 +1,7 @@
 import React from "react";
+import Link from 'next/link';
+import { connect } from 'react-redux';
+import { logout as authLogout } from '../redux/actions/auth';
 import { fade, makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -14,147 +17,161 @@ import AccountCircle from "@material-ui/icons/AccountCircle";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 
 const useStyles = makeStyles((theme) => ({
-  grow: {
-    flexGrow: 1
-  },
-  menuButton: {
-    marginRight: theme.spacing(2)
-  },
-  title: {
-    display: "none",
-    [theme.breakpoints.up("sm")]: {
-      display: "block"
-    }
-  },
-  search: {
-    position: "relative",
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: fade(theme.palette.common.white, 0.15),
-    "&:hover": {
-      backgroundColor: fade(theme.palette.common.white, 0.25)
+    grow: {
+        flexGrow: 1
     },
-    marginRight: theme.spacing(2),
-    marginLeft: 0,
-    width: "100%",
-    [theme.breakpoints.up("sm")]: {
-      marginLeft: theme.spacing(3),
-      width: "auto"
+    menuButton: {
+        marginRight: theme.spacing(2)
+    },
+    title: {
+        display: "none",
+        [theme.breakpoints.up("sm")]: {
+            display: "block"
+        },
+        textDecoration: "none",
+        transition: "0.2s all",
+        "&:hover": {
+            // textDecoration: "underline",
+            fontSize: "1.5rem"
+        }
+    },
+    search: {
+        position: "relative",
+        borderRadius: theme.shape.borderRadius,
+        backgroundColor: fade(theme.palette.common.white, 0.15),
+        "&:hover": {
+            backgroundColor: fade(theme.palette.common.white, 0.25)
+        },
+        marginRight: theme.spacing(2),
+        marginLeft: 0,
+        width: "100%",
+        [theme.breakpoints.up("sm")]: {
+            marginLeft: theme.spacing(3),
+            width: "auto"
+        }
+    },
+    searchIcon: {
+        padding: theme.spacing(0, 2),
+        height: "100%",
+        position: "absolute",
+        pointerEvents: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    inputRoot: {
+        color: "inherit"
+    },
+    inputInput: {
+        padding: theme.spacing(1, 1, 1, 0),
+        // vertical padding + font size from searchIcon
+        paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
+        transition: theme.transitions.create("width"),
+        width: "100%",
+        [theme.breakpoints.up("md")]: {
+            width: "20ch"
+        }
+    },
+    sectionDesktop: {
+        display: "flex"
     }
-  },
-  searchIcon: {
-    padding: theme.spacing(0, 2),
-    height: "100%",
-    position: "absolute",
-    pointerEvents: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  inputRoot: {
-    color: "inherit"
-  },
-  inputInput: {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
-    transition: theme.transitions.create("width"),
-    width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: "20ch"
-    }
-  },
-  sectionDesktop: {
-    display: "flex"
-  }
 }));
 
-export default function PrimarySearchAppBar() {
-  const classes = useStyles();
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [isLoggedIn, setIsLoggedIn] = React.useState(true);
+function PrimarySearchAppBar(props) {
+    const classes = useStyles();
+    const [anchorEl, setAnchorEl] = React.useState(null);
 
-  const isMenuOpen = Boolean(anchorEl);
+    const isMenuOpen = Boolean(anchorEl);
 
-  const handleProfileMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+    const handleProfileMenuOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    // handleMobileMenuClose();
-  };
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+        // handleMobileMenuClose();
+    };
 
-  const menuId = "primary-search-account-menu";
-  const renderMenu = (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{ vertical: "top", horizontal: "right" }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My Account</MenuItem>
-    </Menu>
-  );
+    const menuId = "primary-search-account-menu";
+    const renderMenu = (
+        <Menu
+            anchorEl={anchorEl}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            id={menuId}
+            keepMounted
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+            open={isMenuOpen}
+            onClose={handleMenuClose}
+        >
+            <Link href="/dashboard">
+                <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+            </Link>
+            <Link href="/account">
+                <MenuItem onClick={handleMenuClose}>My Account</MenuItem>
+            </Link>
+        </Menu>
+    );
 
-  return (
-    <div className={classes.grow}>
-      <AppBar position="static">
-        <Toolbar>
-          {/* <IconButton
-            edge="start"
-            className={classes.menuButton}
-            color="inherit"
-            aria-label="open drawer"
-          >
-            <MenuIcon />
-          </IconButton> */}
-          <Typography className={classes.title} variant="h6" noWrap>
-            Food Truck Finder
-          </Typography>
-          <div className={classes.grow} />
-          <div className={classes.search}>
-            <div className={classes.searchIcon}>
-              <SearchIcon />
-            </div>
-            <InputBase
-              placeholder="Search…"
-              classes={{
-                root: classes.inputRoot,
-                input: classes.inputInput
-              }}
-              inputProps={{ "aria-label": "search" }}
-            />
-          </div>
-          {isLoggedIn && (
-            <div className={classes.sectionDesktop}>
-              <IconButton
-                aria-label="show 17 new notifications"
-                color="inherit"
-              >
-                <Badge badgeContent={17} color="secondary">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-              <IconButton
-                edge="end"
-                aria-label="account of current user"
-                aria-controls={menuId}
-                aria-haspopup="true"
-                onClick={handleProfileMenuOpen}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
-            </div>
-          )}
-          {!isLoggedIn && <Button color="inherit">Login</Button>}
-        </Toolbar>
-      </AppBar>
-      {renderMenu}
-    </div>
-  );
+    return (
+        <div className={classes.grow}>
+            <AppBar position="static">
+                <Toolbar>
+                    <Link href="/" passHref>
+                        <Typography component="a" className={classes.title} variant="h6" noWrap color="inherit">
+                            Food Truck Finder
+                        </Typography>
+                    </Link>
+                    <div className={classes.grow} />
+                    <div className={classes.search}>
+                        <div className={classes.searchIcon}>
+                            <SearchIcon />
+                        </div>
+                        <InputBase
+                            placeholder="Search…"
+                            classes={{
+                                root: classes.inputRoot,
+                                input: classes.inputInput
+                            }}
+                            inputProps={{ "aria-label": "search" }}
+                        />
+                    </div>
+                    {props.isLoggedIn && (
+                        <div className={classes.sectionDesktop}>
+                            <IconButton
+                                aria-label="show 17 new notifications"
+                                color="inherit"
+                            >
+                                <Badge badgeContent={17} color="secondary">
+                                    <NotificationsIcon />
+                                </Badge>
+                            </IconButton>
+                            <IconButton
+                                edge="end"
+                                aria-label="account of current user"
+                                aria-controls={menuId}
+                                aria-haspopup="true"
+                                onClick={handleProfileMenuOpen}
+                                color="inherit"
+                            >
+                                <AccountCircle />
+                            </IconButton>
+                        </div>
+                    )}
+                    {!props.isLoggedIn && <Button href="/login" color="primary" variant="contained">Login</Button>}
+                </Toolbar>
+            </AppBar>
+            {renderMenu}
+        </div>
+    );
 }
+
+function mapStateToProps(state) {
+    const { auth } = state
+    return { auth }
+}
+  
+const mapDispatchToProps = {
+    authLogout
+}
+  
+export default connect(mapStateToProps, mapDispatchToProps)(PrimarySearchAppBar);
