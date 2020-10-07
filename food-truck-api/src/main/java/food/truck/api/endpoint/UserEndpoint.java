@@ -1,8 +1,10 @@
 package food.truck.api.endpoint;
 
+import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
 import food.truck.api.security.WebSecurityConfig;
+import food.truck.api.validation.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,38 +39,7 @@ public class UserEndpoint {
 
     @PatchMapping("/user")
     public User updateMeUser(Principal principal, @RequestBody User user) {
-        User dbUser = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
-        if (!Objects.equals(principal.getName(), dbUser.getEmailAddress())) {
-            throw new UnauthorizedException();
-        }
-
-        // Create the result user
-        User resultUser = new User();
-        resultUser.setId(dbUser.getId());
-        resultUser.setAuthority(dbUser.getAuthority());
-        resultUser.setEnabled(dbUser.isEnabled());
-
-        // Update password
-        if (user.getPassword() != null) {
-            resultUser.setPasswordHash(WebSecurityConfig.PASSWORD_ENCODER.encode(user.getPassword()));
-        }
-
-        // Update email
-        if (user.getEmailAddress() != null) {
-            resultUser.setEmailAddress(user.getEmailAddress());
-        }
-
-        // Update first name
-        if (user.getFirstName() != null) {
-            resultUser.setFirstName(user.getFirstName());
-        }
-
-        // Update last name
-        if (user.getLastName() != null) {
-            resultUser.setLastName(user.getLastName());
-        }
-
-        return userService.saveUser(resultUser);
+        return userService.updateUser(principal.getName(), user);
     }
 
     @PostMapping("/createuser")
