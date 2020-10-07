@@ -110,8 +110,8 @@ function ManageAccountPage(props) {
     return (
         <Container>
             <h1>Manage Account</h1>
-            <Grid container spacing={3}>
-                <Grid item xs={12} md={4}>
+            <Grid container spacing={3} style={{textAlign:"center"}} justify="center">
+                <Grid item xs={12} sm={6} md={4}>
                     <h2>Change Email Address</h2>
                     <TextField
                         id="email"
@@ -132,13 +132,14 @@ function ManageAccountPage(props) {
                     <Button 
                         variant="contained" 
                         color="primary" 
+                        style={{width:"auto", height:"auto"}}
                         onClick={submitEmailChange} 
                         disabled={email !== confEmail}
                     >
                         Save Email Address
                     </Button>
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} sm={6} md={4}>
                     <h2>Change Password</h2>
                     <TextField
                         id="oldPassword"
@@ -167,13 +168,14 @@ function ManageAccountPage(props) {
                     <Button 
                         variant="contained" 
                         color="primary" 
+                        style={{width:"auto", height:"auto"}}
                         onClick={submitPasswordChange}
                         disabled={props.auth.password !== oldPassword || password === "" || password !== confPassword}
                     >
                         Save Password
                     </Button>
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} sm={6} md={4}>
                     <h2>Change Name</h2>
                     <TextField
                         id="firstName"
@@ -190,7 +192,14 @@ function ManageAccountPage(props) {
                         onChange={e => setLastName(e.target.value)}
                     />
                     <br/>
-                    <Button variant="contained" color="primary" onClick={submitNameChange}>Save Name</Button>
+                    <Button 
+                        variant="contained" 
+                        color="primary" 
+                        style={{width:"auto", height:"auto"}}
+                        onClick={submitNameChange}
+                    >
+                        Save Name
+                    </Button>
                 </Grid>
             </Grid>
         </Container>
