@@ -1,10 +1,8 @@
 package food.truck.api.data.user;
 
-import javax.persistence.*;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import org.hibernate.annotations.NaturalId;
+
+import javax.persistence.*;
 
 @Data
 @Entity
@@ -30,19 +28,23 @@ public class User {
     @Column(name = "last_name", nullable = false)
     String lastName;
 
+    //    @JsonIgnore
     @Column(name = "pass_hash", nullable = false)
-//    @JsonIgnore
     String passwordHash;
 
+    //    @JsonIgnore
     @Column(name = "authority", nullable = false)
-//    @JsonIgnore
     String authority;
 
+    //    @JsonIgnore
     @Column(name = "enabled", nullable = false)
-//    @JsonIgnore
     boolean enabled;
 
+    //    @JsonIgnore
     @Transient
-//    @JsonIgnore
     String password;
+
+    //    @JsonIgnore
+    @Column(name = "user_location")
+    String location;
 }
