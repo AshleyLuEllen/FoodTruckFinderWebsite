@@ -7,6 +7,7 @@ import Head from 'next/head';
 import { CssBaseline } from '@material-ui/core';
 import { FoodTruckThemeProvider } from '../util/theme';
 
+import Layout from '../components/Layout';
 import "./styles.css";
 
 let initialState = {};
@@ -33,7 +34,9 @@ const FoodTruckApp = ({ Component, pageProps }) => {
                     {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
                     <CssBaseline />
 
-                    <Component {...pageProps} />
+                    <Layout>
+                        <Component {...pageProps} />
+                    </Layout>
                 </FoodTruckThemeProvider>
             </PersistGate>
         </Provider>
