@@ -1,5 +1,6 @@
 package food.truck.api.data.truck;
 
+import food.truck.api.data.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,5 +22,6 @@ public class TruckService {
     public Truck createTruck(Truck truck) {
         return truckRepository.save(truck);
     }
+
 }
 
