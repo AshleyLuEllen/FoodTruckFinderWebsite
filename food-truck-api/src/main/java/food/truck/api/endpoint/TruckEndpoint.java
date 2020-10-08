@@ -34,4 +34,9 @@ public class TruckEndpoint {
     public Truck createTruck(@RequestBody Truck truck) {
         return truckService.createTruck(truck);
     }
+
+    @PostMapping("/savetruck")
+    public Truck saveTruck(@RequestBody Truck truck) {
+        return truckService.saveTruck(truck);
+    }
 }
