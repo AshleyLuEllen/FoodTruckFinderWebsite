@@ -130,22 +130,30 @@ class Information extends Component {
             return (
                 <div>
                     <h2>{this.state.name}</h2>
-                    {this.state.truckFound && <h3>Description:</h3>}
-                    {this.state.truckFound && <span>{this.state.description}</span>}
-                    {this.state.truckFound && <h3>License Plate:</h3>}
-                    {this.state.truckFound && <span>{this.state.licensePlate}</span>}
-                    {this.state.truckFound && <h3>Payment Types:</h3>}
-                    {this.state.truckFound && <span>{this.state.paymentTypes}</span>}
-                    {this.state.truckFound && <h3>Owner:</h3>}
-                    {this.state.truckFound && <span>{this.state.owner.firstName + ' ' + this.state.owner.lastName}</span>}
-                    {this.state.truckFound && <h3>Tags:</h3>}
-                    {this.state.truckFound && <span>To be added in our next update.</span>}
-                    {this.state.truckFound && <h3>Schedule and Route:</h3>}
-                    {this.state.truckFound && <li>
-                        <Link href={`/${this.state.id}/schedule`}>
-                            <a>Schedule and Route</a>
-                        </Link>
-                    </li>}
+                    {this.state.truckFound && <tr>
+                        <td><h3>Description: </h3></td>
+                        <td><span>{this.state.description}</span></td>
+                    </tr>}
+                    {this.state.truckFound &&
+                    <tr>
+                        <td><h3>License Plate: </h3></td>
+                        <td><span>{this.state.licensePlate}</span></td>
+                    </tr>}
+                    {this.state.truckFound &&
+                    <tr>
+                        <td><h3>Payment Types: </h3></td>
+                        <td><span>{this.state.paymentTypes}</span></td>
+                    </tr>}
+                    {this.state.truckFound &&
+                    <tr>
+                       <td><h3>Owner: </h3></td>
+                       <td><span>{this.state.owner.firstName + ' ' + this.state.owner.lastName}</span></td>
+                    </tr>}
+                    {this.state.truckFound &&
+                    <tr>
+                        <td><h3>Tags: </h3></td>
+                        <td><span>To be added in our next update.</span></td>
+                    </tr>}
                     <li>
                         <Link href={`/${this.state.id}`}>
                             <a>Back</a>
