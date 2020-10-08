@@ -23,6 +23,7 @@ class Information extends Component {
         this.handleChangeStatus = this.handleChangeStatus.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
+
     handleChangeStatus(event) {
     }
     handleInputChange(event) {
@@ -34,19 +35,15 @@ class Information extends Component {
         event.preventDefault();
     }
 
-    editForm(){
+    editForm = (() => {
+        console.log(this);
         this.setState({
-            id: this.state.id,
-            name: this.state.name,
-            description: this.state.description,
-            licensePlate: this.state.licensePlate,
-            paymentTypes: this.state.paymentTypes,
-            owner: this.state.owner,
-            editing: true
+            editing: true,
+            editingMessage: ''
         });
-    }
+    })
 
-    saveInfo() {
+    saveInfo = (() => {
         const truck = {
             id: this.state.id,
             name: this.state.name,
@@ -56,9 +53,12 @@ class Information extends Component {
             owner: this.state.owner
         }
 
-        axios.post(process.env.FOOD_TRUCK_API_URL + "/savetruck", truck)
+        console.log(this.state);
+
+        axios.post(`${process.env.FOOD_TRUCK_API_URL}/savetruck`, truck)
             .then((res) => {
-                this.props.router.push(`/${this.state.id}`)
+                this.props.router.push(`/${res.data.id}/information`)
+                console.log("saved truck!");
             })
             .catch((err) => {
                 this.setState({
@@ -66,10 +66,7 @@ class Information extends Component {
                     editingMessage: "Invalid information entered. Payment types is of type long."
                 });
             });
-
-
-        console.log("saved truck!");
-    }
+    })
 
     componentDidMount() {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/truck/${this.props.router.query.truck_id}`).then(res => {
@@ -83,6 +80,7 @@ class Information extends Component {
                 truckFound: true,
             });
             console.log(this.state);
+            console.log("found the truck!");
         }).catch(err => {
             this.setState({
                 id: 'empty',
@@ -157,7 +155,7 @@ class Information extends Component {
                         </Link>
                     </li>
                     <br/>
-                    <button onClick={this.editForm}>Edit</button>
+                    <button className="edit-submit-button" onClick={this.editForm}>Edit</button>
                 </div>
             );
         }
@@ -166,7 +164,7 @@ class Information extends Component {
                 <div>
                     <h2>{this.state.name}</h2>
                     <form onSubmit={this.handleSubmit} method="post">
-                        <span>${this.state.editingMessage}</span>
+                        <span>{this.state.editingMessage}</span>
                         <table className="truck-form-details">
                             <tbody>
                             <tr>
@@ -217,8 +215,9 @@ class Information extends Component {
                         </table>
                         <button onClick={this.saveInfo}>Save</button>
                     </form>
+                    <br />
                     <li>
-                        <Link href={`/${this.state.id}`}>
+                        <Link href={`/${this.state.id}/information`}>
                             <a>Cancel</a>
                         </Link>
                     </li>
