@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Link from "next/link";
 import axios from "axios";
 import { withRouter } from 'next/router'
+import {number} from "prop-types";
 
 
 class Information extends Component {
@@ -44,29 +45,31 @@ class Information extends Component {
     })
 
     saveInfo = (() => {
+
         const truck = {
             id: this.state.id,
             name: this.state.name,
             description: this.state.description,
             licensePlate: this.state.licensePlate,
-            paymentTypes: this.state.paymentTypes,
+            paymentTypes: Number(this.state.paymentTypes),
             owner: this.state.owner
         }
 
-        console.log(this.state);
-
         axios.post(`${process.env.FOOD_TRUCK_API_URL}/savetruck`, truck)
             .then((res) => {
-                this.props.router.push(`/${res.data.id}/information`)
                 console.log("saved truck!");
+                this.props.router.push(`/${res.data.id}/information`);
+                this.setState ( {
+                    editing: false
+                });
             })
             .catch((err) => {
                 this.setState({
-                    editing: false,
-                    editingMessage: "Invalid information entered. Payment types is of type long."
+                    editingMessage: err.message
                 });
             });
     })
+    //"Invalid information entered. 'Payment types' is a numeric value."
 
     componentDidMount() {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/truck/${this.props.router.query.truck_id}`).then(res => {
@@ -79,7 +82,6 @@ class Information extends Component {
                 owner: res.data.owner,
                 truckFound: true,
             });
-            console.log(this.state);
             console.log("found the truck!");
         }).catch(err => {
             this.setState({
