@@ -36,11 +36,6 @@ function AccountPage() {
                     <a>Home</a>
                 </Link>
             </li>
-            <li>
-                <Link href="account/dashboard">
-                    <a>Dashboard</a>
-                </Link>
-            </li>
         </ul>
     )
 }
