@@ -135,7 +135,7 @@ function PrimarySearchAppBar(props) {
                             inputProps={{ "aria-label": "search" }}
                         />
                     </div>
-                    {props.isLoggedIn && (
+                    {props.auth.isLoggedIn && (
                         <div className={classes.sectionDesktop}>
                             <IconButton
                                 aria-label="show 17 new notifications"
@@ -157,7 +157,7 @@ function PrimarySearchAppBar(props) {
                             </IconButton>
                         </div>
                     )}
-                    {!props.isLoggedIn && <Button href="/login" color="primary" variant="contained">Login</Button>}
+                    {!props.auth.isLoggedIn && <Button href="/login" color="primary" variant="contained">Login</Button>}
                 </Toolbar>
             </AppBar>
             {renderMenu}
