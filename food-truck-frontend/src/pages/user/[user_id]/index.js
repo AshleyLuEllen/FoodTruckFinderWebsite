@@ -125,7 +125,7 @@ class UserPage extends Component {
                         <Typography variant="subtitle2" style={{ fontStyle: "italic" }}>Member since {this.formatDate(this.state.user?.sinceTime)}</Typography>
                         <Typography variant="subtitle1" style={{ marginTop: "10px" }}>{this.state.user?.description || <em>This user has not set a bio.</em>}</Typography>
                         {this.state.isMe && <Button className={classes.editButton} variant="contained" color="primary" href="/account/manage">Edit Profile</Button>}
-                        <Typography variant="h4" style={{ marginTop: "20px", marginBottom: "5px" }}>Friends</Typography>
+                        <Link href={`./${this.state.userID}/friends`}><Typography variant="h4" style={{ marginTop: "20px", marginBottom: "5px" }}>Friends</Typography></Link>
                         <FriendAvatarGroup max={6} extraURL={`./${this.state.userID}/friends`}>
                             {this.state.friends.map(f => (
                                 <FriendAvatar user={f} />
