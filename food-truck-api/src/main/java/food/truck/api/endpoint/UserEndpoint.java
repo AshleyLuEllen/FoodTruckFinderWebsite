@@ -22,7 +22,7 @@ public class UserEndpoint {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/user")
+    @GetMapping("/users/me")
     public User findMeUser(Principal principal) {
         log.info(principal.getName());
         User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
@@ -32,17 +32,17 @@ public class UserEndpoint {
         return user;
     }
 
-    @GetMapping("/user/{id}")
+    @GetMapping("/users/{id}")
     public User findUserById(@PathVariable Long id) {
         return userService.findUser(id).orElseThrow(ResourceNotFoundException::new);
     }
 
-    @PatchMapping("/user")
+    @PatchMapping("/users/me")
     public User updateMeUser(Principal principal, @RequestBody User user) {
         return userService.updateUser(principal.getName(), user);
     }
 
-    @PostMapping("/createuser")
+    @PostMapping("/users")
     public User createUser(@RequestBody User user) {
         return userService.createUser(user);
     }

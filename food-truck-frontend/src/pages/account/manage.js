@@ -24,7 +24,7 @@ function ManageAccountPage(props) {
 
     useEffect(() => {
         axios
-            .get(`${process.env.FOOD_TRUCK_API_URL}/user`, {
+            .get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
                 auth: {
                     username: props.auth.email,
                     password: props.auth.password
@@ -44,7 +44,7 @@ function ManageAccountPage(props) {
     function submitEmailChange() {
         if (email === confEmail) {
             axios
-                .patch(`${process.env.FOOD_TRUCK_API_URL}/user`, {
+                .patch(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
                     emailAddress: email
                 }, {
                     auth: {
@@ -68,7 +68,7 @@ function ManageAccountPage(props) {
     function submitPasswordChange() {
         if (props.auth.password === oldPassword && password !== "" && password === confPassword) {
             axios
-                .patch(`${process.env.FOOD_TRUCK_API_URL}/user`, {
+                .patch(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
                     password
                 }, {
                     auth: {
@@ -90,7 +90,7 @@ function ManageAccountPage(props) {
 
     function submitNameChange() {
         axios
-            .patch(`${process.env.FOOD_TRUCK_API_URL}/user`, {
+            .patch(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
                 firstName,
                 lastName
             }, {
