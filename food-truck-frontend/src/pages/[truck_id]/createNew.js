@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import Link from "next/link";
 import axios from "axios";
-import withRouter from "next/dist/client/with-router";
+import { withRouter } from "next/router";
+import { connect } from "react-redux";
 
 class CreateNewTruck extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {license_plate: '', payment_types: '', description:'', truck_name:'', owner:''};
+        this.state = {license_plate: '', payment_types: '', description:'', truck_name:''};
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleChangeStatus = this.handleChangeStatus.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -28,40 +29,32 @@ class CreateNewTruck extends Component {
     }
 
     componentDidMount() {
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`)
-            .then(res => {
-                this.setState({
-                    owner: res.data.id
-                });
-            })
-            .catch(err => {
-                console.log(err.response?.status);
-                console.log(err);
-            })
+
     }
 
     createNewTruck(){
         const truck = {
-            license_plate: this.state.license_plate,
+            licensePlate: this.state.license_plate,
             payment_types: this.state.payment_types,
             description: this.state.description,
-            truck_name: this.state.truck_name,
-            owner: {
-                id: this.state.owner
-            }
+            name: this.state.truck_name
         }
 
-        axios.post(process.env.FOOD_TRUCK_API_URL + "/createtruck", truck)
+        axios.post(process.env.FOOD_TRUCK_API_URL + "/createtruck", truck, {
+            auth: {
+                username: this.props.auth.email,
+                password: this.props.auth.password
+            }
+        })
             .then((res) => {
                 this.props.router.push('/dashboard')
             })
-            /*
             .catch((err) => {
+                alert(err);
                 alert("Truck already exists.")
                 console.log(err);
             })
             ;
-             */
 
         console.log("create truck!");
     }
@@ -128,4 +121,12 @@ class CreateNewTruck extends Component {
         );
     }
 }
-export default withRouter(CreateNewTruck);
+function mapStateToProps(state) {
+    const { auth } = state
+    return { auth }
+  }
+  
+const mapDispatchToProps = {
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(CreateNewTruck));

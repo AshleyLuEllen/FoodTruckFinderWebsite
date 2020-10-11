@@ -27,6 +27,22 @@ public class TruckEndpoint {
     @Autowired
     private TruckService truckService;
 
+    @Autowired
+    private UserService userService;
+
     @PostMapping("/createtruck")
-    public Truck createTruck(@RequestBody Truck truck) {return truckService.createTruck(truck);}
+    public Truck createTruck(Principal principal, @RequestBody Truck truck) {
+        // Get the owner email
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
+
+        // Get me user
+        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
+        if (meUser.isEmpty()) {
+            throw new UnauthorizedException();
+        }
+
+        return truckService.createTruck(truck, meUser.get());
+    }
 }
