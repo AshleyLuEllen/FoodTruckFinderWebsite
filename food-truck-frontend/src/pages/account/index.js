@@ -1,43 +1,42 @@
-import React from 'react';
-import Link from 'next/link'
-require('dotenv').config();
+import React, { useEffect } from 'react';
+import axios from "axios";
 
-function AccountPage() {
+import { useRouter } from 'next/router';
+import { connect } from 'react-redux';
+
+function ProfilePage(props) {
+    const router = useRouter();
+
+    useEffect(() => {
+        axios
+            .get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
+                auth: {
+                    username: props.auth.email,
+                    password: props.auth.password
+                }
+            })
+            .then(res => {
+                router.push(`/user/${res.data.id}`);
+            })
+            .catch(err => {
+                router.push('/login')
+            });
+    }, []);
+
     return (
-        <ul>
-            <h2>Account Page</h2>
-            <li>
-                <Link href="account/[user_id]">
-                    <a>User</a>
-                </Link>
-            </li>
-            <li>
-                <Link href="account/favorites">
-                    <a>Favorites</a>
-                </Link>
-            </li>
-            <li>
-                <Link href="account/foodie_friends">
-                    <a>My Friends</a>
-                </Link>
-            </li>
-            <li>
-                <Link href="account/notifications">
-                    <a>Notifications</a>
-                </Link>
-            </li>
-            <li>
-                <Link href="account/settings">
-                    <a>Settings</a>
-                </Link>
-            </li>
-            <li>
-                <Link href="/">
-                    <a>Home</a>
-                </Link>
-            </li>
-        </ul>
+        <div>
+            Redirecting...
+        </div>
     )
 }
 
-export default AccountPage
+function mapStateToProps(state) {
+    const { auth } = state
+    return { auth }
+}
+  
+const mapDispatchToProps = {
+    
+}
+  
+export default connect(mapStateToProps, mapDispatchToProps)(ProfilePage);

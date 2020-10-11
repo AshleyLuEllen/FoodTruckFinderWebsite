@@ -24,6 +24,9 @@ public class UserEndpoint {
 
     @GetMapping("/users/me")
     public User findMeUser(Principal principal) {
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
         log.info(principal.getName());
         User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
         if (!Objects.equals(principal.getName(), user.getEmailAddress())) {

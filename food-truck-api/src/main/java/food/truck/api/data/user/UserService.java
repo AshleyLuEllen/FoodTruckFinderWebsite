@@ -1,5 +1,6 @@
 package food.truck.api.data.user;
 
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -80,6 +81,20 @@ public class UserService {
             resultUser.setLastName(dbUser.getLastName());
         }
 
+        // Update bio
+        if (user.getDescription() != null) {
+            resultUser.setDescription(user.getDescription().strip());
+        } else {
+            resultUser.setDescription(dbUser.getDescription());
+        }
+
+        // Update avatar URL
+        if (user.getAvatarURL() != null) {
+            resultUser.setAvatarURL(user.getAvatarURL().strip());
+        } else {
+            resultUser.setAvatarURL(dbUser.getAvatarURL());
+        }
+
         return userRepository.save(resultUser);
     }
 
@@ -98,6 +113,9 @@ public class UserService {
         user.setPasswordHash(WebSecurityConfig.PASSWORD_ENCODER.encode(user.getPassword()));
         user.setEnabled(true);
         user.setAuthority("ROLE_USER");
+        user.setAvatarURL(null);
+        user.setDescription(null);
+        user.setSinceTime(ZonedDateTime.now());
         return userRepository.save(user);
     }
 

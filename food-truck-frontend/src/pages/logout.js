@@ -1,37 +1,19 @@
-import React, { Component } from 'react';
-import Link from "next/link";
-import { connect, useDispatch } from 'react-redux';
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
 import { logout as authLogout } from '../redux/actions/auth';
+import { withRouter } from 'next/router';
 
-class Logout extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {email: '', password: ''};
-        this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleChangeStatus = this.handleChangeStatus.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
-    handleChangeStatus(event) {
-    }
-    handleInputChange(event) {
-    }
-    handleSubmit(event) {
-    }
-    componentDidMount() {
+function Logout(prop) {
+    useEffect(() => {
         this.props.authLogout();
-    }
-    render() {
-        return (
-            <div>
-                <h2>Logout</h2>
-                <li>
-                    <Link href="/">
-                        <a>Home</a>
-                    </Link>
-                </li>
-            </div>
-        );
-    }
+        this.props.router.push("/");
+    }, []);
+
+    return (
+        <div>
+            Redirecting...
+        </div>
+    )
 }
 
 function mapStateToProps(state) {
@@ -43,4 +25,4 @@ const mapDispatchToProps = {
     authLogout
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Logout);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Logout));

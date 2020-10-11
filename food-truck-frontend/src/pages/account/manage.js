@@ -21,6 +21,8 @@ function ManageAccountPage(props) {
 
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
+    const [avatar, setAvatar] = useState("");
+    const [bio, setBio] = useState("");
 
     useEffect(() => {
         axios
@@ -34,6 +36,8 @@ function ManageAccountPage(props) {
                 setEmail(res.data.emailAddress);
                 setFirstName(res.data.firstName);
                 setLastName(res.data.lastName);
+                setAvatar(res.data.avatarURL);
+                setBio(res.data.description);
             })
             .catch(err => {
                 dispatch(props.authLogout());
@@ -88,11 +92,13 @@ function ManageAccountPage(props) {
         }
     }
 
-    function submitNameChange() {
+    function submitInfoChange() {
         axios
             .patch(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
                 firstName,
-                lastName
+                lastName,
+                description: bio,
+                avatarURL: avatar
             }, {
                 auth: {
                     username: props.auth.email,
@@ -100,7 +106,7 @@ function ManageAccountPage(props) {
                 }
             })
             .then(res => {
-                alert("Name changed!");
+                alert("Information changed!");
             })
             .catch(err => {
                 alert("Error: name not changed!")
@@ -176,7 +182,7 @@ function ManageAccountPage(props) {
                     </Button>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
-                    <h2>Change Name</h2>
+                    <h2>Change Information</h2>
                     <TextField
                         id="firstName"
                         label="First Name"
@@ -192,13 +198,31 @@ function ManageAccountPage(props) {
                         onChange={e => setLastName(e.target.value)}
                     />
                     <br/>
+                    <TextField
+                        id="avatar"
+                        label="Avatar URL"
+                        type="text"
+                        style={{width: "90%"}}
+                        value={avatar}
+                        onChange={e => setAvatar(e.target.value)}
+                    />
+                    <br/>
+                    <TextField
+                        id="bio"
+                        label="Bio"
+                        type="text"
+                        style={{width: "90%"}}
+                        value={bio}
+                        onChange={e => setBio(e.target.value)}
+                    />
+                    <br/>
                     <Button 
                         variant="contained" 
                         color="primary" 
                         style={{width:"auto", height:"auto"}}
-                        onClick={submitNameChange}
+                        onClick={submitInfoChange}
                     >
-                        Save Name
+                        Save Information
                     </Button>
                 </Grid>
             </Grid>
