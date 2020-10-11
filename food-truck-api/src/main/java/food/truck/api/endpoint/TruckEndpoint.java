@@ -30,7 +30,17 @@ public class TruckEndpoint {
     }
 
     @DeleteMapping("/deletetruck")
-    public void deleteTruck(@RequestBody long truckid) {
+    public void deleteTruck(Principal principal, @RequestBody long truckid) {
+        // Get the owner email
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
+        // Get me user
+        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
+        if (meUser.isEmpty()) {
+            throw new UnauthorizedException();
+        }
+        
         truckService.deleteTruck(truckid);
     }
 

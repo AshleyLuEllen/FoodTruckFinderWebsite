@@ -31,6 +31,7 @@ class Information extends Component {
         event.preventDefault();
     }
 
+    // Check that the user who's logged in is the owner of the truck
     editForm = (() => {
         console.log(this);
         console.log(this.state);
@@ -47,15 +48,15 @@ class Information extends Component {
                 editingMessage: ''
             })
         ).catch((err) => {
-            consoler.log(err);
+            console.log(err);
             alert("Only truck owners can edit the truck");
         });
 
 
     })
 
+    // Saves the edited information from the form
     saveInfo = (() => {
-
         const truck = {
             id: this.state.id,
             name: this.state.name,
@@ -81,11 +82,11 @@ class Information extends Component {
     })
 
     removeTruck = (() => {
-        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/deleteTruck`, Number.valueOf(this.state.id))
-            .then((res) => {
+        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/deleteTruck`, Number(this.state.id))
+            .then(() => {
                 console.log("deleted truck!");
                 this.props.router.push(`/[truck_id]`);
-                this.setState ( {
+                this.setState({
                     editing: false
                 });
             })
@@ -104,11 +105,11 @@ class Information extends Component {
                 description: res.data.description,
                 licensePlate: res.data.licensePlate,
                 paymentTypes: res.data.paymentTypes,
-                owner: res.data.owner,
+                owner: res.data.owner.id,
                 truckFound: true,
             });
             console.log("found the truck!");
-        }).catch(err => {
+        }).catch((err) => {
             this.setState({
                 id: 'empty',
                 name: 'empty',
