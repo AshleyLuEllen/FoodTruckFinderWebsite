@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import axios from 'axios';
 import { withRouter } from 'next/router';
+import axios from 'axios';
+import { format } from 'date-fns';
 
 import Link from "next/link";
 import { withStyles } from '@material-ui/core/styles';
@@ -53,6 +54,13 @@ class UserPage extends Component {
         this.fetchData = this.fetchData.bind(this);
     }
 
+    formatDate(dateStr) {
+        if (!dateStr) {
+            return undefined;
+        }
+        return format(new Date(dateStr), "MMMM d, yyyy");
+    }
+
     fetchData() {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}`)
             .then(res => {
@@ -96,7 +104,7 @@ class UserPage extends Component {
                     <Grid item xs={12} md={6}>
                         <Avatar className={classes.bigAvatar} alt={`${this.state.user?.firstName} ${this.state.user?.lastName}`} src={this.state.user?.avatarURL}/>
                         <Typography variant="h3" style={{marginTop: "10px"}}>{this.state.user?.firstName} {this.state.user?.lastName}</Typography>
-                        <Typography variant="subtitle2" style={{fontStyle: "italic"}}>Member since {this.state.user?.sinceTime}</Typography>
+                        <Typography variant="subtitle2" style={{fontStyle: "italic"}}>Member since {this.formatDate(this.state.user?.sinceTime)}</Typography>
                         <Typography variant="subtitle1" style={{marginTop: "10px"}}>{this.state.user?.description || <em>This user has not set a bio.</em>}</Typography>
                         <Typography variant="h4" style={{marginTop: "20px", marginBottom: "5px"}}>Friends</Typography>
                         <AvatarGroup max={6} spacing="0" className={classes.friendAvatars}>
