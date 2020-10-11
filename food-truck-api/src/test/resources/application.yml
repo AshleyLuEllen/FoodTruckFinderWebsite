@@ -6,7 +6,4 @@ spring:
     # Drop and create new tables (create, create-drop, validate, update)
     # Only for testing purpose - comment this in production
     hibernate:
-      ddl-auto: update
-
-server:
-  port: ${PORT:8080}
+      ddl-auto: create-drop
