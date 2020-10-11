@@ -20,6 +20,7 @@ import java.security.Provider;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Objects;
 
 @Log4j2
 @RestController
@@ -44,5 +45,13 @@ public class TruckEndpoint {
         }
 
         return truckService.createTruck(truck, meUser.get());
+    }
+    @GetMapping("/truck/{id}")
+    public Truck findTruckById(@PathVariable Long id) {
+        return truckService.findTruck(id).orElseThrow(ResourceNotFoundException::new);
+    }
+    @PostMapping("/savetruck")
+    public Truck saveTruck(@RequestBody Truck truck) {
+        return truckService.saveTruck(truck);
     }
 }
