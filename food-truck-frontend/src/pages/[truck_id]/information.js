@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import Link from "next/link";
 import axios from "axios";
 import { withRouter } from 'next/router'
-import {number} from "prop-types";
-
 
 class Information extends Component {
     constructor(props) {
@@ -38,6 +36,8 @@ class Information extends Component {
 
     editForm = (() => {
         console.log(this);
+        axios.get(process.env.FOOD_TRUCK_API_URL + "/findMeUser")
+
         this.setState({
             editing: true,
             editingMessage: ''
@@ -69,7 +69,22 @@ class Information extends Component {
                 });
             });
     })
-    //"Invalid information entered. 'Payment types' is a numeric value."
+
+    removeTruck = (() => {
+        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/deleteTruck`, Number.valueOf(this.state.id))
+            .then((res) => {
+                console.log("deleted truck!");
+                this.props.router.push(`/[truck_id]`);
+                this.setState ( {
+                    editing: false
+                });
+            })
+            .catch((err) => {
+                this.setState({
+                    editingMessage: err.message
+                });
+            });
+    })
 
     componentDidMount() {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/truck/${this.props.router.query.truck_id}`).then(res => {
@@ -225,12 +240,12 @@ class Information extends Component {
                         </table>
                         <button onClick={this.saveInfo}>Save</button>
                     </form>
+                    <button onClick={this.removeTruck}>Delete Truck</button>
                     <br />
-                    <li>
-                        <Link href={`/${this.state.id}/information`}>
+                    <br/>
+                    <Link href={`/${this.state.id}/information`}>
                             <a>Cancel</a>
-                        </Link>
-                    </li>
+                    </Link>
                 </div>
             );
         }

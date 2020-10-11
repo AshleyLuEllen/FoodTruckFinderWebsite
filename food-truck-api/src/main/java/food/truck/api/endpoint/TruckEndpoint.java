@@ -5,11 +5,7 @@ import food.truck.api.data.truck.TruckService;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
@@ -33,6 +29,11 @@ public class TruckEndpoint {
     @PostMapping("/createtruck")
     public Truck createTruck(@RequestBody Truck truck) {
         return truckService.createTruck(truck);
+    }
+
+    @DeleteMapping("/deletetruck")
+    public void deleteTruck(@RequestBody long truckid) {
+        truckService.deleteTruck(truckid);
     }
 
     @PostMapping("/savetruck")

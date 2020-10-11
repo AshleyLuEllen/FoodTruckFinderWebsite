@@ -22,5 +22,9 @@ public class TruckService {
         return truckRepository.save(truck);
     }
 
+    public void deleteTruck(long truckid) {
+        truckRepository.deleteById(truckid);
+    }
+
 }
 
