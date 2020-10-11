@@ -22,7 +22,8 @@ test-backend:
     image: openjdk:14
     stage: test
     script:
-        - ./food-truck-api/gradlew test
+        - cd ./food-truck-api
+        - ./gradlew test
 
 deploy-frontend:
     image: docker:latest
