@@ -40,6 +40,7 @@ public class UserService {
         resultUser.setId(dbUser.getId());
         resultUser.setAuthority(dbUser.getAuthority());
         resultUser.setEnabled(dbUser.isEnabled());
+        resultUser.setSinceTime(dbUser.getSinceTime());
 
         // Update password
         if (user.getPassword() != null) {
