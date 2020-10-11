@@ -14,13 +14,12 @@ stages:
     - deploy
 
 test-frontend:
-    image: java:14
     stage: test
     script:
         - "echo TODO: implement tests"
 
 test-backend:
-    image: java:14
+    image: openjdk:14
     stage: test
     script:
         - ./food-truck-api/gradlew test
