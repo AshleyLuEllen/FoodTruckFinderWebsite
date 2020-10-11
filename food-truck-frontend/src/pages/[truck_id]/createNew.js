@@ -47,7 +47,7 @@ class CreateNewTruck extends Component {
             }
         })
             .then((res) => {
-                this.props.router.push('/dashboard')
+                this.props.router.push('/account/dashboard')
             })
             .catch((err) => {
                 alert(err);
