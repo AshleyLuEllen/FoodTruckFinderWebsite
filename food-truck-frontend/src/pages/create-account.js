@@ -39,7 +39,7 @@ class CreateAccount extends Component {
         }
 
         if (this.state.password === this.state.passConf) {
-            axios.post(process.env.FOOD_TRUCK_API_URL + "/createuser", user)
+            axios.post(process.env.FOOD_TRUCK_API_URL + "/users", user)
                 .then((res) => {
                     this.props.router.push('/login')
                 })
