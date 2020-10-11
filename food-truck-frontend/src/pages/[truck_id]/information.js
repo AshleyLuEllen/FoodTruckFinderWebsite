@@ -19,12 +19,9 @@ class Information extends Component {
         };
 
         this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleChangeStatus = this.handleChangeStatus.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
-    handleChangeStatus(event) {
-    }
     handleInputChange(event) {
         this.setState({
             [event.target.name]: event.target.value
@@ -36,12 +33,25 @@ class Information extends Component {
 
     editForm = (() => {
         console.log(this);
-        axios.get(process.env.FOOD_TRUCK_API_URL + "/findMeUser")
-
-        this.setState({
-            editing: true,
-            editingMessage: ''
+        console.log(this.state);
+        axios.get(process.env.FOOD_TRUCK_API_URL + "/user",
+        {
+            auth: {
+                username: this.props.auth.email,
+                password: this.props.auth.password
+            }
+        }
+        ).then(
+            this.setState({
+                editing: true,
+                editingMessage: ''
+            })
+        ).catch((err) => {
+            consoler.log(err);
+            alert("Only truck owners can edit the truck");
         });
+
+
     })
 
     saveInfo = (() => {
