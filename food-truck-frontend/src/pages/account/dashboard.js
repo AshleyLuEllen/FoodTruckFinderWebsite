@@ -42,7 +42,11 @@ class Dashboard extends Component {
                 <h2>Dashboard</h2>
                 <ol>
                     {this.state.truckData.map(tr => (
-                        <li>{tr.name}</li>
+                        <li>
+                            <Link href={"/"+tr.id}>
+                                <a>{tr.name}</a>
+                            </Link>
+                        </li>
                     ))}
                 </ol>
                 <li>

@@ -14,6 +14,10 @@ import java.security.Provider;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+<<<<<<< HEAD
+=======
+import java.util.Objects;
+>>>>>>> origin/owner
 
 @Log4j2
 @RestController
@@ -23,11 +27,6 @@ public class TruckEndpoint {
 
     @Autowired
     private UserService userService;
-
-    @GetMapping("/truck/{id}")
-    public Truck findTruckById(@PathVariable Long id) {
-        return truckService.findTruck(id).orElseThrow(ResourceNotFoundException::new);
-    }
 
     @DeleteMapping("/deletetruck")
     public void deleteTruck(Principal principal, @RequestBody long truckid) {
@@ -44,11 +43,6 @@ public class TruckEndpoint {
         truckService.deleteTruck(truckid);
     }
 
-    @PostMapping("/savetruck")
-    public Truck saveTruck(@RequestBody Truck truck) {
-        return truckService.saveTruck(truck);
-    }
-
     @PostMapping("/createtruck")
     public Truck createTruck(Principal principal, @RequestBody Truck truck) {
         // Get the owner email
@@ -63,5 +57,14 @@ public class TruckEndpoint {
         }
 
         return truckService.createTruck(truck, meUser.get());
+    }
+
+    @GetMapping("/truck/{id}")
+    public Truck findTruckById(@PathVariable Long id) {
+        return truckService.findTruck(id).orElseThrow(ResourceNotFoundException::new);
+    }
+    @PostMapping("/savetruck")
+    public Truck saveTruck(@RequestBody Truck truck) {
+        return truckService.saveTruck(truck);
     }
 }
