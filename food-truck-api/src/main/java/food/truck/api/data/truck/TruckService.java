@@ -21,5 +21,6 @@ public class TruckService {
     public Truck createTruck(Truck truck) {
         return truckRepository.save(truck);
     }
+
 }
 
