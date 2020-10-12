@@ -1,5 +1,6 @@
 package food.truck.api.data.truck;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import food.truck.api.data.user.User;
 import lombok.Data;
 

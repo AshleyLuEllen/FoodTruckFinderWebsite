@@ -62,6 +62,11 @@ function TruckPage() {
                 </Link>
             </li>}
             <li>
+                <Link href="[truck_id]/createNew">
+                    <a>Create New Truck</a>
+                </Link>
+            </li>
+            <li>
                 <Link href="/">
                     <a>Home</a>
                 </Link>

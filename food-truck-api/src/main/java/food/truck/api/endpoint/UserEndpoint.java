@@ -1,5 +1,7 @@
 package food.truck.api.endpoint;
 
+import food.truck.api.data.truck.Truck;
+import food.truck.api.data.truck.TruckService;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +17,18 @@ import lombok.extern.log4j.Log4j2;
 
 import java.security.Principal;
 import java.security.Provider;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Log4j2
 @RestController
 public class UserEndpoint {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TruckService truckService;
 
     @GetMapping("/user")
     public User findMeUser(Principal principal) {
@@ -41,5 +48,16 @@ public class UserEndpoint {
     @PostMapping("/createuser")
     public User createUser(@RequestBody User user) {
         return userService.createUser(user);
+    }
+
+    @GetMapping("/users/{userID}/trucks")
+    public List<Truck> findUserOwnedTrucks(@PathVariable Long userID) {
+        Optional<User> user = userService.findUser(userID);
+
+        if (user.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+
+        return truckService.getTrucksOwnedByUser(user.get());
     }
 }
