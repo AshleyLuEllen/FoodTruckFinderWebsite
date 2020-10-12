@@ -133,6 +133,10 @@ artifacts {
 tasks.build.dependsOn buildTests
 
 test {
+    testLogging {
+        exceptionFormat = 'full'
+    }
+
     useJUnitPlatform()
 
     exclude '**/test/integration/**'
