@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import Link from "next/link";
 import axios from "axios";
-import { withRouter } from 'next/router'
+import { withRouter } from 'next/router';
+import { connect } from "react-redux";
 
 class Information extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            id: '',
+            id: 0,
             name: '',
             description: '',
             licensePlate: '',
@@ -33,8 +34,6 @@ class Information extends Component {
 
     // Check that the user who's logged in is the owner of the truck
     editForm = (() => {
-        console.log(this);
-        console.log(this.state);
         axios.get(process.env.FOOD_TRUCK_API_URL + "/user",
         {
             auth: {
@@ -69,10 +68,11 @@ class Information extends Component {
         axios.post(`${process.env.FOOD_TRUCK_API_URL}/savetruck`, truck)
             .then((res) => {
                 console.log("saved truck!");
-                this.props.router.push(`/${res.data.id}/information`);
-                this.setState ( {
+                this.props.router.push(`/${res.data.id}/information`).then(r =>
+                    this.setState ( {
                     editing: false
-                });
+                }));
+
             })
             .catch((err) => {
                 this.setState({
@@ -82,20 +82,26 @@ class Information extends Component {
     })
 
     removeTruck = (() => {
-        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/deleteTruck`, Number(this.state.id))
-            .then(() => {
-                console.log("deleted truck!");
-                this.props.router.push(`/[truck_id]`);
-                this.setState({
-                    editing: false
-                });
-            })
-            .catch((err) => {
-                this.setState({
-                    editingMessage: err.message
-                });
+        console.log(this.state);
+        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/deletetruck/${this.state.id}`,
+            { auth: {
+                        username: this.props.auth.email,
+                        password: this.props.auth.password
+                    }})
+        .then((res) => {
+            console.log(res.statusText);
+            this.props.router.push("/account/dashboard");
+            this.setState({
+                editing: false
             });
-    })
+        })
+        .catch((err) => {
+            this.setState({
+                editingMessage: err.message
+            });
+        })
+    });
+
 
     componentDidMount() {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/truck/${this.props.router.query.truck_id}`).then(res => {
@@ -138,12 +144,12 @@ class Information extends Component {
                 console.log(this.state);
             }).catch(err => {
                 this.setState({
-                    id: 'empty',
-                    name: 'empty',
-                    description: 'empty',
-                    licensePlate: 'empty',
+                    id: '',
+                    name: '',
+                    description: '',
+                    licensePlate: '',
                     paymentTypes: 0,
-                    owner: 'empty',
+                    owner: '',
                     truckFound: false,
                     editing: false
                 });
@@ -262,4 +268,12 @@ class Information extends Component {
         }
     }
 }
-export default withRouter(Information);
+const mapStateToProps = state => {
+    const { auth } = state
+    return { auth }
+};
+
+const mapDispatchToProps = {
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Information));

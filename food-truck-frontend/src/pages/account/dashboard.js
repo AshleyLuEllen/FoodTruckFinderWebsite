@@ -21,7 +21,6 @@ class Dashboard extends Component {
         this.props.history.push('/')
     }
     componentDidMount() {
-        console.log(this.props.router.query);
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.props.router.query.user_id}/trucks`)
             .then(res => {
                 this.setState({
