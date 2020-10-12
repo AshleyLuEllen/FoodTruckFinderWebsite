@@ -10,7 +10,7 @@ import { connect, useDispatch } from 'react-redux';
 class Dashboard extends Component {
     constructor(props) {
         super(props);
-        this.state = { truckData: [] };
+        this.state = {truckData: [] };
         //this.state = {email: '', password: ''};
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleChangeStatus = this.handleChangeStatus.bind(this);
@@ -24,12 +24,32 @@ class Dashboard extends Component {
         this.props.history.push('/')
     }
     componentDidMount() {
-        let userID = 1;
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userID}/trucks`)
+
+        axios.get(`${process.env.FOOD_TRUCK_API_URL}/user`, {
+            auth: {
+                username: this.props.auth.email,
+                password: this.props.auth.password
+            }
+        })
             .then(res => {
                 this.setState({
-                    truckData: res.data
-                });
+                    owner: res.data.id
+                })
+
+                let userID = this.state.owner;
+
+                //let userID = 1;
+                axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userID}/trucks`)
+                    .then(res => {
+                        this.setState({
+                            truckData: res.data
+                        });
+                    })
+                    .catch(err => {
+                        console.log(err.response?.status);
+                        console.log(err);
+                    });
+
             })
             .catch(err => {
                 console.log(err.response?.status);
