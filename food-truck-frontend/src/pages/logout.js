@@ -3,10 +3,10 @@ import { connect } from 'react-redux';
 import { logout as authLogout } from '../redux/actions/auth';
 import { withRouter } from 'next/router';
 
-function Logout(prop) {
+function Logout(props) {
     useEffect(() => {
-        this.props.authLogout();
-        this.props.router.push("/");
+        props.authLogout();
+        props.router.push("/");
     }, []);
 
     return (
