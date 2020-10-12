@@ -38,8 +38,8 @@ public class TruckService {
         truckRepository.deleteById(truckid);
     }
 
-    public List<Truck> getTrucksOwnedByUser(User user) {
-        return truckRepository.findByOwner(user);
+    public List<Truck> getTrucksOwnedByUser(User owner) {
+        return truckRepository.findAllByOwner(owner);
     }
 }
 

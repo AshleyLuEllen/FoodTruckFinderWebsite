@@ -1,22 +1,18 @@
 package food.truck.api.data.truck;
 import food.truck.api.data.user.User;
-import food.truck.api.data.user.UserRepository;
-import org.junit.Before;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
+import javax.persistence.OneToMany;
 import java.util.List;
 import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -29,6 +25,8 @@ class TruckServiceTest {
     @Autowired
     private TruckRepository truckRepository;
 
+    long truckID = -1l;
+
     @BeforeEach
     void setup() {
         System.out.println("Truck being added");
@@ -39,12 +37,11 @@ class TruckServiceTest {
         user1.setPassword("B0bRo5543vr");
 
         Truck truck = new Truck();
-        truck.setId(56789l);
         truck.setName("Harry");
         truck.setDescription("Best truck ever");
         truck.setLicensePlate("LVN 6982");
         truck.setOwner(user1);
-        truckRepository.save(truck);
+        truckID = truckRepository.save(truck).getId();
     }
 
     @Test
@@ -62,7 +59,6 @@ class TruckServiceTest {
         user1.setPassword("B0bRo5543vr");
 
         Truck truck = new Truck();
-        truck.setId(123456l);
         truck.setName("Harry");
         truck.setDescription("Best truck ever");
         truck.setLicensePlate("LVN 6982");
@@ -81,7 +77,6 @@ class TruckServiceTest {
         user1.setPassword("B0bRo5543vr");
 
         Truck truck = new Truck();
-        truck.setId(56789l);
         truck.setName("Bob");
         truck.setDescription("Worst truck ever");
         truck.setLicensePlate("LVN 6982");
@@ -94,12 +89,13 @@ class TruckServiceTest {
     @Test
     void deleteTruck() {
         System.out.println("Truck being deleted");
-        truckService.deleteTruck(56789l);
+        truckService.deleteTruck(truckID);
 
-        assertThat(truckRepository.findById(56789l).isEmpty());
+        assertThat(truckRepository.findById(truckID).isEmpty());
     }
 
     @Test
+    @Cascade(CascadeType.ALL)
     void getTrucksOwnedByUser() {
         User user1 = new User();
         user1.setFirstName("Bob");
@@ -110,9 +106,6 @@ class TruckServiceTest {
         Truck t1 = new Truck();
         Truck t2 = new Truck();
         Truck t3 = new Truck();
-        t1.setId(1l);
-        t2.setId(2l);
-        t3.setId(3l);
         t1.setOwner(user1);
         t2.setOwner(user1);
         t3.setOwner(user1);
@@ -120,10 +113,8 @@ class TruckServiceTest {
         truckRepository.save(t2);
         truckRepository.save(t3);
 
-        List<Truck> trucks = truckRepository.findByOwner(user1);
-        assert(trucks.get(0).getOwner().getId() == 1l);
-        assert(trucks.get(1).getOwner().getId() == 2l);
-        assert(trucks.get(2).getOwner().getId() == 3l);
-
+        List<Truck> trucks = truckService.getTrucksOwnedByUser(user1);
+        assertThat(trucks != null);
+        assertThat(trucks.size() == 3);
     }
 }

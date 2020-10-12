@@ -4,6 +4,10 @@ import axios from "axios";
 import { withRouter } from 'next/router';
 import { connect } from "react-redux";
 
+/**
+ * Information page for the food trucks which includes an editing form if you're the
+ * authenticated owner
+ */
 class Information extends Component {
     constructor(props) {
         super(props);
@@ -14,7 +18,10 @@ class Information extends Component {
             licensePlate: '',
             paymentTypes: 0,
             owner: '',
+
             truckFound: false,
+
+            // Will display the form when true and will display any error messages while editing
             editing: false,
             editingMessage: ''
         };
@@ -23,16 +30,24 @@ class Information extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
+    /**
+     * Sets the state value to the value in the form
+     * @param event the source of the new value in the state
+     */
     handleInputChange(event) {
         this.setState({
             [event.target.name]: event.target.value
         });
     }
+
     handleSubmit(event) {
         event.preventDefault();
     }
 
-    // Check that the user who's logged in is the owner of the truck
+    /**
+     * Checks that the user is authenticated and authorized to edit this
+     * truck's information.
+     */
     editForm = (() => {
         axios.get(process.env.FOOD_TRUCK_API_URL + "/user",
         {
@@ -54,7 +69,9 @@ class Information extends Component {
 
     })
 
-    // Saves the edited information from the form
+    /**
+     * Saves the edited information from the form
+     */
     saveInfo = (() => {
         const truck = {
             id: this.state.id,
@@ -81,6 +98,9 @@ class Information extends Component {
             });
     })
 
+    /**
+     * Removes the truck that's currently being edited
+     */
     removeTruck = (() => {
         console.log(this.state);
         axios.delete(`${process.env.FOOD_TRUCK_API_URL}/deletetruck/${this.state.id}`,
@@ -102,7 +122,10 @@ class Information extends Component {
         })
     });
 
-
+    /**
+     * Displays all the information about the truck who's id is being
+     * used in the URL
+     */
     componentDidMount() {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/truck/${this.props.router.query.truck_id}`).then(res => {
             this.setState({
@@ -128,6 +151,9 @@ class Information extends Component {
         });
     }
 
+    /**
+     * Continuously updates the truck information on the page
+     */
     componentWillUpdate() {
         if(!this.state.truckFound) {
             axios.get(`${process.env.FOOD_TRUCK_API_URL}/truck/${this.props.router.query.truck_id}`).then(res => {
@@ -158,6 +184,9 @@ class Information extends Component {
     }
 
     render() {
+        /**
+         * If the truck is not being edited, just display the information
+         */
         if(!this.state.editing) {
             return (
                 <div>
@@ -201,6 +230,9 @@ class Information extends Component {
                 </div>
             );
         }
+        /**
+         * If the truck is being edited, display a form
+         */
         else {
             return (
                 <div>
