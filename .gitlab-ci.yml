@@ -1,6 +1,4 @@
-image: docker:latest
-services:
-    - docker:dind
+
 
 variables:
     DOCKER_DRIVER: overlay
@@ -21,11 +19,16 @@ test-frontend:
         - "echo TODO: implement tests"
 
 test-backend:
+    image: openjdk:14
     stage: test
     script:
-        - "echo TODO: implement tests"
+        - cd ./food-truck-api
+        - ./gradlew test
 
 deploy-frontend:
+    image: docker:latest
+    services:
+        - docker:dind
     stage: deploy
     script:
         - apk add --no-cache curl
@@ -42,6 +45,9 @@ deploy-frontend:
         - web
 
 deploy-backend:
+    image: docker:latest
+    services:
+        - docker:dind
     stage: deploy
     script: 
         - apk add --no-cache curl
