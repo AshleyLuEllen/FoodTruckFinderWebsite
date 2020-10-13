@@ -12,6 +12,7 @@ import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
 import lombok.extern.log4j.Log4j2;
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 
 @Log4j2
@@ -69,5 +70,16 @@ public class TruckEndpoint {
     @PostMapping("/savetruck")
     public Truck saveTruck(@RequestBody Truck truck) {
         return truckService.saveTruck(truck);
+    }
+
+    @GetMapping("/users/{userID}/trucks")
+    public List<Truck> findUserOwnedTrucks(@PathVariable Long userID) {
+        Optional<User> user = userService.findUser(userID);
+
+        if (user.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+
+        return truckService.getTrucksOwnedByUser(user.get());
     }
 }
