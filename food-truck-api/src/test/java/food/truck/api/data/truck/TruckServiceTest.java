@@ -46,8 +46,8 @@ class TruckServiceTest {
 
     @Test
     void findTruck() {
-        Optional<Truck> found = truckService.findTruck(56789l);
-        assertThat(found.get().getId() == 56789l);
+        Optional<Truck> found = truckService.findTruck(truckID);
+        assertThat(found.get().getId() == truckID);
     }
 
     @Test
