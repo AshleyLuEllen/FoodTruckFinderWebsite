@@ -27,44 +27,33 @@ class Schedule extends Component {
         });
     }
 
-    handleSubmit(event) {
-        event.preventDefault();
-    }
+    truckSchedule() {
 
-    editForm = (() => {
-        console.log(this);
-        this.setState({
-            editing: true,
-            editingMessage: ''
-        });
-    })
-
-    saveInfo = (() => {
-
-        const truck = {
+        const schedule = {
             truck_id: this.state.truck_id,
             location: this.state.location,
             time_from: this.state.time_from,
             time_to: this.state.time_to
         }
 
-        axios.post(`${process.env.FOOD_TRUCK_API_URL}/savetruck`, truck)
+        axios.post(`${process.env.FOOD_TRUCK_API_URL}/saveschedule`, truck, {
+            auth: {
+                username: this.props.auth.email,
+                password: this.props.auth.password
+            }
+        })
             .then((res) => {
-                console.log("saved truck!");
-                this.props.router.push(`/${res.data.id}/information`);
-                this.setState({
-                    editing: false
-                });
+                this.props.router.push(`/account/dashboard`);
             })
             .catch((err) => {
-                this.setState({
-                    editingMessage: err.message
-                });
+                alert(err);
+                alert("Invalid Schedule/Location")
+                console.log(err);
             });
     })
 
     componentDidMount() {
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/truck/${this.props.router.query.truck_id}`).then(res => {
+      /*  axios.get(`${process.env.FOOD_TRUCK_API_URL}/truck/${this.props.router.query.truck_id}`).then(res => {
             this.setState({
                 truck_id: res.data.truck_id,
                 location: res.data.location,
@@ -79,10 +68,10 @@ class Schedule extends Component {
                 time_from: 'empty',
                 time_to: 'empty'
             });
-        });
+        });*/
     }
 
-    componentWillUpdate() {
+  /*  componentWillUpdate() {
         if (!this.state.truckFound) {
             axios.get(`${process.env.FOOD_TRUCK_API_URL}/truck/${this.props.router.query.truck_id}`).then(res => {
                 this.setState({
@@ -103,7 +92,7 @@ class Schedule extends Component {
                 });
             });
         }
-    }
+    }*/
 
     render() {
         if (!this.state.editing) {
@@ -138,7 +127,7 @@ class Schedule extends Component {
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="timeFrom" timeFrom="timeFrom" type="text"
+                                    <input name="timeFrom" timeFrom="timeFrom" type="time"
                                            value={this.state.time_from} onChange={this.handleInputChange} />
                                 </td>
                             </tr>
@@ -149,7 +138,7 @@ class Schedule extends Component {
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="timeTo" timeTo="timeTo" type="text"
+                                    <input name="timeTo" timeTo="timeTo" type="time"
                                            value={this.state.time_to} onChange={this.handleInputChange} />
                                 </td>
                             </tr>
@@ -178,7 +167,7 @@ class Schedule extends Component {
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="timeFrom" timeFrom="timeFrom" type="text"
+                                    <input name="timeFrom" timeFrom="timeFrom" type="time"
                                            value={this.state.time_from} onChange={this.handleInputChange} />
                                 </td>
                             </tr>
@@ -189,7 +178,7 @@ class Schedule extends Component {
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="timeTo" timeTo="timeTo" type="text"
+                                    <input name="timeTo" timeTo="timeTo" type="time"
                                            value={this.state.time_to} onChange={this.handleInputChange} />
                                 </td>
                             </tr>
@@ -218,7 +207,7 @@ class Schedule extends Component {
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="timeFrom" timeFrom="timeFrom" type="text"
+                                    <input name="timeFrom" timeFrom="timeFrom" type="time"
                                            value={this.state.time_from} onChange={this.handleInputChange} />
                                 </td>
                             </tr>
@@ -229,7 +218,7 @@ class Schedule extends Component {
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="timeTo" timeTo="timeTo" type="text"
+                                    <input name="timeTo" timeTo="timeTo" type="time"
                                            value={this.state.time_to} onChange={this.handleInputChange} />
                                 </td>
                             </tr>
@@ -258,7 +247,7 @@ class Schedule extends Component {
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="timeFrom" timeFrom="timeFrom" type="text"
+                                    <input name="timeFrom" timeFrom="timeFrom" type="time"
                                            value={this.state.time_from} onChange={this.handleInputChange} />
                                 </td>
                             </tr>
@@ -269,7 +258,7 @@ class Schedule extends Component {
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="timeTo" timeTo="timeTo" type="text"
+                                    <input name="timeTo" timeTo="timeTo" type="time"
                                            value={this.state.time_to} onChange={this.handleInputChange} />
                                 </td>
                             </tr>
@@ -298,7 +287,7 @@ class Schedule extends Component {
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="timeFrom" timeFrom="timeFrom" type="text"
+                                    <input name="timeFrom" timeFrom="timeFrom" type="time"
                                            value={this.state.time_from} onChange={this.handleInputChange} />
                                 </td>
                             </tr>
@@ -309,7 +298,7 @@ class Schedule extends Component {
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="timeTo" timeTo="timeTo" type="text"
+                                    <input name="timeTo" timeTo="timeTo" type="time"
                                            value={this.state.time_to} onChange={this.handleInputChange} />
                                 </td>
                             </tr>
@@ -338,7 +327,7 @@ class Schedule extends Component {
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="timeFrom" timeFrom="timeFrom" type="text"
+                                    <input name="timeFrom" timeFrom="timeFrom" type="time"
                                            value={this.state.time_from} onChange={this.handleInputChange} />
                                 </td>
                             </tr>
@@ -349,7 +338,7 @@ class Schedule extends Component {
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="timeTo" timeTo="timeTo" type="text"
+                                    <input name="timeTo" timeTo="timeTo" type="time"
                                            value={this.state.time_to} onChange={this.handleInputChange} />
                                 </td>
                             </tr>
@@ -378,7 +367,7 @@ class Schedule extends Component {
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="timeFrom" timeFrom="timeFrom" type="text"
+                                    <input name="timeFrom" timeFrom="timeFrom" type="time"
                                            value={this.state.time_from} onChange={this.handleInputChange} />
                                 </td>
                             </tr>
@@ -389,7 +378,7 @@ class Schedule extends Component {
                                     </label>
                                 </td>
                                 <td>
-                                    <input name="timeTo" timeTo="timeTo" type="text"
+                                    <input name="timeTo" timeTo="timeTo" type="time"
                                            value={this.state.time_to} onChange={this.handleInputChange} />
                                 </td>
                             </tr>
@@ -416,4 +405,13 @@ class Schedule extends Component {
         }
     }
 }
-export default Schedule;
+
+function mapStateToProps(state) {
+    const { auth } = state
+    return { auth }
+}
+
+const mapDispatchToProps = {
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(SaveTruckSchedule));

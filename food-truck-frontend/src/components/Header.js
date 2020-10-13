@@ -104,10 +104,13 @@ function PrimarySearchAppBar(props) {
             onClose={handleMenuClose}
         >
             <Link href="/dashboard">
-                <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+                <MenuItem onClick={handleMenuClose}>Dashboard</MenuItem>
             </Link>
             <Link href="/account">
-                <MenuItem onClick={handleMenuClose}>My Account</MenuItem>
+                <MenuItem onClick={handleMenuClose}>My Profile</MenuItem>
+            </Link>
+            <Link href="/logout">
+                <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
             </Link>
         </Menu>
     );
