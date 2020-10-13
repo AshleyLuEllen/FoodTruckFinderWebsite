@@ -3,6 +3,7 @@ package food.truck.api.data.user;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 
 @Data
 @Entity
@@ -47,4 +48,13 @@ public class User {
     //    @JsonIgnore
     @Column(name = "user_location")
     String location;
+
+    @Column(name = "user_description")
+    String description;
+
+    @Column(name = "user_avatar")
+    String avatarURL;
+
+    @Column(name = "user_since")
+    ZonedDateTime sinceTime;
 }

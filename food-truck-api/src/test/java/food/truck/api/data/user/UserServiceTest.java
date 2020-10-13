@@ -35,14 +35,14 @@ class UserServiceTest {
         user1.setFirstName("Bob");
         user1.setLastName("Ross");
         user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo5543vr");
+        user1.setPassword("B0bRo$$43vr");
 
         // Create test user 2 (same email as user 1)
         User user2 = new User();
         user2.setFirstName("Robert");
         user2.setLastName("Ross");
         user2.setEmailAddress("bob.ross@example.com");
-        user2.setPassword("B0bRo5543vr2");
+        user2.setPassword("B0bRo$$43vr2");
 
         assertDoesNotThrow(() -> userService.createUser(user1));
 
@@ -57,7 +57,7 @@ class UserServiceTest {
         user.setFirstName("Bob");
         user.setLastName("Ross");
         user.setEmailAddress("bob.ross@example.com");
-        user.setPassword("B0bRo5543vr");
+        user.setPassword("B0bRo$$43vr");
         userService.createUser(user);
 
         assertTrue(userService.findUserByEmailAddress("bob.ross@example.com").isPresent());

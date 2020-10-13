@@ -7,3 +7,6 @@ spring:
     # Only for testing purpose - comment this in production
     hibernate:
       ddl-auto: create-drop
+
+server:
+  port: ${PORT:8080}

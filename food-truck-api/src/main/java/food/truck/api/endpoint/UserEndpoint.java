@@ -1,15 +1,14 @@
 package food.truck.api.endpoint;
 
+import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckService;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
+import food.truck.api.security.WebSecurityConfig;
+import food.truck.api.validation.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
@@ -27,11 +26,15 @@ public class UserEndpoint {
     @Autowired
     private UserService userService;
 
+    
     @Autowired
     private TruckService truckService;
 
-    @GetMapping("/user")
+    @GetMapping("/users/me")
     public User findMeUser(Principal principal) {
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
         log.info(principal.getName());
         User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
         if (!Objects.equals(principal.getName(), user.getEmailAddress())) {
@@ -40,12 +43,17 @@ public class UserEndpoint {
         return user;
     }
 
-    @GetMapping("/user/{id}")
+    @GetMapping("/users/{id}")
     public User findUserById(@PathVariable Long id) {
         return userService.findUser(id).orElseThrow(ResourceNotFoundException::new);
     }
 
-    @PostMapping("/createuser")
+    @PatchMapping("/users/me")
+    public User updateMeUser(Principal principal, @RequestBody User user) {
+        return userService.updateUser(principal.getName(), user);
+    }
+
+    @PostMapping("/users")
     public User createUser(@RequestBody User user) {
         return userService.createUser(user);
     }

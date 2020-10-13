@@ -37,7 +37,7 @@ class TruckEndpointTest {
         user1.setFirstName("Bob");
         user1.setLastName("Ross");
         user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo5543vr");
+        user1.setPassword("B0bRo$$43vr");
 
         Truck truck = new Truck();
         truck.setName("Harry");
@@ -58,7 +58,7 @@ class TruckEndpointTest {
         user1.setFirstName("Bob");
         user1.setLastName("Ross");
         user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo5543vr");
+        user1.setPassword("B0bRo$$43vr");
         User user = userService.createUser(user1);
 
         Truck truck = new Truck();
@@ -85,7 +85,7 @@ class TruckEndpointTest {
         user1.setFirstName("Bob");
         user1.setLastName("Ross");
         user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo5543vr");
+        user1.setPassword("B0bRo$$43vr");
 
         Truck truck = new Truck();
         truck.setName("Harry");
