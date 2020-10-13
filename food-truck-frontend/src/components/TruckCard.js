@@ -49,8 +49,8 @@ function TruckCard(props) {
             />
             <CardContent>
                 <div className={classes.truckTags}>
-                    {props.tags.map(t => (
-                        <Chip label={t} href={`/search?tags=${t}`}></Chip>
+                    {props.tags.map((t, i) => (
+                        <Chip key={i} label={t} href={`/search?tags=${t}`}></Chip>
                     ))}
                 </div>
             </CardContent>

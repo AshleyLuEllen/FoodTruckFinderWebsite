@@ -85,7 +85,7 @@ class Information extends Component {
         axios.put(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.id}`, truck)
             .then((res) => {
                 console.log("saved truck!");
-                this.props.router.push(`/${res.data.id}/information`).then(r =>
+                this.props.router.push(`/owner/trucks/${res.data.id}`).then(r =>
                     this.setState ( {
                     editing: false
                 }));
@@ -110,7 +110,7 @@ class Information extends Component {
                     }})
         .then((res) => {
             console.log(res.statusText);
-            this.props.router.push("/account/dashboard");
+            this.props.router.push("/owner/trucks");
             this.setState({
                 editing: false
             });
@@ -215,21 +215,33 @@ class Information extends Component {
                         <td><h3>Tags: </h3></td>
                         <td><span>To be added in our next update.</span></td>
                     </tr>}
-                    <li>
-                        <Link href={`/${this.state.id}`}>
-                            <a>Back</a>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link href="/account/dashboard">
-                            <a>Dashboard</a>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link href="/">
-                            <a>Home</a>
-                        </Link>
-                    </li>
+                    <ul>
+                        <li>
+                            <Link href={`/owner/trucks/${this.props.router.query.truck_id}/manage`}>
+                                <a>Manage Truck</a>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href={`/owner/trucks/${this.props.router.query.truck_id}/notifications`}>
+                                <a>Notifications</a>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href={`/owner/trucks/${this.props.router.query.truck_id}/schedule`}>
+                                <a>Truck Schedule</a>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href={`/owner/trucks`}>
+                                <a>Back</a>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href="/">
+                                <a>Home</a>
+                            </Link>
+                        </li>
+                    </ul>
                     <br/>
                     <button className="edit-submit-button" onClick={this.editForm}>Edit</button>
                 </div>

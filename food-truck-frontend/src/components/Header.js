@@ -103,8 +103,8 @@ function PrimarySearchAppBar(props) {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <Link href="/dashboard">
-                <MenuItem onClick={handleMenuClose}>Dashboard</MenuItem>
+            <Link href="/owner">
+                <MenuItem onClick={handleMenuClose}>Owner Dashboard</MenuItem>
             </Link>
             <Link href="/account">
                 <MenuItem onClick={handleMenuClose}>My Profile</MenuItem>

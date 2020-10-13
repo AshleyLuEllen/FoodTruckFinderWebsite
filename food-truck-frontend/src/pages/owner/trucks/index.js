@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Link from "next/link";
 import axios from "axios";
-import {login as authLogin, logout as authLogout} from "../../redux/actions/auth";
+import {login as authLogin, logout as authLogout} from "../../../redux/actions/auth";
 import {withRouter} from "next/router";
 import { connect, useDispatch } from 'react-redux';
 
@@ -76,22 +76,12 @@ class Dashboard extends Component {
                 <ol>
                     {this.state.truckData.map(tr => (
                         <li>
-                            <Link href={"/"+tr.id}>
+                            <Link href={"/owner/trucks/"+tr.id}>
                                 <a>{tr.name}</a>
                             </Link>
                         </li>
                     ))}
                 </ol>
-                <li>
-                    <Link href="/account">
-                        <a>Account</a>
-                    </Link>
-                </li>
-                <li>
-                    <Link href="/">
-                        <a>Home</a>
-                    </Link>
-                </li>
             </div>
         );
     }

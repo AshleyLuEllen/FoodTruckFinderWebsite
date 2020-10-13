@@ -1,79 +1,85 @@
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link'
+import React, { Component } from 'react';
+import Link from "next/link";
+import { withRouter } from 'next/router'
 import axios from "axios";
+import { connect } from 'react-redux';
+import { login as authLogin, logout as authLogout } from '../redux/actions/auth';
 
-import { useRouter } from 'next/router';
-import { connect, useDispatch } from 'react-redux';
-import { logout as authLogout } from '../redux/actions/auth';
+import TruckMap from '../components/TruckMap';
+import SubscriptionCard from '../components/SubscriptionCard';
+import { withStyles } from '@material-ui/core/styles';
+import { Container, Grid, Typography, Box } from "@material-ui/core";
 
-require('dotenv').config();
+const dashboardStyles = theme => ({
+    root: {
+        marginTop: '20px'
+    },
+    mapWrapper: {
+        position: 'relative',
+        width: '100%',
+        height: '87vh'
+    },
+    truckCard: {
+        marginBottom: '5px'
+    }
+});
 
-function HomePage(props) {
-    const router = useRouter();
-    const dispatch = useDispatch();
+class DashboardPage extends Component {
+    constructor(props) {
+        super(props);
+        this.state = { trucks: [], currentlySelected: undefined };
+    }
+    
+    componentDidMount() {
+        if (!this.props.auth.isLoggedIn) {
+            this.props.router.push('/search')
+        }
+        // TODO: stub
+        this.setState({
+            trucks: [
+                { name: "Test Food Truck 1", description: "A lighthearted eatery", id: 1, location: {lat: 37.759703, lng: -122.428093}, locationStr: "Sid Rich parking lot" },
+                { name: "Test Food Truck 2", description: "A lighthearted eatery", id: 1, location: {lat: 37.760703, lng: -122.429093}, locationStr: "Sid Rich parking lot" },
+                { name: "Test Food Truck 3", description: "A lighthearted eatery", id: 1, location: {lat: 37.761703, lng: -122.430093}, locationStr: "Sid Rich parking lot" },
+                { name: "Test Food Truck 4", description: "A lighthearted eatery", id: 1, location: {lat: 37.762703, lng: -122.431093}, locationStr: "Sid Rich parking lot" },
+                { name: "Test Food Truck 5", description: "A lighthearted eatery", id: 1, location: {lat: 37.763703, lng: -122.432093}, locationStr: "Sid Rich parking lot" },
+                { name: "Test Food Truck 6", description: "A lighthearted eatery", id: 1, location: {lat: 37.764703, lng: -122.433093}, locationStr: "Sid Rich parking lot" },
+            ],
+            currentlySelected: 0
+        })
+    }
 
-    const [emailMessage, setEmailMessage] = useState(undefined);
-    const [loading, setLoading] = useState(true);
+    render() {
+        const { classes } = this.props;
 
-    useEffect(() => {
-        axios
-            .get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
-                auth: {
-                    username: props.auth.email,
-                    password: props.auth.password
-                }
-            })
-            .then(res => {
-                setEmailMessage(`Logged in as ${res.data.firstName} ${res.data.lastName}`);
-                setLoading(false);
-            })
-            .catch(err => {
-                setEmailMessage("Not logged in.");
-                setLoading(false);
-                dispatch(props.authLogout());
-            });
-    }, []);
-
-    return (
-        <ul>
-            <h1>Home Page (Food Truck Finder - Group 1)</h1>
-            <h2>{!loading && emailMessage}</h2>
-            <li>
-                <Link href="/login">
-                    <a>Login</a>
-                </Link>
-            </li>
-            <li>
-                <Link href="/logout">
-                    <a>Logout</a>
-                </Link>
-            </li>
-            <li>
-                <Link href="/search">
-                    <a>Search</a>
-                </Link>
-            </li>
-            <li>
-                <Link href="/[truck_id]">
-                    <a>Trucks!</a>
-                </Link>
-            </li>
-            <li>
-                <Link href="/account">
-                    <a>Account</a>
-                </Link>
-            </li>
-        </ul>
-    )
+        return (
+            <Container className={classes.root}>
+                <Grid container spacing={3}>
+                    <Grid item xs={12} md={8}>
+                        <div className={classes.mapWrapper}>
+                            <TruckMap trucks={this.state.trucks} selected={this.state.currentlySelected}/>
+                        </div>
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                        <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>Subscriptions</Typography>
+                        <Box style={{ textAlign: "left", maxHeight: "calc(87vh - 50px)", overflow: "auto" }}>
+                            {this.state.trucks.map((tr, i) => (
+                                <SubscriptionCard className={classes.truckCard} truck={tr} onClick={evt => this.setState({currentlySelected: i})}/>
+                            ))}
+                        </Box>
+                    </Grid>
+                </Grid>
+            </Container>
+        );
+    }
 }
 
 function mapStateToProps(state) {
     const { auth } = state
     return { auth }
-}
+  }
   
 const mapDispatchToProps = {
     authLogout
 }
-  
-export default connect(mapStateToProps, mapDispatchToProps)(HomePage);
+
+export default withStyles(dashboardStyles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(DashboardPage)));
