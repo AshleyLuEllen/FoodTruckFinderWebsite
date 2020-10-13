@@ -5,6 +5,7 @@ import food.truck.api.data.truck.TruckRepository;
 import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserRepository;
+import food.truck.api.data.user.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -25,7 +26,7 @@ class TruckEndpointTest {
     private TruckRepository truckRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Autowired
     private AuthEndpoint authEndpoint;
@@ -51,32 +52,32 @@ class TruckEndpointTest {
         assertThat(f.getId() == found.get().getId());
     }
 
-//    @Test
-//    void createTruck() {
-//        User user1 = new User();
-//        user1.setFirstName("Bob");
-//        user1.setLastName("Ross");
-//        user1.setEmailAddress("bob.ross@example.com");
-//        user1.setPassword("B0bRo5543vr");
-//        User user = userRepository.save(user1);
-//
-//        Truck truck = new Truck();
-//        truck.setName("Harry");
-//        truck.setDescription("Best truck ever");
-//        truck.setLicensePlate("LVN 6982");
-////        truck.setOwner(user1);
-//
-//        Principal p = new Principal() {
-//            @Override
-//            public String getName() {
-//                return user.getEmailAddress();
-//            }
-//        };
-//
-//        authEndpoint.authenticate();
-//        Truck found = truckEndpoint.createTruck(p, truck);
-//        assertThat(found.getOwner().equals(user1));
-//    }
+    @Test
+    void createTruck() {
+        User user1 = new User();
+        user1.setFirstName("Bob");
+        user1.setLastName("Ross");
+        user1.setEmailAddress("bob.ross@example.com");
+        user1.setPassword("B0bRo5543vr");
+        User user = userService.createUser(user1);
+
+        Truck truck = new Truck();
+        truck.setName("Harry");
+        truck.setDescription("Best truck ever");
+        truck.setLicensePlate("LVN 6982");
+        truck.setOwner(user);
+
+        Principal p = new Principal() {
+            @Override
+            public String getName() {
+                return user.getEmailAddress();
+            }
+        };
+
+        authEndpoint.authenticate();
+        Truck found = truckEndpoint.createTruck(p, truck);
+        assertThat(found.getOwner().equals(user1));
+    }
 
     @Test
     void saveTruck() {
