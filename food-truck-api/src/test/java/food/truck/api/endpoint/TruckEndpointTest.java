@@ -1,65 +1,107 @@
 package food.truck.api.endpoint;
 
 import food.truck.api.data.truck.Truck;
+import food.truck.api.data.truck.TruckRepository;
 import food.truck.api.data.truck.TruckService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import food.truck.api.data.user.User;
+import food.truck.api.data.user.UserRepository;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.SQLException;
+import java.security.Principal;
 import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
 @Transactional
-@RunWith(SpringRunner.class)
-@DataJpaTest
 class TruckEndpointTest {
     @Autowired
-    private TestEntityManager entityManager;
+    private TruckEndpoint truckEndpoint;
 
     @Autowired
-    private TruckService truckService;
+    private TruckRepository truckRepository;
 
-    @BeforeEach
-    void setUp() throws SQLException {
+    @Autowired
+    private UserRepository userRepository;
 
-    }
-
-    @AfterEach
-    void tearDown() {
-    }
+    @Autowired
+    private AuthEndpoint authEndpoint;
 
     @Test
     void findTruckById() {
-        Truck t = new Truck();
-        t.setDescription("description");
-        t.setId(12345l);
-        t.setName("Food Truck");
+        User user1 = new User();
+        user1.setFirstName("Bob");
+        user1.setLastName("Ross");
+        user1.setEmailAddress("bob.ross@example.com");
+        user1.setPassword("B0bRo5543vr");
 
-        entityManager.persist(t);
-        entityManager.flush();
+        Truck truck = new Truck();
+        truck.setName("Harry");
+        truck.setDescription("Best truck ever");
+        truck.setLicensePlate("LVN 6982");
+        truck.setOwner(user1);
 
-        Optional<Truck> found = truckService.findTruck(t.getId());
+        Truck f = truckRepository.save(truck);
+
+        Optional<Truck> found = Optional.ofNullable(truckEndpoint.findTruckById(f.getId()));
         assert(!found.isEmpty());
-        assertThat(t.getId() == found.get().getId());
+        assertThat(f.getId() == found.get().getId());
     }
 
-    @Test
-    void createTruck() {
-    }
+//    @Test
+//    void createTruck() {
+//        User user1 = new User();
+//        user1.setFirstName("Bob");
+//        user1.setLastName("Ross");
+//        user1.setEmailAddress("bob.ross@example.com");
+//        user1.setPassword("B0bRo5543vr");
+//        User user = userRepository.save(user1);
+//
+//        Truck truck = new Truck();
+//        truck.setName("Harry");
+//        truck.setDescription("Best truck ever");
+//        truck.setLicensePlate("LVN 6982");
+////        truck.setOwner(user1);
+//
+//        Principal p = new Principal() {
+//            @Override
+//            public String getName() {
+//                return user.getEmailAddress();
+//            }
+//        };
+//
+//        authEndpoint.authenticate();
+//        Truck found = truckEndpoint.createTruck(p, truck);
+//        assertThat(found.getOwner().equals(user1));
+//    }
 
     @Test
     void saveTruck() {
+        User user1 = new User();
+        user1.setFirstName("Bob");
+        user1.setLastName("Ross");
+        user1.setEmailAddress("bob.ross@example.com");
+        user1.setPassword("B0bRo5543vr");
+
+        Truck truck = new Truck();
+        truck.setName("Harry");
+        truck.setDescription("Best truck ever");
+        truck.setLicensePlate("LVN 6982");
+        truck.setOwner(user1);
+        Truck found = truckRepository.save(truck);
+
+        Truck truck2 = new Truck();
+        truck2.setName("Bob");
+        truck2.setDescription("Worst truck ever");
+        truck2.setLicensePlate("LVN 6982");
+        truck2.setOwner(user1);
+
+        Truck found2 = truckEndpoint.saveTruck(truck);
+
+        assertThat(found.getId() == found2.getId());
+        assertThat(!found.getName().equals(found2.getName()));
     }
 }

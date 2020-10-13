@@ -29,7 +29,6 @@ class TruckServiceTest {
 
     @BeforeEach
     void setup() {
-        System.out.println("Truck being added");
         User user1 = new User();
         user1.setFirstName("Bob");
         user1.setLastName("Ross");
@@ -94,27 +93,27 @@ class TruckServiceTest {
         assertThat(truckRepository.findById(truckID).isEmpty());
     }
 
-    @Test
-    @Cascade(CascadeType.ALL)
-    void getTrucksOwnedByUser() {
-        User user1 = new User();
-        user1.setFirstName("Bob");
-        user1.setLastName("Ross");
-        user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo5543vr");
-
-        Truck t1 = new Truck();
-        Truck t2 = new Truck();
-        Truck t3 = new Truck();
-        t1.setOwner(user1);
-        t2.setOwner(user1);
-        t3.setOwner(user1);
-        truckRepository.save(t1);
-        truckRepository.save(t2);
-        truckRepository.save(t3);
-
-        List<Truck> trucks = truckService.getTrucksOwnedByUser(user1);
-        assertThat(trucks != null);
-        assertThat(trucks.size() == 3);
-    }
+//    @Test
+//    @Cascade(CascadeType.ALL)
+//    void getTrucksOwnedByUser() {
+//        User user1 = new User();
+//        user1.setFirstName("Bob");
+//        user1.setLastName("Ross");
+//        user1.setEmailAddress("bob.ross@example.com");
+//        user1.setPassword("B0bRo5543vr");
+//
+//        Truck t1 = new Truck();
+//        Truck t2 = new Truck();
+//        Truck t3 = new Truck();
+//        t1.setOwner(user1);
+//        t2.setOwner(user1);
+//        t3.setOwner(user1);
+//        truckRepository.save(t1);
+//        truckRepository.save(t2);
+//        truckRepository.save(t3);
+//
+//        List<Truck> trucks = truckService.getTrucksOwnedByUser(user1);
+//        assertThat(trucks != null);
+//        assertThat(trucks.size() == 3);
+//    }
 }
