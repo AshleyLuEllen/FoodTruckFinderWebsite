@@ -35,11 +35,11 @@ class DashboardPage extends Component {
         this.setState({
             trucks: [
                 { name: "Test Food Truck 1", description: "A lighthearted eatery", id: 1, location: {lat: 37.759703, lng: -122.428093}, locationStr: "Sid Rich parking lot" },
-                { name: "Test Food Truck 2", description: "A lighthearted eatery", id: 1, location: {lat: 37.759703, lng: -122.429093}, locationStr: "Sid Rich parking lot" },
-                { name: "Test Food Truck 3", description: "A lighthearted eatery", id: 1, location: {lat: 37.759703, lng: -122.430093}, locationStr: "Sid Rich parking lot" },
-                { name: "Test Food Truck 4", description: "A lighthearted eatery", id: 1, location: {lat: 37.759703, lng: -122.431093}, locationStr: "Sid Rich parking lot" },
-                { name: "Test Food Truck 5", description: "A lighthearted eatery", id: 1, location: {lat: 37.759703, lng: -122.432093}, locationStr: "Sid Rich parking lot" },
-                { name: "Test Food Truck 6", description: "A lighthearted eatery", id: 1, location: {lat: 37.759703, lng: -122.433093}, locationStr: "Sid Rich parking lot" },
+                { name: "Test Food Truck 2", description: "A lighthearted eatery", id: 1, location: {lat: 37.760703, lng: -122.429093}, locationStr: "Sid Rich parking lot" },
+                { name: "Test Food Truck 3", description: "A lighthearted eatery", id: 1, location: {lat: 37.761703, lng: -122.430093}, locationStr: "Sid Rich parking lot" },
+                { name: "Test Food Truck 4", description: "A lighthearted eatery", id: 1, location: {lat: 37.762703, lng: -122.431093}, locationStr: "Sid Rich parking lot" },
+                { name: "Test Food Truck 5", description: "A lighthearted eatery", id: 1, location: {lat: 37.763703, lng: -122.432093}, locationStr: "Sid Rich parking lot" },
+                { name: "Test Food Truck 6", description: "A lighthearted eatery", id: 1, location: {lat: 37.764703, lng: -122.433093}, locationStr: "Sid Rich parking lot" },
             ],
             currentlySelected: 0
         })
