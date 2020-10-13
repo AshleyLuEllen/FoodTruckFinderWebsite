@@ -82,6 +82,7 @@ class Dashboard extends Component {
                         </li>
                     ))}
                 </ol>
+                Want to create a truck? Click <Link href="/owner/trucks/create">here</Link>
             </div>
         );
     }
