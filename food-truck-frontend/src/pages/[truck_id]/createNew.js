@@ -124,7 +124,7 @@ class CreateNewTruck extends Component {
 function mapStateToProps(state) {
     const { auth } = state
     return { auth }
-  }
+}
   
 const mapDispatchToProps = {
 }

@@ -34,8 +34,12 @@ public class TruckService {
         return truckRepository.save(truck);
     }
 
-    public List<Truck> getTrucksOwnedByUser(User user) {
-        return truckRepository.findByOwner(user);
+    public void deleteTruck(long truckid) {
+        truckRepository.deleteById(truckid);
+    }
+
+    public List<Truck> getTrucksOwnedByUser(User owner) {
+        return truckRepository.findAllByOwner(owner);
     }
 }
 
