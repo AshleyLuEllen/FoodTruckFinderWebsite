@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
 import Link from "next/link";
 import axios from "axios";
-import Settings from "./settings";
 import {login as authLogin, logout as authLogout} from "../../redux/actions/auth";
 import {withRouter} from "next/router";
 import { connect, useDispatch } from 'react-redux';
-//import { login as authLogin, logout as authLogout } from '../redux/actions/auth';
 
 class Dashboard extends Component {
     constructor(props) {
@@ -56,6 +54,21 @@ class Dashboard extends Component {
                 console.log(err);
             })
     }
+
+    componentWillUpdate = () => {
+        console.log(this.props.router.query);
+        axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.props.router.query.user_id}/trucks`)
+            .then(res => {
+                this.setState({
+                    truckData: res.data
+                });
+            })
+            .catch(err => {
+                console.log(err.response?.status);
+                console.log(err);
+            })
+    };
+
     render() {
         return (
             <div>

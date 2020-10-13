@@ -1,51 +1,78 @@
 import React, { Component } from 'react';
 import Link from "next/link";
 import axios from "axios";
-import { withRouter } from 'next/router'
-import {number} from "prop-types";
+import { withRouter } from 'next/router';
+import { connect } from "react-redux";
 
-
+/**
+ * Information page for the food trucks which includes an editing form if you're the
+ * authenticated owner
+ */
 class Information extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            id: '',
+            id: 0,
             name: '',
             description: '',
             licensePlate: '',
             paymentTypes: 0,
             owner: '',
+
             truckFound: false,
+
+            // Will display the form when true and will display any error messages while editing
             editing: false,
             editingMessage: ''
         };
 
         this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleChangeStatus = this.handleChangeStatus.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
-    handleChangeStatus(event) {
-    }
+    /**
+     * Sets the state value to the value in the form
+     * @param event the source of the new value in the state
+     */
     handleInputChange(event) {
         this.setState({
             [event.target.name]: event.target.value
         });
     }
+
     handleSubmit(event) {
         event.preventDefault();
     }
 
+    /**
+     * Checks that the user is authenticated and authorized to edit this
+     * truck's information.
+     */
     editForm = (() => {
-        console.log(this);
-        this.setState({
-            editing: true,
-            editingMessage: ''
+        axios.get(process.env.FOOD_TRUCK_API_URL + "/user",
+        {
+            auth: {
+                username: this.props.auth.email,
+                password: this.props.auth.password
+            }
+        }
+        ).then(
+            this.setState({
+                editing: true,
+                editingMessage: ''
+            })
+        ).catch((err) => {
+            console.log(err);
+            alert("Only truck owners can edit the truck");
         });
+
+
     })
 
+    /**
+     * Saves the edited information from the form
+     */
     saveInfo = (() => {
-
         const truck = {
             id: this.state.id,
             name: this.state.name,
@@ -58,10 +85,11 @@ class Information extends Component {
         axios.post(`${process.env.FOOD_TRUCK_API_URL}/savetruck`, truck)
             .then((res) => {
                 console.log("saved truck!");
-                this.props.router.push(`/${res.data.id}/information`);
-                this.setState ( {
+                this.props.router.push(`/${res.data.id}/information`).then(r =>
+                    this.setState ( {
                     editing: false
-                });
+                }));
+
             })
             .catch((err) => {
                 this.setState({
@@ -69,8 +97,35 @@ class Information extends Component {
                 });
             });
     })
-    //"Invalid information entered. 'Payment types' is a numeric value."
 
+    /**
+     * Removes the truck that's currently being edited
+     */
+    removeTruck = (() => {
+        console.log(this.state);
+        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/deletetruck/${this.state.id}`,
+            { auth: {
+                        username: this.props.auth.email,
+                        password: this.props.auth.password
+                    }})
+        .then((res) => {
+            console.log(res.statusText);
+            this.props.router.push("/account/dashboard");
+            this.setState({
+                editing: false
+            });
+        })
+        .catch((err) => {
+            this.setState({
+                editingMessage: err.message
+            });
+        })
+    });
+
+    /**
+     * Displays all the information about the truck who's id is being
+     * used in the URL
+     */
     componentDidMount() {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/truck/${this.props.router.query.truck_id}`).then(res => {
             this.setState({
@@ -79,11 +134,11 @@ class Information extends Component {
                 description: res.data.description,
                 licensePlate: res.data.licensePlate,
                 paymentTypes: res.data.paymentTypes,
-                owner: res.data.owner,
+                owner: res.data.owner.id,
                 truckFound: true,
             });
             console.log("found the truck!");
-        }).catch(err => {
+        }).catch((err) => {
             this.setState({
                 id: 'empty',
                 name: 'empty',
@@ -96,6 +151,9 @@ class Information extends Component {
         });
     }
 
+    /**
+     * Continuously updates the truck information on the page
+     */
     componentWillUpdate() {
         if(!this.state.truckFound) {
             axios.get(`${process.env.FOOD_TRUCK_API_URL}/truck/${this.props.router.query.truck_id}`).then(res => {
@@ -112,12 +170,12 @@ class Information extends Component {
                 console.log(this.state);
             }).catch(err => {
                 this.setState({
-                    id: 'empty',
-                    name: 'empty',
-                    description: 'empty',
-                    licensePlate: 'empty',
+                    id: '',
+                    name: '',
+                    description: '',
+                    licensePlate: '',
                     paymentTypes: 0,
-                    owner: 'empty',
+                    owner: '',
                     truckFound: false,
                     editing: false
                 });
@@ -126,6 +184,9 @@ class Information extends Component {
     }
 
     render() {
+        /**
+         * If the truck is not being edited, just display the information
+         */
         if(!this.state.editing) {
             return (
                 <div>
@@ -160,6 +221,11 @@ class Information extends Component {
                         </Link>
                     </li>
                     <li>
+                        <Link href="/account/dashboard">
+                            <a>Dashboard</a>
+                        </Link>
+                    </li>
+                    <li>
                         <Link href="/">
                             <a>Home</a>
                         </Link>
@@ -169,6 +235,9 @@ class Information extends Component {
                 </div>
             );
         }
+        /**
+         * If the truck is being edited, display a form
+         */
         else {
             return (
                 <div>
@@ -225,15 +294,23 @@ class Information extends Component {
                         </table>
                         <button onClick={this.saveInfo}>Save</button>
                     </form>
+                    <button onClick={this.removeTruck}>Delete Truck</button>
                     <br />
-                    <li>
-                        <Link href={`/${this.state.id}/information`}>
+                    <br/>
+                    <Link href={`/${this.state.id}/information`}>
                             <a>Cancel</a>
-                        </Link>
-                    </li>
+                    </Link>
                 </div>
             );
         }
     }
 }
-export default withRouter(Information);
+const mapStateToProps = state => {
+    const { auth } = state
+    return { auth }
+};
+
+const mapDispatchToProps = {
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Information));

@@ -67,8 +67,8 @@ function TruckPage() {
                 </Link>
             </li>
             <li>
-                <Link href="/">
-                    <a>Home</a>
+                <Link href="/account/dashboard">
+                    <a>Back</a>
                 </Link>
             </li>
         </ul>

@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import Link from "next/link";
+import { withRouter } from 'next/router';
+
 
 class Reviews extends Component {
     constructor(props) {
@@ -22,7 +24,7 @@ class Reviews extends Component {
             <div>
                 <h2>Reviews</h2>
                 <li>
-                    <Link href="/[truck_id]">
+                    <Link href={`/${this.props.router.query.truck_id}`}>
                         <a>Trucks!</a>
                     </Link>
                 </li>
@@ -35,4 +37,4 @@ class Reviews extends Component {
         );
     }
 }
-export default Reviews;
+export default withRouter(Reviews);
