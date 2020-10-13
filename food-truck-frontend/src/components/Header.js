@@ -110,7 +110,7 @@ function PrimarySearchAppBar(props) {
                 <MenuItem onClick={handleMenuClose}>My Profile</MenuItem>
             </Link>
             <Link href="/logout">
-                <MenuItem onclick={handleMenuClose}>Logout</MenuItem>
+                <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
             </Link>
         </Menu>
     );
