@@ -221,6 +221,11 @@ class Information extends Component {
                         </Link>
                     </li>
                     <li>
+                        <Link href="/account/dashboard">
+                            <a>Dashboard</a>
+                        </Link>
+                    </li>
+                    <li>
                         <Link href="/">
                             <a>Home</a>
                         </Link>
