@@ -49,7 +49,7 @@ class Information extends Component {
      * truck's information.
      */
     editForm = (() => {
-        axios.get(process.env.FOOD_TRUCK_API_URL + "/user",
+        axios.get(process.env.FOOD_TRUCK_API_URL + "/users/me",
         {
             auth: {
                 username: this.props.auth.email,
@@ -82,7 +82,7 @@ class Information extends Component {
             owner: this.state.owner
         }
 
-        axios.post(`${process.env.FOOD_TRUCK_API_URL}/savetruck`, truck)
+        axios.put(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.id}`, truck)
             .then((res) => {
                 console.log("saved truck!");
                 this.props.router.push(`/${res.data.id}/information`).then(r =>
@@ -103,7 +103,7 @@ class Information extends Component {
      */
     removeTruck = (() => {
         console.log(this.state);
-        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/deletetruck/${this.state.id}`,
+        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.id}`,
             { auth: {
                         username: this.props.auth.email,
                         password: this.props.auth.password
@@ -127,7 +127,7 @@ class Information extends Component {
      * used in the URL
      */
     componentDidMount() {
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/truck/${this.props.router.query.truck_id}`).then(res => {
+        axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`).then(res => {
             this.setState({
                 id: res.data.id,
                 name: res.data.name,
@@ -156,7 +156,7 @@ class Information extends Component {
      */
     componentWillUpdate() {
         if(!this.state.truckFound) {
-            axios.get(`${process.env.FOOD_TRUCK_API_URL}/truck/${this.props.router.query.truck_id}`).then(res => {
+            axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`).then(res => {
                 this.setState({
                     id: res.data.id,
                     name: res.data.name,

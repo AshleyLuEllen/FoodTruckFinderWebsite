@@ -14,7 +14,7 @@ function TruckPage() {
         console.log(router.query);
 
         axios
-            .get(`${process.env.FOOD_TRUCK_API_URL}/truck/${router.query.truck_id}`)
+            .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${router.query.truck_id}`)
             .then(res => {
                 setPageMessage(`${res.data.name} Truck Page`);
                 setLoading(false);

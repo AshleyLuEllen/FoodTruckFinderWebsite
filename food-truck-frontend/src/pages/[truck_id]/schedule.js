@@ -50,7 +50,7 @@ class Schedule extends Component {
                 alert("Invalid Schedule/Location")
                 console.log(err);
             });
-    })
+    }
 
     componentDidMount() {
       /*  axios.get(`${process.env.FOOD_TRUCK_API_URL}/truck/${this.props.router.query.truck_id}`).then(res => {
@@ -388,7 +388,7 @@ class Schedule extends Component {
                             Save Changes
                         </button>
                     </form>
-                    <br>
+                    <br/>
                     <label>{this.state.message}</label>
                     <li>
                         <Link href="/[truck_id]">

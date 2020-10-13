@@ -2,6 +2,7 @@ package food.truck.api.endpoint;
 
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckService;
+import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class TruckEndpoint {
     @Autowired
     private UserService userService;
 
-    @DeleteMapping("/deletetruck/{id}")
+    @DeleteMapping("/trucks/{id}")
     public ResponseEntity<String> deleteTruck(Principal principal, @PathVariable long id) {
         // Get the owner email
         if (principal == null) {
@@ -45,7 +46,7 @@ public class TruckEndpoint {
         return new ResponseEntity<>("Truck has been deleted!", HttpStatus.OK);
     }
 
-    @PostMapping("/createtruck")
+    @PostMapping("/trucks")
     public Truck createTruck(Principal principal, @RequestBody Truck truck) {
         // Get the owner email
         if (principal == null) {
@@ -61,13 +62,17 @@ public class TruckEndpoint {
         return truckService.createTruck(truck, meUser.get());
     }
 
-    @GetMapping("/truck/{id}")
+    @GetMapping("/trucks/{id}")
     public Truck findTruckById(@PathVariable Long id) {
         return truckService.findTruck(id).orElseThrow(ResourceNotFoundException::new);
     }
 
-    @PostMapping("/savetruck")
-    public Truck saveTruck(@RequestBody Truck truck) {
+    @PutMapping("/trucks/{id}")
+    public Truck saveTruck(@PathVariable Long id, @RequestBody Truck truck) {
+        if (!truck.getId().equals(id)) {
+            throw new BadRequestException("IDs don't match");
+        }
+
         return truckService.saveTruck(truck);
     }
 }

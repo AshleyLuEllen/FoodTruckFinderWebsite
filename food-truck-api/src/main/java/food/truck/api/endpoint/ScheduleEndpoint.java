@@ -4,6 +4,7 @@ import food.truck.api.data.schedule.Schedule;
 import food.truck.api.data.schedule.ScheduleService;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckService;
+import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class ScheduleEndpoint {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/createSchedule")
+    @PostMapping("/schedules")
     public Schedule createSchedule(Principal principal, @RequestBody Schedule schedule) {
         // Get the owner email
         if (principal == null) {
@@ -45,12 +46,17 @@ public class ScheduleEndpoint {
         return scheduleService.createSchedule(schedule, meTruck.get());
     }
 
-    @GetMapping("/schedule/{id}")
+    @GetMapping("/schedules/{id}")
     public Schedule findScheduleById(@PathVariable Long id) {
         return scheduleService.findSchedule(id).orElseThrow(ResourceNotFoundException::new);
     }
-    @PostMapping("/saveSchedule")
-    public Schedule saveTruck(@RequestBody Schedule schedule) {
+
+    @PutMapping("/schedules/{id}")
+    public Schedule saveTruck(@PathVariable Long id, @RequestBody Schedule schedule) {
+        if (!schedule.getId().equals(id)) {
+            throw new BadRequestException("IDs do not match");
+        }
+
         return scheduleService.saveSchedule(schedule);
     }
 }

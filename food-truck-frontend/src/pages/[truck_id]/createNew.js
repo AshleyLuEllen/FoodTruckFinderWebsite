@@ -40,7 +40,7 @@ class CreateNewTruck extends Component {
             name: this.state.truck_name
         }
 
-        axios.post(process.env.FOOD_TRUCK_API_URL + "/createtruck", truck, {
+        axios.post(process.env.FOOD_TRUCK_API_URL + "/trucks", truck, {
             auth: {
                 username: this.props.auth.email,
                 password: this.props.auth.password
