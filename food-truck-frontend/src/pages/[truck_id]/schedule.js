@@ -4,6 +4,21 @@ import axios from "axios";
 import { withRouter } from "next/router";
 import { connect } from "react-redux";
 
+import { makeStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+
+const useStyles = theme => ({
+    container: {
+        display: 'flex',
+        flexWrap: 'wrap',
+    },
+    textField: {
+        marginLeft: theme.spacing(1),
+        marginRight: theme.spacing(1),
+        width: 200,
+    },
+});
+
 class Schedule extends Component {
     constructor(props) {
         super(props);
@@ -39,13 +54,43 @@ class Schedule extends Component {
     truckSchedule() {
 
         const schedule = {
-         //   truck_id: this.state.truck_id,
+            id: this.state.id, // if you are creating (POSTing) a new schedule, you won't have this
+            truck: this.state.truck,
             location: this.state.location,
-            time_from: this.state.time_from,
-            time_to: this.state.time_to
+            timeFrom: this.state.timeFrom.toISOString(), // both of these locations need to be ISO strings, which can
+            timeTo: this.state.timeTo.toISOString(),     // be gotten from dateObj.toISOString()
+            override: false
         }
 
-        axios.post(`${process.env.FOOD_TRUCK_API_URL}/saveschedule`, truck, {
+        axios.get(`${process.env.FOOD_TRUCK_API_URL}/schedules/${schedule_id}`, {
+            auth: {
+                username: this.props.auth.email,
+                password: this.props.auth.password
+            }
+        }).then(res => {
+            console.log("schedule found!");
+            this.props.router.push(`/${res.data.id}`);
+        }).catch(err => {
+            console.log(err);
+            // use `res.response.status` to get the status code
+        });
+
+        axios.put(`${process.env.FOOD_TRUCK_API_URL}/schedules/${schedule_id}`, schedule, {
+            auth: {
+                username: this.props.auth.email,
+                password: this.props.auth.password
+            }
+        })
+            .then((res) => {
+                this.props.router.push(`/account/dashboard`);
+            })
+            .catch((err) => {
+                alert(err);
+                alert("Invalid Schedule/Location")
+                console.log(err);
+            });
+
+        axios.post(`${process.env.FOOD_TRUCK_API_URL}/schedules`, schedule,{
             auth: {
                 username: this.props.auth.email,
                 password: this.props.auth.password
@@ -104,6 +149,7 @@ class Schedule extends Component {
     }*/
 
     render() {
+        const {classes} = this.props;
         return (
             <div className="truck-schedule-form">
                 <h2>Schedule</h2>
@@ -135,8 +181,20 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="time_from" time_from="time_from" type="text"
-                                       value={this.state.time_from} onChange={this.handleInputChange} />
+                                <TextField
+                                    id="time_from"
+                                    type="time"
+                                    defaultValue="12:00"
+
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    inputProps={{
+                                        step: 300, // 5 min
+                                    }}
+                                    value={this.state.time_from} onChange={this.handleInputChange}
+                                />
+
                             </td>
                         </tr>
                         <tr>
