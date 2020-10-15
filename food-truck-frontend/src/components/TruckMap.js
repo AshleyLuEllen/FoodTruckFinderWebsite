@@ -68,6 +68,7 @@ export class MapContainer extends Component {
 
                 {this.props.trucks.map((tr, i) => (
                     <Marker
+                        key={i}
                         ref={`marker${i}`}
                         onClick={this.onMarkerClick}
                         name={tr.name}

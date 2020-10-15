@@ -6,6 +6,7 @@ import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserRepository;
 import food.truck.api.data.user.UserService;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -100,7 +101,7 @@ class TruckEndpointTest {
         truck2.setLicensePlate("LVN 6982");
         truck2.setOwner(user1);
 
-        Truck found2 = truckEndpoint.saveTruck(truck);
+        Truck found2 = truckEndpoint.saveTruck(found.getId(),truck);
 
         assertThat(found.getId() == found2.getId());
         assertThat(!found.getName().equals(found2.getName()));

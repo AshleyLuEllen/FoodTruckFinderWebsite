@@ -34,7 +34,7 @@ function TruckCard(props) {
     return (
         <Card className={props.className}>
             <CardHeader 
-                title={<Link href={`/truck/${props.truck.id}`}>{props.truck.name}</Link>}
+                title={<Link href={`/trucks/${props.truck.id}`}>{props.truck.name}</Link>}
                 subheader={props.truck.description}
                 action={
                     <IconButton aria-label="settings">
@@ -49,8 +49,8 @@ function TruckCard(props) {
             />
             <CardContent>
                 <div className={classes.truckTags}>
-                    {props.tags.map(t => (
-                        <Chip label={t} href={`/search?tags=${t}`}></Chip>
+                    {props.tags.map((t, i) => (
+                        <Chip key={i} label={t} href={`/search?tags=${t}`}></Chip>
                     ))}
                 </div>
             </CardContent>
