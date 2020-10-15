@@ -1,5 +1,7 @@
 package food.truck.api.endpoint;
 
+import food.truck.api.data.schedule.Schedule;
+import food.truck.api.data.schedule.ScheduleService;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckService;
 import food.truck.api.endpoint.error.BadRequestException;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
 import lombok.extern.log4j.Log4j2;
+
+import javax.swing.text.html.Option;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +28,9 @@ public class TruckEndpoint {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ScheduleService scheduleService;
 
     @DeleteMapping("/trucks/{id}")
     public ResponseEntity<String> deleteTruck(Principal principal, @PathVariable long id) {
