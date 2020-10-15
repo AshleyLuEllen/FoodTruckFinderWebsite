@@ -57,12 +57,12 @@ class Schedule extends Component {
             id: this.state.id, // if you are creating (POSTing) a new schedule, you won't have this
             truck: this.state.truck,
             location: this.state.location,
-            timeFrom: this.state.timeFrom.toISOString(), // both of these locations need to be ISO strings, which can
-            timeTo: this.state.timeTo.toISOString(),     // be gotten from dateObj.toISOString()
+            timeFrom: this.state.timeFrom, // both of these locations need to be ISO strings, which can
+            timeTo: this.state.timeTo,     // be gotten from dateObj.toISOString()
             override: false
         }
 
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/schedules/${schedule_id}`, {
+        axios.get(`${process.env.FOOD_TRUCK_API_URL}/schedules/${this.state.id}`, {
             auth: {
                 username: this.props.auth.email,
                 password: this.props.auth.password
@@ -75,7 +75,7 @@ class Schedule extends Component {
             // use `res.response.status` to get the status code
         });
 
-        axios.put(`${process.env.FOOD_TRUCK_API_URL}/schedules/${schedule_id}`, schedule, {
+        axios.put(`${process.env.FOOD_TRUCK_API_URL}/schedules/${this.state.id}`, schedule, {
             auth: {
                 username: this.props.auth.email,
                 password: this.props.auth.password
@@ -86,7 +86,7 @@ class Schedule extends Component {
             })
             .catch((err) => {
                 alert(err);
-                alert("Invalid Schedule/Location")
+                alert("Invalid Schedule/Location!!!!")
                 console.log(err);
             });
 
@@ -181,19 +181,8 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <TextField
-                                    id="time_from"
-                                    type="time"
-                                    defaultValue="12:00"
-
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    inputProps={{
-                                        step: 300, // 5 min
-                                    }}
-                                    value={this.state.time_from} onChange={this.handleInputChange}
-                                />
+                                <input name="time_from" time_from="time_from" type="datetime-local"
+                                       value={this.state.time_from} onChange={this.handleInputChange} />
 
                             </td>
                         </tr>
@@ -204,7 +193,7 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="time_to" time_to="time_to" type="text"
+                                <input name="time_to" time_to="time_to" type="datetime-local"
                                        value={this.state.time_to} onChange={this.handleInputChange} />
                             </td>
                         </tr>
@@ -233,7 +222,7 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="time_from" time_from="time_from" type="text"
+                                <input name="time_from" time_from="time_from" type="datetime-local"
                                        value={this.state.time_from} onChange={this.handleInputChange} />
                             </td>
                         </tr>
@@ -244,7 +233,7 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="time_to" time_to="time_to" type="text"
+                                <input name="time_to" time_to="time_to" type="datetime-local"
                                        value={this.state.time_to} onChange={this.handleInputChange} />
                             </td>
                         </tr>
@@ -273,7 +262,7 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="time_from" time_from="time_from" type="text"
+                                <input name="time_from" time_from="time_from" type="datetime-local"
                                        value={this.state.time_from} onChange={this.handleInputChange} />
                             </td>
                         </tr>
@@ -284,7 +273,7 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="time_to" time_to="time_to" type="text"
+                                <input name="time_to" time_to="time_to" type="datetime-local"
                                        value={this.state.time_to} onChange={this.handleInputChange} />
                             </td>
                         </tr>
@@ -313,7 +302,7 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="time_from" time_from="time_from" type="text"
+                                <input name="time_from" time_from="time_from" type="datetime-local"
                                        value={this.state.time_from} onChange={this.handleInputChange} />
                             </td>
                         </tr>
@@ -324,7 +313,7 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="time_to" time_to="time_to" type="text"
+                                <input name="time_to" time_to="time_to" type="datetime-local"
                                        value={this.state.time_to} onChange={this.handleInputChange} />
                             </td>
                         </tr>
@@ -353,7 +342,7 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="time_from" time_from="time_from" type="text"
+                                <input name="time_from" time_from="time_from" type="datetime-local"
                                        value={this.state.time_from} onChange={this.handleInputChange} />
                             </td>
                         </tr>
@@ -364,7 +353,7 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="time_to" time_to="time_to" type="text"
+                                <input name="time_to" time_to="time_to" type="datetime-local"
                                        value={this.state.time_to} onChange={this.handleInputChange} />
                             </td>
                         </tr>
@@ -393,7 +382,7 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="time_from" time_from="time_from" type="text"
+                                <input name="time_from" time_from="time_from" type="datetime-local"
                                        value={this.state.time_from} onChange={this.handleInputChange} />
                             </td>
                         </tr>
@@ -404,7 +393,7 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="time_to" time_to="time_to" type="text"
+                                <input name="time_to" time_to="time_to" type="datetime-local"
                                        value={this.state.time_to} onChange={this.handleInputChange} />
                             </td>
                         </tr>
@@ -433,7 +422,7 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="time_from" time_from="time_from" type="text"
+                                <input name="time_from" time_from="time_from" type="datetime-local"
                                        value={this.state.time_from} onChange={this.handleInputChange} />
                             </td>
                         </tr>
@@ -444,7 +433,7 @@ class Schedule extends Component {
                                 </label>
                             </td>
                             <td>
-                                <input name="time_to" time_to="time_to" type="text"
+                                <input name="time_to" time_to="time_to" type="datetime-local"
                                        value={this.state.time_to} onChange={this.handleInputChange} />
                             </td>
                         </tr>
