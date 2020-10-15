@@ -15,6 +15,7 @@ import food.truck.api.data.user.UserService;
 import lombok.extern.log4j.Log4j2;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 
 @Log4j2
@@ -29,34 +30,56 @@ public class ScheduleEndpoint {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/schedules")
-    public Schedule createSchedule(Principal principal, @RequestBody Schedule schedule) {
-        // Get the owner email
-        if (principal == null) {
-            throw new UnauthorizedException();
+    @GetMapping("/trucks/{id}/schedules")
+    public List<Schedule> getAllSchedules(@PathVariable Long id) {
+        Optional<Truck> truck = truckService.findTruck(id);
+
+        if (truck.isEmpty()) {
+            throw new ResourceNotFoundException();
         }
 
-        // Get me user
-        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
-        if (meUser.isEmpty()) {
-            throw new UnauthorizedException();
+        return scheduleService.findSchedulesOfTruck(truck.get());
+    }
+
+    @PostMapping("/trucks/{id}/schedules")
+    public Schedule createSchedule(@PathVariable Long id, @RequestBody Schedule schedule) {
+//        // Get the owner email
+//        if (principal == null) {
+//            throw new UnauthorizedException();
+//        }
+
+//        // Get me user
+//        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
+//        if (meUser.isEmpty()) {
+//            throw new UnauthorizedException();
+//        }
+//        Optional<Truck> meTruck = truckService.findTruck(meUser.get().getId());
+
+        Optional<Truck> truck = truckService.findTruck(id);
+
+        if (truck.isEmpty()) {
+            throw new ResourceNotFoundException();
         }
-        Optional<Truck> meTruck = truckService.findTruck(meUser.get().getId());
 
-        return scheduleService.createSchedule(schedule, meTruck.get());
+        return scheduleService.createSchedule(schedule, truck.get());
     }
 
-    @GetMapping("/schedules/{id}")
-    public Schedule findScheduleById(@PathVariable Long id) {
-        return scheduleService.findSchedule(id).orElseThrow(ResourceNotFoundException::new);
+    @GetMapping("/trucks/{truckId}/schedules/{scheduleId}")
+    public Schedule findScheduleById(@PathVariable Long truckId, @PathVariable Long scheduleId) {
+        return scheduleService.findSchedule(scheduleId).orElseThrow(ResourceNotFoundException::new);
     }
 
-    @PutMapping("/schedules/{id}")
-    public Schedule saveTruck(@PathVariable Long id, @RequestBody Schedule schedule) {
-        if (!schedule.getId().equals(id)) {
+    @PutMapping("/trucks/{truckId}/schedules/{scheduleId}")
+    public Schedule saveTruck(@PathVariable Long truckId, @PathVariable Long scheduleId, @RequestBody Schedule schedule) {
+        if (!schedule.getId().equals(scheduleId)) {
             throw new BadRequestException("IDs do not match");
         }
 
         return scheduleService.saveSchedule(schedule);
+    }
+
+    @DeleteMapping("/trucks/{truckId}/schedules/{scheduleId}")
+    public void deleteScheduleById(@PathVariable Long truckId, @PathVariable Long scheduleId) {
+        scheduleService.deleteSchedule(scheduleId);
     }
 }
