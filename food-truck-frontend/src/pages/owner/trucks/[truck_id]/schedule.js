@@ -239,7 +239,7 @@ class Schedule extends Component {
                 <br />
                 <label>{this.state.message}</label>
                 <li>
-                    <Link href="/">
+                    <Link href={`/owner/trucks/${this.props?.router?.query?.truck_id}`}>
                         <a>Cancel</a>
                     </Link>
                 </li>
