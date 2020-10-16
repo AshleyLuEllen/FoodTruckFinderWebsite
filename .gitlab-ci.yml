@@ -14,7 +14,7 @@ stages:
     - deploy
 
 test-frontend:
-    stage: tesit
+    stage: test
     script:
         - "echo TODO: implement tests"
     only:
