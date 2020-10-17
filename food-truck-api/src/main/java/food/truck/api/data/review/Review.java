@@ -30,13 +30,13 @@ public class Review {
     @ManyToOne
     Truck truck;
 
-    @Column(name = "rating")
+    @Column(name = "review_rating")
     short rating;
 
-    @Column(name="review_comment")
+    @Column(name = "review_comment")
     String comment;
 
-    @Column(name="timestamp")
+    @Column(name = "review_timestamp", columnDefinition = "TIMESTAMP")
     ZonedDateTime reviewTimestamp;
 }
 

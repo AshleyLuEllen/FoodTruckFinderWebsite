@@ -28,10 +28,10 @@ public class Schedule {
     @Column(name = "truck_location")
     String location;
 
-    @Column(name = "time_from")
+    @Column(name = "time_from", columnDefinition = "TIMESTAMP")
     ZonedDateTime timeFrom;
 
-    @Column(name = "time_to")
+    @Column(name = "time_to", columnDefinition = "TIMESTAMP")
     ZonedDateTime timeTo;
 
     @Column(name = "override")
