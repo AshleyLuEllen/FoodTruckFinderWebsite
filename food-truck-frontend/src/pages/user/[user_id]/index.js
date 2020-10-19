@@ -120,7 +120,7 @@ class UserPage extends Component {
             <Container style={{ marginTop: "20px", textAlign: "center" }}>
                 <Grid container>
                     <Grid item xs={12} md={6}>
-                        <Avatar className={classes.bigAvatar} alt={`${this.state.user?.firstName} ${this.state.user?.lastName}`} src={this.state.user?.avatarURL} />
+                        <Avatar className={classes.bigAvatar} alt={`${this.state.user?.firstName} ${this.state.user?.lastName}`} src={this.state.user?.avatar?.url} />
                         <Typography variant="h3" style={{ marginTop: "10px" }}>{this.state.user?.firstName} {this.state.user?.lastName}</Typography>
                         <Typography variant="subtitle2" style={{ fontStyle: "italic" }}>Member since {this.formatDate(this.state.user?.sinceTime)}</Typography>
                         <Typography variant="subtitle1" style={{ marginTop: "10px" }}>{this.state.user?.description || <em>This user has not set a bio.</em>}</Typography>

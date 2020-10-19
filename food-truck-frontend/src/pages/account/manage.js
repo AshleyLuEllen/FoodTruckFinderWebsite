@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link'
 import axios from "axios";
 
@@ -21,8 +21,10 @@ function ManageAccountPage(props) {
 
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
-    const [avatar, setAvatar] = useState("");
+    const [avatar, setAvatar] = useState(undefined);
     const [bio, setBio] = useState("");
+
+    const avatarInputRef = useRef(null);
 
     useEffect(() => {
         axios
@@ -93,12 +95,31 @@ function ManageAccountPage(props) {
     }
 
     function submitInfoChange() {
+        const formData = new FormData();
+        formData.append("file", avatar);
+
+        axios
+            .put(`${process.env.FOOD_TRUCK_API_URL}/media/profiles/me`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                auth: {
+                    username: props.auth.email,
+                    password: props.auth.password
+                }
+            })
+            .then(res => {
+                console.log("Success");
+            })
+            .catch(err => {
+                console.log(err);
+            });
+
         axios
             .patch(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
                 firstName,
                 lastName,
-                description: bio,
-                avatarURL: avatar
+                description: bio
             }, {
                 auth: {
                     username: props.auth.email,
@@ -199,15 +220,6 @@ function ManageAccountPage(props) {
                     />
                     <br/>
                     <TextField
-                        id="avatar"
-                        label="Avatar URL"
-                        type="text"
-                        style={{width: "90%"}}
-                        value={avatar}
-                        onChange={e => setAvatar(e.target.value)}
-                    />
-                    <br/>
-                    <TextField
                         id="bio"
                         label="Bio"
                         type="text"
@@ -215,7 +227,23 @@ function ManageAccountPage(props) {
                         value={bio}
                         onChange={e => setBio(e.target.value)}
                     />
-                    <br/>
+                    <div>
+                        <Button
+                            variant="contained"
+                            component="label"
+                            style={{width:"auto", height:"auto"}}
+                        >
+                            Upload Avatar
+                            <input
+                                type="file"
+                                style={{ display: "none" }}
+                                ref={avatarInputRef}
+                                accept="image/jpeg,image/png,image/gif"
+                                onChange={e => setAvatar(e.target.files[0])}
+                            />
+                        </Button>
+                        { avatar && `Selected file: ${avatar.name}`}
+                    </div>
                     <Button 
                         variant="contained" 
                         color="primary" 
