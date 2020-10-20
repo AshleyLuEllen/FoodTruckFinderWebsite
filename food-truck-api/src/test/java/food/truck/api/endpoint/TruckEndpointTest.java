@@ -2,11 +2,8 @@ package food.truck.api.endpoint;
 
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckRepository;
-import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.user.User;
-import food.truck.api.data.user.UserRepository;
 import food.truck.api.data.user.UserService;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -21,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 class TruckEndpointTest {
     @Autowired
-    private TruckEndpoint truckEndpoint;
+    private ReviewEndpoint truckEndpoint;
 
     @Autowired
     private TruckRepository truckRepository;
