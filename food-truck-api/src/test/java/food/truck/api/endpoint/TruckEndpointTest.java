@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 class TruckEndpointTest {
     @Autowired
-    private ReviewEndpoint truckEndpoint;
+    private TruckEndpoint truckEndpoint;
 
     @Autowired
     private TruckRepository truckRepository;
