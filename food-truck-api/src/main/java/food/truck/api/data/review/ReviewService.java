@@ -18,7 +18,9 @@ public class ReviewService {
         return reviewRepository.findById(reviewId);
     }
 
-    public Review saveReview(Review review) {
+    public Review saveReview(Review review, Truck truck, User user) {
+        review.setUser(user);
+        review.setTruck(truck);
         return reviewRepository.save(review);
     }
 

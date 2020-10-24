@@ -32,6 +32,7 @@ public class ReviewEndpoint {
     @Autowired
     private TruckService truckService;
 
+    // Checked
     @PostMapping("/trucks/{truckID}/reviews")
     public Review createReview(Principal principal, @RequestBody Review review, @PathVariable long truckID) {
         // Get the associated Truck
@@ -53,6 +54,7 @@ public class ReviewEndpoint {
         return reviewService.createReview(review, user, truck.get());
     }
 
+    // Checked
     @GetMapping("/trucks/{truckID}/reviews")
     public List<Review> findReviewsByTruck(@PathVariable Long truckID) {
         Optional<Truck> truck = truckService.findTruck(truckID);
@@ -64,18 +66,22 @@ public class ReviewEndpoint {
         return reviewService.getReviewsByTruck(truck.get());
     }
 
+    // Checked
     @GetMapping("/trucks/{truckID}/reviews/{reviewID}")
     public Review findReviewById(@PathVariable Long reviewID, @PathVariable Long truckID) {
         Review rev = reviewService.findReviewById(reviewID).orElseThrow(ResourceNotFoundException::new);
 
+        Optional<Truck> truck = truckService.findTruck(truckID);
+
         // If the returned review doesn't match the truck provided
-        if(rev.getTruck().getId() != truckID) {
+        if(rev.getTruck().getId() != truck.get().getId()) {
             throw new BadRequestException("Truck IDs don't match");
         }
 
         return rev;
     }
 
+    // Checked
     @PutMapping("/trucks/{truckID}/reviews/{reviewID}")
     public Review saveReview(Principal principal, @PathVariable Long reviewID, @PathVariable long truckID, @RequestBody Review review) {
         // If the review doesn't match the reviewID provided
@@ -83,7 +89,23 @@ public class ReviewEndpoint {
             throw new BadRequestException("Review IDs don't match");
         }
 
-        Review rev = reviewService.saveReview(review);
+        // Get the associated Truck
+        Optional<Truck> truck = truckService.findTruck(truckID);
+        if(truck.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+
+        // Get the associated User
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
+        log.info(principal.getName());
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+        if (!Objects.equals(principal.getName(), user.getEmailAddress())) {
+            throw new UnauthorizedException();
+        }
+
+        Review rev = reviewService.saveReview(review, truck.get(), user);
 
         // If the review's truck id doesn't match the path variable
         if(rev.getTruck().getId() != truckID) {
@@ -96,6 +118,7 @@ public class ReviewEndpoint {
 
     /** User Reviews Endpoints **/
 
+    // Checked
     @GetMapping("/users/{userID}/reviews")
     public List<Review> findReviewsByUser(@PathVariable Long userID) {
         Optional<User> user = userService.findUser(userID);
@@ -107,6 +130,7 @@ public class ReviewEndpoint {
         return reviewService.getReviewsByUser(user.get());
     }
 
+    // Checked
     @GetMapping("/users/{userID}/reviews/{reviewID}")
     public Review findReviewByUser(@PathVariable Long userID, @PathVariable long reviewID) {
         Optional<Review> rev = reviewService.findReviewById(reviewID);
@@ -121,6 +145,7 @@ public class ReviewEndpoint {
         return rev.get();
     }
 
+    // Checked
     @DeleteMapping("/users/{userID}/reviews/{reviewID}")
     public ResponseEntity<String> deleteReviewByUser(Principal principal, @PathVariable Long userID, @PathVariable long reviewID) {
         // Get the owner email
