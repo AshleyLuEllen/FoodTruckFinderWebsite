@@ -5,11 +5,12 @@ import food.truck.api.data.tag.TagService;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-
+@Log4j2
+@RestController
 public class TagEndpoint {
     @Autowired
     private TagService tagService;
