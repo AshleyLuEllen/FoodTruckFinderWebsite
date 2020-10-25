@@ -32,17 +32,18 @@ public class UserSubscriptionEndpoint {
     SubscriptionService subscriptionService;
 
     @GetMapping("/users/{userId}/subscriptions")
-    List<Tag> getUserSubscriptions(@PathVariable Long userId){
+    List<Truck> getUserSubscriptions(@PathVariable Long userId){
+        // check that the user exists
         Optional<User> userOpt = userService.findUser(userId);
         if (userOpt.isEmpty()) {
             throw new ResourceNotFoundException();
         }
 
-        return userService.findUserSubscriptions(userOpt.get());
+        return subscriptionService.findUserSubscriptions(userOpt.get());
     }
 
     @PostMapping("/users/{userId}/subscriptions/{truckId}")
-    Tag addUserSubscription(@PathVariable Long userId, @PathVariable Long truckId, Principal principal){
+    void addUserSubscription(@PathVariable Long userId, @PathVariable Long truckId, Principal principal){
         // Check if user exists
         Optional<User> userOpt = userService.findUser(userId);
         if (userOpt.isEmpty()) {
@@ -67,7 +68,7 @@ public class UserSubscriptionEndpoint {
             throw new UnauthorizedException();
         }
 
-        return userService.addUserSubscription(userOpt.get(), truckOpt.get());
+        subscriptionService.addUserSubscription(userOpt.get(), truckOpt.get());
     }
 
     @DeleteMapping("/users/{userId}/subscriptions/{truckId}")
@@ -95,11 +96,11 @@ public class UserSubscriptionEndpoint {
             throw new UnauthorizedException();
         }
 
-        // Check if truck tag association exists
+        // Check if subscription association exists
         if (subscriptionService.findSubscription(userOpt.get(), truckOpt.get()).isEmpty()) {
             throw new ResourceNotFoundException();
         }
 
-        userService.deleteUserSubscription(userOpt.get(), truckOpt.get());
+        subscriptionService.deleteUserSubscription(userOpt.get(), truckOpt.get());
     }
 }
