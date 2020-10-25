@@ -5,6 +5,7 @@ import food.truck.api.data.truck_notification.TruckNotification;
 import food.truck.api.data.truck_notification.TruckNotificationService;
 import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
+import food.truck.api.data.user_notification.UserNotification;
 import food.truck.api.data.user_notification.UserNotificationService;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
@@ -30,7 +31,7 @@ public class UserNotificationsSavedEndpoint {
     TruckNotificationService notificationService;
 
     @GetMapping("/users/{userId}/notifications/saved")
-    List<Tag> getUserSavedNotifications(@PathVariable Long userId, Principal principal){
+    List<TruckNotification> getUserSavedNotifications(@PathVariable Long userId, Principal principal){
         // check if the user exists
         Optional<User> userOpt = userService.findUser(userId);
         if (userOpt.isEmpty()) {

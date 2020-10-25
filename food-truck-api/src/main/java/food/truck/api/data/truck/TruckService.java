@@ -1,6 +1,7 @@
 package food.truck.api.data.truck;
 
 import food.truck.api.data.user.User;
+import food.truck.api.util.Location;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

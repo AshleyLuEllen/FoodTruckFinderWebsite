@@ -9,10 +9,9 @@ import food.truck.api.endpoint.error.ResourceConflictException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
 import food.truck.api.security.WebSecurityConfig;
+import food.truck.api.util.Location;
 import food.truck.api.validation.UserValidator;
-import org.hibernate.criterion.Example;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -124,7 +123,7 @@ public class UserService {
         return userRepository.findByEmailAddress(email);
     }
 
-    public UserLocation updateUserLocation(String email, UserLocation location) {
+    public Location updateUserLocation(String email, Location location) {
         Optional<User> userOpt = userRepository.findByEmailAddress(email);
 
         if (userOpt.isEmpty()) {
@@ -141,7 +140,7 @@ public class UserService {
         return location;
     }
 
-    public UserLocation findUserLocationByEmail(String email) {
+    public Location findUserLocationByEmail(String email) {
         Optional<User> userOpt = userRepository.findByEmailAddress(email);
 
         if (userOpt.isEmpty()) {
@@ -150,7 +149,7 @@ public class UserService {
 
         User user = userOpt.get();
 
-        UserLocation loc = new UserLocation();
+        Location loc = new Location();
         loc.setLatitude(user.getLatitude());
         loc.setLongitude(user.getLongitude());
 

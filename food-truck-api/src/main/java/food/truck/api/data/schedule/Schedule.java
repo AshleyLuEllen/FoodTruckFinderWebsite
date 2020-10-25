@@ -28,6 +28,12 @@ public class Schedule {
     @Column(name = "truck_location")
     String location;
 
+    @Column(name = "truck_latitude")
+    Double latitude;
+
+    @Column(name = "truck_longitude")
+    Double longitude;
+
     @Column(name = "time_from", columnDefinition = "TIMESTAMP")
     ZonedDateTime timeFrom;
 
