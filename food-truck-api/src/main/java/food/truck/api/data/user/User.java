@@ -46,8 +46,11 @@ public class User {
     String password;
 
     //    @JsonIgnore
-    @Column(name = "user_location")
-    String location;
+    @Column(name = "user_location_latitude")
+    Double latitude;
+
+    @Column(name = "user_location_longitude")
+    Double longitude;
 
     @Column(name = "user_description")
     String description;

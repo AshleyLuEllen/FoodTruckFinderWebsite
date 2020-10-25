@@ -1,6 +1,7 @@
 package food.truck.api.endpoint;
 
 import food.truck.api.data.user.User;
+import food.truck.api.data.user.UserLocation;
 import food.truck.api.data.user.UserService;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
@@ -38,6 +39,19 @@ public class UserEndpoint {
     @PatchMapping("/users/me")
     public User updateMeUser(Principal principal, @RequestBody User user) {
         return userService.updateUser(principal.getName(), user);
+    }
+
+    @PutMapping("/users/me/location")
+    public UserLocation updateMeUserLocation(Principal principal, @RequestBody UserLocation location) {
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
+        return userService.updateUserLocation(principal.getName(), location);
+    }
+
+    @GetMapping
+    public UserLocation findMyLocation(Principal principal) {
+        return userService.findUserLocationByEmail(principal.getName());
     }
 
     @PostMapping("/users")

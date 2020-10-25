@@ -123,4 +123,37 @@ public class UserService {
     public Optional<User> findUserByEmailAddress(String email) {
         return userRepository.findByEmailAddress(email);
     }
+
+    public UserLocation updateUserLocation(String email, UserLocation location) {
+        Optional<User> userOpt = userRepository.findByEmailAddress(email);
+
+        if (userOpt.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+
+        User user = userOpt.get();
+
+        user.setLatitude(location.getLatitude());
+        user.setLongitude(location.getLongitude());
+
+        userRepository.save(user);
+
+        return location;
+    }
+
+    public UserLocation findUserLocationByEmail(String email) {
+        Optional<User> userOpt = userRepository.findByEmailAddress(email);
+
+        if (userOpt.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+
+        User user = userOpt.get();
+
+        UserLocation loc = new UserLocation();
+        loc.setLatitude(user.getLatitude());
+        loc.setLongitude(user.getLongitude());
+
+        return loc;
+    }
 }
