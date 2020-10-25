@@ -1,10 +1,8 @@
 package food.truck.api.endpoint;
 
-import food.truck.api.data.subscription.SubscriptionService;
 import food.truck.api.data.tag.Tag;
-import food.truck.api.data.truck.Truck;
-import food.truck.api.data.truck.TruckService;
-import food.truck.api.data.truck_notification.NotificationType;
+import food.truck.api.data.truck_notification.TruckNotification;
+import food.truck.api.data.truck_notification.TruckNotificationService;
 import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
 import food.truck.api.data.user_notification.UserNotificationService;
@@ -28,8 +26,12 @@ public class UserNotificationsSavedEndpoint {
     @Autowired
     UserService userService;
 
+    @Autowired
+    TruckNotificationService notificationService;
+
     @GetMapping("/users/{userId}/notifications/saved")
     List<Tag> getUserSavedNotifications(@PathVariable Long userId, Principal principal){
+        // check if the user exists
         Optional<User> userOpt = userService.findUser(userId);
         if (userOpt.isEmpty()) {
             throw new ResourceNotFoundException();
@@ -47,10 +49,10 @@ public class UserNotificationsSavedEndpoint {
             throw new UnauthorizedException();
         }
 
-        return userService.findUserSubscriptions(userOpt.get());
+        return userNotificationService.findAllSavedNotifications(userOpt.get());
     }
 
-    @PostMapping("/users/{userId}/subscriptions/saved/{notificationId}")
+    @PostMapping("/users/{userId}/notifications/saved/{notificationId}")
     void addUserSavedNotifications(@PathVariable Long userId, @PathVariable Long notificationId, Principal principal){
         // Check if user exists
         Optional<User> userOpt = userService.findUser(userId);
@@ -58,6 +60,11 @@ public class UserNotificationsSavedEndpoint {
             throw new ResourceNotFoundException();
         }
 
+        Optional<TruckNotification> notificationOpt = notificationService.findTruckNotification(notificationId);
+        if (notificationOpt.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+
         // Check if user has same id
         if (principal == null) {
             throw new UnauthorizedException();
@@ -70,17 +77,17 @@ public class UserNotificationsSavedEndpoint {
             throw new UnauthorizedException();
         }
 
-        userService.addUserSubscription(userOpt.get(), truckOpt.get());
+        userNotificationService.addUserSavedNotification(userOpt.get(), notificationOpt.get());
     }
 
-    @DeleteMapping("/users/{userId}/subscriptions/saved/{notificationId}")
+    @DeleteMapping("/users/{userId}/notifications/saved/{notificationId}")
     void deleteUserSavedNotifications(@PathVariable Long userId, @PathVariable Long notificationId, Principal principal){
         Optional<User> userOpt = userService.findUser(userId);
         if (userOpt.isEmpty()) {
             throw new ResourceNotFoundException();
         }
 
-        Optional<NotificationType> notificationOpt = userNotificationService.findUserNotification(userOpt.get(), notificationId);
+        Optional<TruckNotification> notificationOpt = notificationService.findTruckNotification(notificationId);
         if (notificationOpt.isEmpty()) {
             throw new ResourceNotFoundException();
         }
@@ -98,10 +105,10 @@ public class UserNotificationsSavedEndpoint {
         }
 
         // Check if truck tag association exists
-        if (userNotificationService.findUserNotification(userOpt.get(), truckOpt.get()).isEmpty()) {
+        if (userNotificationService.findUserNotification(userOpt.get(), notificationOpt.get()).isEmpty()) {
             throw new ResourceNotFoundException();
         }
 
-        userService.deleteUserSubscription(userOpt.get(), truckOpt.get());
+        userNotificationService.deleteUserSavedNotification(userOpt.get(), notificationOpt.get());
     }
 }
