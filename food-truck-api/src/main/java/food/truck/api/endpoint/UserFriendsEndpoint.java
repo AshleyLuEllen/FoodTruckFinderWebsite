@@ -1,5 +1,6 @@
 package food.truck.api.endpoint;
 
+import food.truck.api.data.friends.FriendService;
 import food.truck.api.data.subscription.SubscriptionService;
 import food.truck.api.data.tag.Tag;
 import food.truck.api.data.truck.Truck;
@@ -23,18 +24,21 @@ public class UserFriendsEndpoint {
     @Autowired
     UserService userService;
 
+    @Autowired
+    FriendService friendService;
+
     @GetMapping("/users/{userId}/friends")
-    List<Tag> getUserSubscriptions(@PathVariable Long userId){
+    List<User> getUserSubscriptions(@PathVariable Long userId){
         Optional<User> userOpt = userService.findUser(userId);
         if (userOpt.isEmpty()) {
             throw new ResourceNotFoundException();
         }
 
-        return userService.findUserSubscriptions(userOpt.get());
+        return friendService.findAllFriendsOfUser(userOpt.get());
     }
 
     @PostMapping("/users/{userId}/friends/{fuserId}")
-    Tag addUserFriend(@PathVariable Long userId, @PathVariable Long fuserId, Principal principal){
+    void addUserFriend(@PathVariable Long userId, @PathVariable Long fuserId, Principal principal){
         // Check if user exists
         Optional<User> userOpt = userService.findUser(userId);
         if (userOpt.isEmpty()) {
@@ -59,13 +63,19 @@ public class UserFriendsEndpoint {
             throw new UnauthorizedException();
         }
 
-        return userService.addUserSubscription(userOpt.get(), truckOpt.get());
+        friendService.becomeFriends(userOpt.get(), friendOpt.get());
     }
 
     @DeleteMapping("/users/{userId}/friends/{userId}")
-    void deleteUserFriend(@PathVariable Long userId, @PathVariable Long truckId, Principal principal){
+    void deleteUserFriend(@PathVariable Long userId, @PathVariable Long fuserId, Principal principal){
         Optional<User> userOpt = userService.findUser(userId);
         if (userOpt.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+
+        // Check if friend exists
+        Optional<User> friendOpt = userService.findUser(fuserId);
+        if (friendOpt.isEmpty()) {
             throw new ResourceNotFoundException();
         }
 
@@ -82,10 +92,10 @@ public class UserFriendsEndpoint {
         }
 
         // Check if truck tag association exists
-        if (subscriptionService.findSubscription(userOpt.get(), truckOpt.get()).isEmpty()) {
+        if (!friendService.areFriends(userOpt.get(), friendOpt.get())) {
             throw new ResourceNotFoundException();
         }
 
-        userService.deleteUserSubscription(userOpt.get(), truckOpt.get());
+        friendService.removeFriends(userOpt.get(), friendOpt.get());
     }
 }

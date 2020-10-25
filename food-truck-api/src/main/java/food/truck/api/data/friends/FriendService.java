@@ -1,5 +1,7 @@
 package food.truck.api.data.friends;
 
+import food.truck.api.data.tag.Tag;
+import food.truck.api.data.truck_tag.TruckTag;
 import food.truck.api.data.user.User;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
