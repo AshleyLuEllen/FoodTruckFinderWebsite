@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
-import Link from "next/link";
 import axios from "axios";
 import { withRouter } from 'next/router';
 import { connect } from "react-redux";
 import {Button, TextField, Container, Grid, InputLabel} from '@material-ui/core';
-import Error from "next/error";
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -95,7 +93,7 @@ class ManagePage extends Component {
                 }})
             .then((res) => {
                 console.log(res.statusText);
-                this.props.router.push("/owner/trucks");
+                this.props.router.push("/owner/trucks").then();
             })
             .catch((err) => {
                 console.log(err.message);
@@ -232,6 +230,7 @@ class ManagePage extends Component {
                         <Grid item xs={6} sm={3}>
                             <Button
                                 variant="outlined"
+                                color="secondary"
                                 onClick={this.removeTruck}
                                 width={1/3}>
                                 Delete
