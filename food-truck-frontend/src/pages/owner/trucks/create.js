@@ -113,7 +113,7 @@ class CreateNewTruck extends Component {
                 <br />
                 <label>{this.state.message}</label>
                 <li>
-                    <Link href="/">
+                    <Link href="/owner/trucks">
                         <a>Cancel</a>
                     </Link>
                 </li>
