@@ -9,6 +9,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Log4j2
 @RestController
 public class TagEndpoint {
@@ -18,6 +20,11 @@ public class TagEndpoint {
     @GetMapping("/tags/{id}")
     public Tag findTagByID(@PathVariable Long id) {
         return tagService.findTag(id).orElseThrow(ResourceNotFoundException::new);
+    }
+
+    @GetMapping("/tags")
+    public List<Tag> findAllTags() {
+        return tagService.getAllTags();
     }
 
     @PostMapping("/tags")
