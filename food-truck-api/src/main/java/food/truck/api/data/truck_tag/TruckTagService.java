@@ -16,7 +16,7 @@ public class TruckTagService {
     private TruckTagRepository truckTagRepository;
 
     public Optional<TruckTag> findTruckTag(Truck truck, Tag tag) {
-        return truckTagRepository.findById(new TruckTagId(tag, truck));
+        return truckTagRepository.findById(new TruckTagId(truck.getId(), tag.getId()));
     }
 
     public List<Tag> findTruckTags(Truck truck) {
@@ -34,7 +34,7 @@ public class TruckTagService {
     }
 
     public void deleteTruckTag(Truck truck, Tag tag) {
-        truckTagRepository.deleteById(new TruckTagId(tag, truck));
+        truckTagRepository.deleteById(new TruckTagId(truck.getId(), tag.getId()));
     }
 }
 
