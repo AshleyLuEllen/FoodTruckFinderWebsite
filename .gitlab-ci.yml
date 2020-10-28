@@ -17,6 +17,8 @@ test-frontend:
     stage: test
     script:
         - "echo TODO: implement tests"
+    only:
+        - merge_requests
 
 test-backend:
     image: openjdk:14
@@ -24,6 +26,8 @@ test-backend:
     script:
         - cd ./food-truck-api
         - ./gradlew test
+    only:
+        - merge_requests
 
 deploy-frontend:
     image: docker:latest

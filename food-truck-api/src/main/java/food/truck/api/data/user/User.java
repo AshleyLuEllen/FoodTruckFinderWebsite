@@ -55,6 +55,6 @@ public class User {
     @Column(name = "user_avatar")
     String avatarURL;
 
-    @Column(name = "user_since")
+    @Column(name = "user_since", columnDefinition = "TIMESTAMP")
     ZonedDateTime sinceTime;
 }
