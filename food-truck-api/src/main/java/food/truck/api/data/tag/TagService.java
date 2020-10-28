@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,5 +24,7 @@ public class TagService {
     public Tag createTag(Tag tag) {
         return tagRepository.save(tag);
     }
+
+    public List<Tag> getAllTags() { return tagRepository.findAll(); }
 }
 
