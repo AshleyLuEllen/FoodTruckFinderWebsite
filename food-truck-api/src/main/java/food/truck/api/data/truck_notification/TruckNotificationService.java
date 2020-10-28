@@ -1,5 +1,6 @@
 package food.truck.api.data.truck_notification;
 
+import java.util.List;
 import java.util.Optional;
 
 import food.truck.api.data.truck.Truck;
@@ -24,5 +25,14 @@ public class TruckNotificationService {
 
         return truckNotificationRepository.save(truckNotification);
     }
+
+    public void deleteTruckNotification(long truckNotificationId) {
+        truckNotificationRepository.deleteById(truckNotificationId);
+    }
+
+    public List<TruckNotification> getNotsOwnedByTruck(Truck truck) {
+        return truckNotificationRepository.findAllByTruck(truck);
+    }
+
 }
 
