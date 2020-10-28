@@ -1,10 +1,13 @@
 package food.truck.api.data.truck;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import food.truck.api.data.truck_tag.TruckTag;
 import food.truck.api.data.user.User;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Data
 @Entity
@@ -36,5 +39,9 @@ public class Truck {
     @JoinColumn(name = "owner")
     @ManyToOne
     User owner;
+
+    @OneToMany(mappedBy = "truck")
+    @JsonIgnoreProperties("truck")
+    List<TruckTag> tags;
 }
 
