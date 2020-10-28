@@ -1,6 +1,7 @@
 package food.truck.api.recommendations.impl;
 
 import com.google.common.collect.Maps;
+import food.truck.api.data.schedule.Schedule;
 import food.truck.api.data.schedule.ScheduleService;
 import food.truck.api.data.tag.Tag;
 import food.truck.api.data.truck.Truck;
@@ -8,6 +9,7 @@ import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.truck_tag.TruckTagService;
 import food.truck.api.util.Location;
 import food.truck.api.recommendations.IRecommendationAlgorithm;
+import food.truck.api.util.LocationUtils;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -59,7 +61,14 @@ public class TagBasedRecommendationAlgorithm implements IRecommendationAlgorithm
             .collect(Collectors.toMap(
                 t -> t,
                 t -> {
-                    double currentDistance = 0.0; // TODO: implement
+                    double currentDistance;
+                    List<Schedule> schedules = scheduleService.findSchedulesOfTruck(t);
+                    if (schedules.isEmpty() || location == null) {
+                        currentDistance = 0.0;
+                    } else {
+                        Schedule latest = schedules.stream().sorted(Comparator.comparing(Schedule::getTimeFrom).reversed()).findFirst().get();
+                        currentDistance = LocationUtils.mToMi(LocationUtils.sphericalDistance(location, new Location(latest.getLatitude(), latest.getLongitude())));
+                    }
                     double result = this.truckTagService.findTruckTags(t).stream().filter(adjustedWeights::containsKey).mapToDouble(adjustedWeights::get).sum();
 
                     result += Math.max(0, (this.maxDistance - currentDistance) / this.maxDistance * this.distanceWeight);

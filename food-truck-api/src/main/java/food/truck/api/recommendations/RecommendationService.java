@@ -45,7 +45,7 @@ public class RecommendationService {
     }
 
     public List<Truck> getRecommendations(List<Truck> subscriptions, Location location, boolean includeSubscriptions, long maxNum) {
-        List<Truck> trucksWithinDistanceFromLocation = scheduleService.getAllTrucksWithinDistanceFromLocation(location, recommendationComputer.getMaxDistance());
+        List<Truck> trucksWithinDistanceFromLocation = scheduleService.getAllTrucksWithinDistanceFromLocation(location, this.getRecommendationComputer().getMaxDistance());
 
         return this.getRecommendationComputer().getRecommendations(trucksWithinDistanceFromLocation, subscriptions, location, includeSubscriptions, maxNum);
     }
