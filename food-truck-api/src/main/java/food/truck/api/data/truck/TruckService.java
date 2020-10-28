@@ -42,5 +42,9 @@ public class TruckService {
     public List<Truck> getTrucksOwnedByUser(User owner) {
         return truckRepository.findAllByOwner(owner);
     }
+
+    public List<Truck> findAll() {
+        return truckRepository.findAll();
+    }
 }
 
