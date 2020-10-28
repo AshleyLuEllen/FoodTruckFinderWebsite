@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import axios from "axios";
 import { withRouter } from 'next/router';
 import { connect } from "react-redux";
-import {Button, TextField, Container, Grid, InputLabel} from '@material-ui/core';
+import {Menu, FormControlLabel, MenuItem, Checkbox, Button, TextField, Container, Grid, InputLabel} from '@material-ui/core';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -18,49 +20,64 @@ class ManagePage extends Component {
             licensePlate: '',
             paymentTypes: 0,
             owner: '',
+            tags: [],
 
             truckFound: false,
-            cancelDialog: false
+            cancelDialog: false,
+            menuOpen: false,
+            anchor: null
         };
 
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
+    handleClick = (e) => {
+        this.setState({
+            menuOpen: true,
+            anchor: e.currentTarget
+        });
+        console.log(this.state);
+    }
+
+    handleClose = (e) => {
+        this.setState({
+            menuOpen: false
+        });
+    }
+
     /**
      * Sets the state value to the value in the form
      * @param event the source of the new value in the state
      */
-    handleInputChange(event, name) {
+    handleInputChange(event, name_of_attribute, index_in_tags, tag_info) {
         console.log(event.target);
-        this.setState({
-            [name]: event.target.value
-        });
+        if(name_of_attribute !== "tags") {
+            this.setState({
+                [name_of_attribute]: event.target.value
+            });
+        }
+        else {
+            console.log(index_in_tags);
+            console.log(tag_info);
+            const newTags = this.state.tags.splice();
+            newTags[index_in_tags] = {index_in_tags, tag_info};
+            this.setState({ tags: newTags});
+        }
     }
 
     handleSubmit(event) {
         event.preventDefault();
     }
 
-    handleCancel = (() => {
+    handleCancel = () => {
         this.props.router.push(`/owner/trucks/${this.state.id}`);
-    });
-
-    handleClose = ((option) => {
-        if(option === true) {
-            this.props.router.push(`/owner/trucks/${this.state.id}`);
-        }
-        else {
-            this.setState({
-                cancelDialog: false
-            })
-        }
-    });
+    }
 
     /**
      * Saves the edited information from the form
      */
-    saveInfo = (() => {
+    saveInfo = () => {
         const truck = {
             id: this.state.id,
             name: this.state.name,
@@ -78,12 +95,12 @@ class ManagePage extends Component {
             .catch((err) => {
                 console.log(err.message);
             });
-    })
+    }
 
     /**
      * Removes the truck that's currently being edited
      */
-    removeTruck = (() => {
+    removeTruck = () => {
         console.log(this.state);
         console.log(this.props.auth);
         axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.id}`,
@@ -98,7 +115,7 @@ class ManagePage extends Component {
             .catch((err) => {
                 console.log(err.message);
             })
-    });
+    }
 
     /**
      * Displays all the information about the truck who's id is being
@@ -113,8 +130,12 @@ class ManagePage extends Component {
                 licensePlate: res.data.licensePlate,
                 paymentTypes: res.data.paymentTypes,
                 owner: res.data.owner.id,
+                tags: [{id:0, name:["food", false]}, {id: 1, name: ["beer", true]}, {id: 2, name: ["bar", true]},
+                    {id: 3, name: ["lively", false]}, {id: 4, name: ["cheap", true]}, {id: 5, name: ["quick bite", false]}],
+
                 truckFound: true,
-                cancelDialog: false
+                cancelDialog: false,
+                anchor: null
             });
             console.log("found the truck!");
         }).catch((err) => {
@@ -126,7 +147,8 @@ class ManagePage extends Component {
                 paymentTypes: 0,
                 owner: 'empty',
                 truckFound: false,
-                cancelDialog: false
+                cancelDialog: false,
+                anchor: null
             });
         });
     }
@@ -144,8 +166,11 @@ class ManagePage extends Component {
                     licensePlate: res.data.licensePlate,
                     paymentTypes: res.data.paymentTypes,
                     owner: res.data.owner,
+                    tags: [["food", false], ["beer", true], ["bar", true], ["lively", false], ["cheap", true], ["quick bite", false]],
+
                     truckFound: true,
-                    cancelDialog: false
+                    cancelDialog: false,
+                    anchor: null
                 });
                 console.log(this.state);
             }).catch(err => {
@@ -156,8 +181,11 @@ class ManagePage extends Component {
                     licensePlate: '',
                     paymentTypes: 0,
                     owner: '',
+                    tags: [],
+
                     truckFound: false,
-                    cancelDialog: false
+                    cancelDialog: false,
+                    anchor: null
                 });
             });
         }
@@ -222,6 +250,58 @@ class ManagePage extends Component {
                         <Grid item xs={6} sm={3}>
                             <Button
                                 variant="outlined"
+                                color="primary"
+                                width={1/3}
+                                onClick={this.handleClick}>
+                                Edit Tags
+                            </Button>
+                            <Menu
+                                id="simple-menu"
+                                keepMounted
+                                open={this.state.menuOpen}
+                                onClose={this.handleClose}
+                                anchorEl={this.state.anchor}
+                            >
+                                {this.state.tags.map(t => (
+                                    <MenuItem>
+                                        <FormControlLabel
+                                            value={t[0]}
+                                            control={
+                                                <Checkbox
+                                                    color="primary"
+                                                    checked={t[1]}
+                                                    onChange={e => this.handleInputChange(e, "tags", t.id,[t[0], !t[1]])}
+                                                    name="checkedF"
+                                                    indeterminate
+                                                />}
+                                            label={t[0]}
+                                            labelPlacement="right"
+                                        />
+                                    </MenuItem>
+                                ))}
+                            </Menu>
+                        </Grid>
+
+                        {/*{this.state.tags.map(t => (*/}
+                        {/*    <Grid xs={12}>*/}
+                        {/*        <FormControlLabel*/}
+                        {/*            control={*/}
+                        {/*                <Checkbox*/}
+                        {/*                    checked={t[1]}*/}
+                        {/*                    onChange={e => this.handleInputChange(t.name, "tags", t.id)}*/}
+                        {/*                    name="checkedF"*/}
+                        {/*                    indeterminate*/}
+                        {/*                />*/}
+                        {/*            }*/}
+                        {/*            label={t[0]}>*/}
+                        {/*        </FormControlLabel>*/}
+                        {/*    </Grid>*/}
+                        {/*))}*/}
+
+                        <Grid item xs={6} sm={3}>
+                            <Button
+                                variant="outlined"
+                                color="primary"
                                 onClick={this.saveInfo}
                                 width={1/3}>
                                 Save
