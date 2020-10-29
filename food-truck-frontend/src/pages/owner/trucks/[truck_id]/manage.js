@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import axios from "axios";
 import { withRouter } from 'next/router';
 import { connect } from "react-redux";
+import ChipSelector from "../../../../components/ChipSelector";
 import {Menu, FormControlLabel, MenuItem, Checkbox, Button, TextField, Container, Grid, InputLabel} from '@material-ui/core';
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -20,10 +19,10 @@ class ManagePage extends Component {
             licensePlate: '',
             paymentTypes: 0,
             owner: '',
-            tags: [],
+            allTags: [],
+            truckTags: [],
 
             truckFound: false,
-            cancelDialog: false,
             menuOpen: false,
             anchor: null
         };
@@ -50,20 +49,16 @@ class ManagePage extends Component {
      * Sets the state value to the value in the form
      * @param event the source of the new value in the state
      */
-    handleInputChange(event, name_of_attribute, index_in_tags, tag_info) {
+    handleInputChange(event, name_of_attribute) {
         console.log(event.target);
-        if(name_of_attribute !== "tags") {
-            this.setState({
-                [name_of_attribute]: event.target.value
-            });
-        }
-        else {
-            console.log(index_in_tags);
-            console.log(tag_info);
-            const newTags = this.state.tags.splice();
-            newTags[index_in_tags] = {index_in_tags, tag_info};
-            this.setState({ tags: newTags});
-        }
+        this.setState({
+            [name_of_attribute]: event.target.value
+        });
+    }
+
+    handleTagChange(event, tag) {
+        //TODO: fix this so that we add and remove tags from the truck tags list
+        this.setState({ truckTags: tag});
     }
 
     handleSubmit(event) {
@@ -103,6 +98,7 @@ class ManagePage extends Component {
     removeTruck = () => {
         console.log(this.state);
         console.log(this.props.auth);
+
         axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.id}`,
             { auth: {
                     username: this.props.auth.email,
@@ -122,7 +118,9 @@ class ManagePage extends Component {
      * used in the URL
      */
     componentDidMount() {
+        console.log(this.props.router.query);
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`).then(res => {
+            console.log(res.data);
             this.setState({
                 id: res.data.id,
                 name: res.data.name,
@@ -130,15 +128,13 @@ class ManagePage extends Component {
                 licensePlate: res.data.licensePlate,
                 paymentTypes: res.data.paymentTypes,
                 owner: res.data.owner.id,
-                tags: [{id:0, name:["food", false]}, {id: 1, name: ["beer", true]}, {id: 2, name: ["bar", true]},
-                    {id: 3, name: ["lively", false]}, {id: 4, name: ["cheap", true]}, {id: 5, name: ["quick bite", false]}],
 
                 truckFound: true,
-                cancelDialog: false,
                 anchor: null
             });
             console.log("found the truck!");
         }).catch((err) => {
+            console.log(err.message);
             this.setState({
                 id: 'empty',
                 name: 'empty',
@@ -147,9 +143,20 @@ class ManagePage extends Component {
                 paymentTypes: 0,
                 owner: 'empty',
                 truckFound: false,
-                cancelDialog: false,
                 anchor: null
             });
+        });
+
+        // TODO: add all tags as well as truck tags to the state
+        axios.get(`${process.env.FOOD_TRUCK_API_URL}/tags`).then(r => {
+            console.log(r.data);
+            this.setState({
+                allTags: r.data,
+                truckTags: r.data
+            });
+            console.log(this.state);
+        }).catch(error => {
+            console.log(error.message);
         });
     }
 
@@ -157,6 +164,7 @@ class ManagePage extends Component {
      * Continuously updates the truck information on the page
      */
     componentWillUpdate() {
+        console.log(this.props.router.query);
         if(!this.state.truckFound) {
             axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`).then(res => {
                 this.setState({
@@ -166,10 +174,8 @@ class ManagePage extends Component {
                     licensePlate: res.data.licensePlate,
                     paymentTypes: res.data.paymentTypes,
                     owner: res.data.owner,
-                    tags: [["food", false], ["beer", true], ["bar", true], ["lively", false], ["cheap", true], ["quick bite", false]],
 
                     truckFound: true,
-                    cancelDialog: false,
                     anchor: null
                 });
                 console.log(this.state);
@@ -181,13 +187,21 @@ class ManagePage extends Component {
                     licensePlate: '',
                     paymentTypes: 0,
                     owner: '',
-                    tags: [],
 
                     truckFound: false,
-                    cancelDialog: false,
                     anchor: null
                 });
             });
+
+            // TODO: add all tags as well as truck tags to the state
+            axios.get(`${process.env.FOOD_TRUCK_API_URL}/tags`).then(r => {
+                this.setState({
+                    allTags: r.data,
+                    truckTags: r.data
+                })
+            });
+
+            console.log(this.state);
         }
     }
 
@@ -247,57 +261,42 @@ class ManagePage extends Component {
                                 onChange={e => this.handleInputChange(e, "description")}
                             />
                         </Grid>
-                        <Grid item xs={6} sm={3}>
-                            <Button
-                                variant="outlined"
-                                color="primary"
-                                width={1/3}
-                                onClick={this.handleClick}>
-                                Edit Tags
-                            </Button>
-                            <Menu
-                                id="simple-menu"
-                                keepMounted
-                                open={this.state.menuOpen}
-                                onClose={this.handleClose}
-                                anchorEl={this.state.anchor}
-                            >
-                                {this.state.tags.map(t => (
-                                    <MenuItem>
-                                        <FormControlLabel
-                                            value={t[0]}
-                                            control={
-                                                <Checkbox
-                                                    color="primary"
-                                                    checked={t[1]}
-                                                    onChange={e => this.handleInputChange(e, "tags", t.id,[t[0], !t[1]])}
-                                                    name="checkedF"
-                                                    indeterminate
-                                                />}
-                                            label={t[0]}
-                                            labelPlacement="right"
-                                        />
-                                    </MenuItem>
-                                ))}
-                            </Menu>
+                        <Grid item xs={12} >
+                            <ChipSelector
+                            label="Tags"
+                            options={this.state.allTags}
+                            selectedOptions={this.state.truckTags}
+                            onChange={(event, value) => { this.handleTagChange(event, value) }}
+                            onSelectOption={t => console.log(t)}
+                            onDeselectOption={t => console.log(t)}
+                            />
+                            {/*<Menu*/}
+                            {/*    id="simple-menu"*/}
+                            {/*    keepMounted*/}
+                            {/*    open={this.state.menuOpen}*/}
+                            {/*    onClose={this.handleClose}*/}
+                            {/*    anchorEl={this.state.anchor}*/}
+                            {/*    disableCloseOnSelect*/}
+                            {/*>*/}
+                            {/*    {this.state.allTags.map(t => (*/}
+                            {/*        <MenuItem>*/}
+                            {/*            <FormControlLabel*/}
+                            {/*                value={t[0]}*/}
+                            {/*                control={*/}
+                            {/*                    <Checkbox*/}
+                            {/*                        color="primary"*/}
+                            {/*                        checked={t[1]}*/}
+                            {/*                        onChange={e => this.handleInputChange(e, "tags", t.id,[t[0], !t[1]])}*/}
+                            {/*                        name="checkedF"*/}
+                            {/*                        indeterminate*/}
+                            {/*                    />}*/}
+                            {/*                label={t[0]}*/}
+                            {/*                labelPlacement="right"*/}
+                            {/*            />*/}
+                            {/*        </MenuItem>*/}
+                            {/*    ))}*/}
+                            {/*</Menu>*/}
                         </Grid>
-
-                        {/*{this.state.tags.map(t => (*/}
-                        {/*    <Grid xs={12}>*/}
-                        {/*        <FormControlLabel*/}
-                        {/*            control={*/}
-                        {/*                <Checkbox*/}
-                        {/*                    checked={t[1]}*/}
-                        {/*                    onChange={e => this.handleInputChange(t.name, "tags", t.id)}*/}
-                        {/*                    name="checkedF"*/}
-                        {/*                    indeterminate*/}
-                        {/*                />*/}
-                        {/*            }*/}
-                        {/*            label={t[0]}>*/}
-                        {/*        </FormControlLabel>*/}
-                        {/*    </Grid>*/}
-                        {/*))}*/}
-
                         <Grid item xs={6} sm={3}>
                             <Button
                                 variant="outlined"
