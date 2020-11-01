@@ -66,7 +66,7 @@ public class ReviewEndpoint {
         return reviewService.getReviewsByTruck(truck.get());
     }
 
-    @GetMapping("/reviews/trucks/{truckID}/reviews")
+    @GetMapping("/trucks/{truckID}/rating")
     public double getAverageReviewsByTruck(@PathVariable long truckID) {
         Optional<Truck> truck = truckService.findTruck(truckID);
         if(truck.isEmpty()) {
