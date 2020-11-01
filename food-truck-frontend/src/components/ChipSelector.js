@@ -56,7 +56,7 @@ function ChipSelector(props) {
                         {props.getOptionLabel ? props.getOptionLabel(option) : getOptionLabel(option)}
                     </React.Fragment>
                 )}
-                style={{ width: 500 }}
+                style={{ width: "100%" }}
                 renderInput={(params) => (
                     <TextField {...params} variant="outlined" label={props.label}/> 
                 )}
