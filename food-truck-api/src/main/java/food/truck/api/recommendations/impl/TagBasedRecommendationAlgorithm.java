@@ -28,17 +28,27 @@ public class TagBasedRecommendationAlgorithm implements IRecommendationAlgorithm
     private TruckTagService truckTagService;
 
     private Function<Long, Double> weightAdjustmentFunction;
+
     @Getter
     private double distanceWeight;
+
     @Getter
     private double maxDistance;
 
-    public TagBasedRecommendationAlgorithm(ScheduleService scheduleService, TruckTagService truckTagService, Function<Long, Double> weightAdjustmentFunction, double distanceWeight, double maxDistance) {
+    @Getter
+    private double ratingWeight;
+
+    @Getter
+    private double maxRating;
+
+    public TagBasedRecommendationAlgorithm(ScheduleService scheduleService, TruckTagService truckTagService, Function<Long, Double> weightAdjustmentFunction, double distanceWeight, double maxDistance, double ratingWeight, double maxRating) {
         this.scheduleService = scheduleService;
         this.truckTagService = truckTagService;
         this.weightAdjustmentFunction = weightAdjustmentFunction;
         this.distanceWeight = distanceWeight;
         this.maxDistance = maxDistance;
+        this.ratingWeight = ratingWeight;
+        this.maxRating = maxRating;
     }
 
     @Override
@@ -61,6 +71,7 @@ public class TagBasedRecommendationAlgorithm implements IRecommendationAlgorithm
             .collect(Collectors.toMap(
                 t -> t,
                 t -> {
+                    // Get latest location of truck
                     double currentDistance;
                     List<Schedule> schedules = scheduleService.findSchedulesOfTruck(t);
                     if (schedules.isEmpty() || location == null) {
@@ -69,9 +80,16 @@ public class TagBasedRecommendationAlgorithm implements IRecommendationAlgorithm
                         Schedule latest = schedules.stream().sorted(Comparator.comparing(Schedule::getTimeFrom).reversed()).findFirst().get();
                         currentDistance = LocationUtils.mToMi(LocationUtils.sphericalDistance(location, new Location(latest.getLatitude(), latest.getLongitude())));
                     }
+
+                    // Compute tag relevance
                     double result = this.truckTagService.findTruckTags(t).stream().filter(adjustedWeights::containsKey).mapToDouble(adjustedWeights::get).sum();
 
+                    // Compute location relevance
                     result += Math.max(0, (this.maxDistance - currentDistance) / this.maxDistance * this.distanceWeight);
+
+                    // Compute rating relevance
+                    double rating = t.getRating() == null ? 0 : t.getRating();
+                    result += Math.max(0, rating / this.getMaxRating() * this.getRatingWeight());
 
                     return result;
                 }
@@ -84,14 +102,14 @@ public class TagBasedRecommendationAlgorithm implements IRecommendationAlgorithm
     }
 
     public static TagBasedRecommendationAlgorithm noWeightAdjustment(ScheduleService scheduleService, TruckTagService truckTagService) {
-        return new TagBasedRecommendationAlgorithm(scheduleService, truckTagService, Long::doubleValue, 5, 20);
+        return new TagBasedRecommendationAlgorithm(scheduleService, truckTagService, Long::doubleValue, 5, 20, 10, 5);
     }
 
     public static TagBasedRecommendationAlgorithm cappedWeights(ScheduleService scheduleService, TruckTagService truckTagService, long maxWeight) {
-        return new TagBasedRecommendationAlgorithm(scheduleService, truckTagService, w -> Math.min(w.doubleValue(), maxWeight), maxWeight, 20);
+        return new TagBasedRecommendationAlgorithm(scheduleService, truckTagService, w -> Math.min(w.doubleValue(), maxWeight), maxWeight, 20, 10, 5);
     }
 
     public static TagBasedRecommendationAlgorithm progressiveWeights(ScheduleService scheduleService, TruckTagService truckTagService, long maxWeight) {
-        return new TagBasedRecommendationAlgorithm(scheduleService, truckTagService, w -> maxWeight * Math.sin((Math.PI * Math.min(w, 2 * maxWeight)) / (4 * maxWeight)), maxWeight, 20);
+        return new TagBasedRecommendationAlgorithm(scheduleService, truckTagService, w -> maxWeight * Math.sin((Math.PI * Math.min(w, 2 * maxWeight)) / (4 * maxWeight)), maxWeight, 20, 10, 5);
     }
 }
