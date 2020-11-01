@@ -2,9 +2,11 @@ package food.truck.api.data.truck;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import food.truck.api.data.review.Review;
 import food.truck.api.data.truck_tag.TruckTag;
 import food.truck.api.data.user.User;
 import lombok.Data;
+import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
 import java.util.List;
@@ -44,5 +46,8 @@ public class Truck {
     @OneToMany(mappedBy = "truck")
     @JsonIgnoreProperties("truck")
     List<TruckTag> tags;
+
+    @Formula("(SELECT AVG(r.review_rating) FROM " + Review.TABLE_NAME + " r WHERE r.truck_id = truck_id)")
+    Double rating;
 }
 
