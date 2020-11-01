@@ -1,5 +1,7 @@
 package food.truck.api.endpoint;
 
+import food.truck.api.data.review.Review;
+import food.truck.api.data.review.ReviewService;
 import food.truck.api.data.schedule.Schedule;
 import food.truck.api.data.schedule.ScheduleService;
 import food.truck.api.data.truck.Truck;
@@ -30,6 +32,9 @@ public class TruckEndpoint {
     private UserService userService;
 
     @Autowired
+    private ReviewService reviewService;
+
+    @Autowired
     private ScheduleService scheduleService;
 
     @DeleteMapping("/trucks/{id}")
@@ -37,6 +42,11 @@ public class TruckEndpoint {
         // Get the owner email
         if (principal == null) {
             throw new UnauthorizedException();
+        }
+
+        List<Review> reviews = reviewService.getReviewsByTruck(truckService.findTruck(id).get());
+        for(Review r : reviews) {
+            reviewService.deleteReview(r.getId());
         }
 
         // Get me user
@@ -48,7 +58,7 @@ public class TruckEndpoint {
         try {
             truckService.deleteTruck(id);
         } catch (Exception e) {
-            return new ResponseEntity<>("Fail to delete!", HttpStatus.EXPECTATION_FAILED);
+            return new ResponseEntity<>("Fail to delete: " + e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
 
         return new ResponseEntity<>("Truck has been deleted!", HttpStatus.OK);
