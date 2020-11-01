@@ -66,6 +66,16 @@ public class ReviewEndpoint {
         return reviewService.getReviewsByTruck(truck.get());
     }
 
+    @GetMapping("/reviews/trucks/{truckID}/reviews")
+    public double getAverageReviewsByTruck(@PathVariable long truckID) {
+        Optional<Truck> truck = truckService.findTruck(truckID);
+        if(truck.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+
+        return reviewService.getAverageReviewByTruckID(truckID);
+    }
+
     // Checked
     @GetMapping("/trucks/{truckID}/reviews/{reviewID}")
     public Review findReviewById(@PathVariable Long reviewID, @PathVariable Long truckID) {
