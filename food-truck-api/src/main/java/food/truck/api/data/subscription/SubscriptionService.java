@@ -18,7 +18,7 @@ public class SubscriptionService {
     private SubscriptionRepository subscriptionRepository;
 
     public Optional<Subscription> findSubscription(User user, Truck truck) {
-        return subscriptionRepository.findById(new SubscriptionId(user, truck));
+        return subscriptionRepository.findById(new SubscriptionId(user.getId(), truck.getId()));
     }
 
     public Subscription saveSubscription(Subscription subscription) {
@@ -42,7 +42,7 @@ public class SubscriptionService {
     }
 
     public void deleteUserSubscription(User user, Truck truck) {
-        subscriptionRepository.deleteById(new SubscriptionId(user, truck));
+        subscriptionRepository.deleteById(new SubscriptionId(user.getId(), truck.getId()));
     }
 }
 

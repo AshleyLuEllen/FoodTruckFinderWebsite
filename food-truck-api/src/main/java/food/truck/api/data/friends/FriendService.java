@@ -23,13 +23,13 @@ public class FriendService {
 
     public Optional<FriendPair> findFriendPair(User user1, User user2) {
         // Check left-association
-        Optional<FriendPair> friendPairOpt = friendPairRepository.findById(new FriendPairId(user1, user2));
+        Optional<FriendPair> friendPairOpt = friendPairRepository.findById(new FriendPairId(user1.getId(), user2.getId()));
         if (friendPairOpt.isPresent()) {
             return friendPairOpt;
         }
 
         // Check right-association
-        return friendPairRepository.findById(new FriendPairId(user2, user1));
+        return friendPairRepository.findById(new FriendPairId(user2.getId(), user1.getId()));
     }
 
     public List<User> findAllFriendsOfUser(User user) {
@@ -58,7 +58,7 @@ public class FriendService {
             throw new ResourceNotFoundException();
         }
 
-        friendPairRepository.deleteById(new FriendPairId(user1, user2));
-        friendPairRepository.deleteById(new FriendPairId(user2, user1));
+        friendPairRepository.deleteById(new FriendPairId(user1.getId(), user2.getId()));
+        friendPairRepository.deleteById(new FriendPairId(user2.getId(), user1.getId()));
     }
 }

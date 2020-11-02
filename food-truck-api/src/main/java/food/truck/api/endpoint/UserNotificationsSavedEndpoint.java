@@ -30,7 +30,7 @@ public class UserNotificationsSavedEndpoint {
     TruckNotificationService notificationService;
 
     @GetMapping("/users/{userId}/notifications/saved")
-    List<Tag> getUserSavedNotifications(@PathVariable Long userId, Principal principal){
+    List<TruckNotification> getUserSavedNotifications(@PathVariable Long userId, Principal principal){
         // check if the user exists
         Optional<User> userOpt = userService.findUser(userId);
         if (userOpt.isEmpty()) {

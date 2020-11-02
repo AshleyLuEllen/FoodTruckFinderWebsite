@@ -18,7 +18,7 @@ public class UserNotificationService {
     private UserNotificationRepository userNotificationRepository;
 
     public Optional<UserNotification> findUserNotification(User user, TruckNotification notification) {
-        return userNotificationRepository.findById(new UserNotificationId(user, notification));
+        return userNotificationRepository.findById(new UserNotificationId(user.getId(), notification.getId()));
     }
 
     public UserNotification saveUserNotification(UserNotification userNotification) {
@@ -42,7 +42,7 @@ public class UserNotificationService {
     }
 
     public void deleteUserSavedNotification(User user, TruckNotification notification) {
-        userNotificationRepository.deleteById(new UserNotificationId(user, notification));
+        userNotificationRepository.deleteById(new UserNotificationId(user.getId(), notification.getId()));
     }
 }
 
