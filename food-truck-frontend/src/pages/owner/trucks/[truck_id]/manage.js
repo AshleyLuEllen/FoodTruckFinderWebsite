@@ -31,33 +31,19 @@ class ManagePage extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
-    handleClick = (e) => {
-        this.setState({
-            menuOpen: true,
-            anchor: e.currentTarget
-        });
-        console.log(this.state);
-    }
-
-    handleClose = (e) => {
-        this.setState({
-            menuOpen: false
-        });
-    }
-
     /**
      * Sets the state value to the value in the form
      * @param event the source of the new value in the state
+     * @param name_of_attribute
      */
     handleInputChange(event, name_of_attribute) {
-        console.log(event.target);
         this.setState({
             [name_of_attribute]: event.target.value
         });
     }
 
     handleTagChange(event, tag) {
-        //TODO: fix this so that we add and remove tags from the truck tags list
+        console.log(tag);
         this.setState({ truckTags: tag});
     }
 
@@ -96,9 +82,6 @@ class ManagePage extends Component {
      * Removes the truck that's currently being edited
      */
     removeTruck = () => {
-        console.log(this.state);
-        console.log(this.props.auth);
-
         axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.id}`,
             { auth: {
                     username: this.props.auth.email,
@@ -118,9 +101,7 @@ class ManagePage extends Component {
      * used in the URL
      */
     componentDidMount() {
-        console.log(this.props.router.query);
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`).then(res => {
-            console.log(res.data);
             this.setState({
                 id: res.data.id,
                 name: res.data.name,
@@ -147,14 +128,19 @@ class ManagePage extends Component {
             });
         });
 
-        // TODO: add all tags as well as truck tags to the state
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/tags`).then(r => {
-            console.log(r.data);
             this.setState({
                 allTags: r.data,
-                truckTags: r.data
             });
-            console.log(this.state);
+        }).catch(error => {
+            console.log(error.message);
+        });
+
+        axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`).then(r => {
+            this.setState({
+                truckTags: this.state.allTags.filter(t => r.data.findIndex(tt =>
+                tt.id === t.id) !== -1)
+            });
         }).catch(error => {
             console.log(error.message);
         });
@@ -164,7 +150,6 @@ class ManagePage extends Component {
      * Continuously updates the truck information on the page
      */
     componentWillUpdate() {
-        console.log(this.props.router.query);
         if(!this.state.truckFound) {
             axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`).then(res => {
                 this.setState({
@@ -178,7 +163,6 @@ class ManagePage extends Component {
                     truckFound: true,
                     anchor: null
                 });
-                console.log(this.state);
             }).catch(err => {
                 this.setState({
                     id: '',
@@ -197,11 +181,19 @@ class ManagePage extends Component {
             axios.get(`${process.env.FOOD_TRUCK_API_URL}/tags`).then(r => {
                 this.setState({
                     allTags: r.data,
-                    truckTags: r.data
                 })
+            }).catch(error => {
+                console.log(error.message);
             });
 
-            console.log(this.state);
+            axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`).then(r => {
+                this.setState({
+                    truckTags: this.state.allTags.filter(t => r.data.findIndex(tt =>
+                        tt.id === t.id) !== -1)
+                });
+            }).catch(error => {
+                console.log(error.message);
+            });
         }
     }
 
@@ -267,35 +259,21 @@ class ManagePage extends Component {
                             options={this.state.allTags}
                             selectedOptions={this.state.truckTags}
                             onChange={(event, value) => { this.handleTagChange(event, value) }}
-                            onSelectOption={t => console.log(t)}
-                            onDeselectOption={t => console.log(t)}
+                            onSelectOption={t => axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.id}/tags/${t.id}`,
+                                { auth: {
+                                        username: this.props.auth.email,
+                                        password: this.props.auth.password
+                                    }}).then().catch(error => {
+                                console.log(error.message);
+                            })}
+                            onDeselectOption={t => axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.id}/tags/${t.id}`,
+                                { auth: {
+                                        username: this.props.auth.email,
+                                        password: this.props.auth.password
+                                    }}).then().catch(error => {
+                                console.log(error.message);
+                            })}
                             />
-                            {/*<Menu*/}
-                            {/*    id="simple-menu"*/}
-                            {/*    keepMounted*/}
-                            {/*    open={this.state.menuOpen}*/}
-                            {/*    onClose={this.handleClose}*/}
-                            {/*    anchorEl={this.state.anchor}*/}
-                            {/*    disableCloseOnSelect*/}
-                            {/*>*/}
-                            {/*    {this.state.allTags.map(t => (*/}
-                            {/*        <MenuItem>*/}
-                            {/*            <FormControlLabel*/}
-                            {/*                value={t[0]}*/}
-                            {/*                control={*/}
-                            {/*                    <Checkbox*/}
-                            {/*                        color="primary"*/}
-                            {/*                        checked={t[1]}*/}
-                            {/*                        onChange={e => this.handleInputChange(e, "tags", t.id,[t[0], !t[1]])}*/}
-                            {/*                        name="checkedF"*/}
-                            {/*                        indeterminate*/}
-                            {/*                    />}*/}
-                            {/*                label={t[0]}*/}
-                            {/*                labelPlacement="right"*/}
-                            {/*            />*/}
-                            {/*        </MenuItem>*/}
-                            {/*    ))}*/}
-                            {/*</Menu>*/}
                         </Grid>
                         <Grid item xs={6} sm={3}>
                             <Button
@@ -330,72 +308,6 @@ class ManagePage extends Component {
             </div>
         );
     }
-
-    // render() {
-    //     return (
-    //         <div>
-    //             <h2>{this.state.name}</h2>
-    //             <form onSubmit={this.handleSubmit} method="post">
-    //                 <span>{this.state.editingMessage}</span>
-    //                 <table className="truck-form-details">
-    //                     <tbody>
-    //                     <tr>
-    //                         <td>
-    //                             <label htmlFor="name">
-    //                                 Name:
-    //                             </label>
-    //                         </td>
-    //                         <td>
-    //                             <input name="name" type="text" value={this.state.name}
-    //                                    onChange={this.handleInputChange}/>
-    //                         </td>
-    //                     </tr>
-    //                     <tr>
-    //                         <td>
-    //                             <label htmlFor="description">
-    //                                 Description:
-    //                             </label>
-    //                         </td>
-    //                         <td>
-    //                             <input name="description" type="text" value={this.state.description}
-    //                                    onChange={this.handleInputChange}/>
-    //                         </td>
-    //                     </tr>
-    //                     <tr>
-    //                         <td>
-    //                             <label htmlFor="licensePlate">
-    //                                 License Plate:
-    //                             </label>
-    //                         </td>
-    //                         <td>
-    //                             <input name="licensePlate" type="text" value={this.state.licensePlate}
-    //                                    onChange={this.handleInputChange}/>
-    //                         </td>
-    //                     </tr>
-    //                     <tr>
-    //                         <td>
-    //                             <label htmlFor="paymentTypes">
-    //                                 Payment Types:
-    //                             </label>
-    //                         </td>
-    //                         <td>
-    //                             <input name="paymentTypes" type="text" value={this.state.paymentTypes}
-    //                                    onChange={this.handleInputChange}/>
-    //                         </td>
-    //                     </tr>
-    //                     </tbody>
-    //                 </table>
-    //                 <button onClick={this.saveInfo}>Save</button>
-    //             </form>
-    //             <button onClick={this.removeTruck}>Delete Truck</button>
-    //             <br />
-    //             <br/>
-    //             <Link href={`/owner/trucks/${this.state.id}`}>
-    //                 <a>Cancel</a>
-    //             </Link>
-    //         </div>
-    //     );
-    // }
 }
 const mapStateToProps = state => {
     const { auth } = state
