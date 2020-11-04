@@ -52,29 +52,6 @@ function SearchPage(props) {
             .catch(err => {
                 console.log(err);
             })
-
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, 
-            { 
-                auth: {
-                    username: props.auth.email,
-                    password: props.auth.password
-                }
-            }
-        )
-            .then(userres => {
-                axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userres.data.id}/recommendations`)
-                .then(res => {
-                    setTrucks(res.data);
-                })
-                .catch(err => {
-                    console.log(err);
-                })
-            })
-            .catch(err => {
-                console.log(err);
-            })
-
-        
     }, []);
 
     return (
@@ -83,7 +60,7 @@ function SearchPage(props) {
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={4}>
                         <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>Search</Typography>
-                        <TextField 
+                        <TextField
                             className={classes.queryField}
                             label="Name or Description"
                             variant="outlined"
@@ -91,11 +68,11 @@ function SearchPage(props) {
                             onChange={e => setSearchQuery(e.target.value)}
                         />
                         <div className={classes.queryField}>
-                            <ChipSelector 
-                                label="Tags" 
+                            <ChipSelector
+                                label="Tags"
                                 options={tagOptions}
-                                selectedOptions={selectedTags} 
-                                onChange={(event, value) => setSelectedTags(value)} 
+                                selectedOptions={selectedTags}
+                                onChange={(event, value) => setSelectedTags(value)}
                                 onSelectOption={t => console.log(t)}
                                 onDeselectOption={t => console.log(t)}
                             />
@@ -108,13 +85,6 @@ function SearchPage(props) {
                         >
                                 Search!
                         </Button>
-                        <Divider/>
-                        <Typography variant="h5" style={{ marginTop: "10px", marginBottom: "10px", textAlign: "center" }}>{showingResults ? "Results" : "Recommendations"}</Typography>
-                        <Box style={{ textAlign: "left", maxHeight: "calc(52vh - 50px)", overflow: "auto" }}>
-                            {trucks.map((tr, i) => (
-                                <SubscriptionCard className={classes.truckCard} truck={tr} onClick={evt => setCurrentlySelected(i)}/>
-                            ))}
-                        </Box>
                     </Grid>
                     <Grid item xs={12} md={8}>
                         <div className={classes.mapWrapper}>
@@ -123,7 +93,6 @@ function SearchPage(props) {
                     </Grid>
                 </Grid>
             </Container>
-            
         </ul>
     )
 }
