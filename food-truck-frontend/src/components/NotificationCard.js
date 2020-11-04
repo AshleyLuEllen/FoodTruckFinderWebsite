@@ -11,11 +11,12 @@ function NotificationCard(props) {
     return (
         <Card className={props.className} onClick={props.onClick}>
             <CardHeader
-                title={<Link href={`/trucks/${props.truck.id}/notifications/${props.notification.id}`}>{props.notification.subject}</Link>}
+                title={<Link href={`/trucks/${props.truck.id}/notifications/${props.notification.id}`}>
+                    {props.notification.subject}
+                </Link>}
                 subheader={props.notification.description}
                 action={
-                    <IconButton aria-label="settings">
-                        <NotificationsOff/>
+                    <IconButton aria-label="manage">
                     </IconButton>
                 }
             />
