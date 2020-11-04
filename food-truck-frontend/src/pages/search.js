@@ -4,9 +4,12 @@ import axios from 'axios';
 
 import { makeStyles } from '@material-ui/core/styles'
 import { TextField, Divider, Grid, Container, Typography, Button, Box } from '@material-ui/core';
+import { Rating } from '@material-ui/lab';
 import ChipSelector from '../components/ChipSelector';
 import TruckMap from '../components/TruckMap';
 import SubscriptionCard from '../components/SubscriptionCard';
+import LocationInput from '../components/LocationInput';
+import throttle from 'lodash/throttle';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -42,6 +45,8 @@ function SearchPage(props) {
     const [trucks, setTrucks] = useState([]);
     const [currentlySelected, setCurrentlySelected] = useState(undefined);
     const [showingResults, setShowingResults] = useState(false);
+    const [preferredRating, setPreferredRating] = useState(undefined);
+    const [location, setLocation] = useState(undefined);
 
     useEffect(() => {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/tags`)
@@ -77,6 +82,18 @@ function SearchPage(props) {
                                 onDeselectOption={t => console.log(t)}
                             />
                         </div>
+                        <LocationInput onChange={(event, value) => {
+                            console.log(value);
+                            // TODO: get coordinates on server-side
+                        }}/>
+                        <Rating
+                            precision={0.5}
+                            value={preferredRating}
+                            onChange={(event, newValue) => {
+                                setPreferredRating(newValue);
+                            }}
+                            size="large"
+                        />
                         <Button
                             className={classes.searchButton}
                             onClick={() => alert("hi")}
