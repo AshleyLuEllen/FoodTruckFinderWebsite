@@ -35,14 +35,20 @@ public class TruckNotificationEndpoint {
     private TruckService truckService;
 
     @GetMapping("/trucks/{truckId}/notifications/{notificationId}")
-    public TruckNotification findTruckNotification(@PathVariable Long notificationId) {
+    public TruckNotification findTruckNotification(@PathVariable Long notificationId, @RequestBody TruckNotification notification, @PathVariable Long truckId) {
+        if(notification.getTruck().getId().equals(truckId)) {
+            throw new ResourceNotFoundException();
+        }
         return truckNotificationService.findTruckNotification(notificationId).orElseThrow(ResourceNotFoundException::new);
     }
 
     @PutMapping("/trucks/{truckId}/notifications/{notificationId}")
-    public TruckNotification saveTruckNotification(@PathVariable Long notificationId, @RequestBody TruckNotification notification) {
+    public TruckNotification saveTruckNotification(@PathVariable Long notificationId, @RequestBody TruckNotification notification, @PathVariable Long truckId) {
         if (!notification.getId().equals(notificationId)) {
             throw new BadRequestException("IDs don't match");
+        }
+        if(notification.getTruck().getId().equals(truckId)) {
+            throw new ResourceNotFoundException();
         }
 
         return truckNotificationService.saveTruckNotification(notification);
