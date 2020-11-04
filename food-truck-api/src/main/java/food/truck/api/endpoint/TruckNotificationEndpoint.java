@@ -34,27 +34,27 @@ public class TruckNotificationEndpoint {
     @Autowired
     private TruckService truckService;
 
-    @GetMapping("/trucks_notifications/{notification_id}")
-    public TruckNotification findTruckNotification(@PathVariable Long notification_id) {
-        return truckNotificationService.findTruckNotification(notification_id).orElseThrow(ResourceNotFoundException::new);
+    @GetMapping("/trucks/{truckId}/notifications/{notificationId}")
+    public TruckNotification findTruckNotification(@PathVariable Long notificationId) {
+        return truckNotificationService.findTruckNotification(notificationId).orElseThrow(ResourceNotFoundException::new);
     }
 
-    @PutMapping("/trucks_notifications/{notification_id}")
-    public TruckNotification saveTruckNotification(@PathVariable Long notification_id, @RequestBody TruckNotification notification) {
-        if (!notification.getId().equals(notification_id)) {
+    @PutMapping("/trucks/{truckId}/notifications/{notificationId}")
+    public TruckNotification saveTruckNotification(@PathVariable Long notificationId, @RequestBody TruckNotification notification) {
+        if (!notification.getId().equals(notificationId)) {
             throw new BadRequestException("IDs don't match");
         }
 
         return truckNotificationService.saveTruckNotification(notification);
     }
 
-    @PostMapping("/trucks_notifications")
-    public TruckNotification createTruckNotification(Truck truck, @RequestBody TruckNotification truckNotification) {
-        if (truck == null) {
+    @PostMapping("/trucks/{truckId}/notifications/{notificationId}")
+    public TruckNotification createTruckNotification(@PathVariable Long truckId, @RequestBody TruckNotification truckNotification) {
+        if (truckId == null) {
             throw new UnauthorizedException();
         }
 
-        Optional<Truck> meTruck = truckService.findTruck(truck.getId());
+        Optional<Truck> meTruck = truckService.findTruck(truckId);
         if (meTruck.isEmpty()) {
             throw new UnauthorizedException();
         }
