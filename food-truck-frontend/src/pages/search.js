@@ -9,7 +9,6 @@ import ChipSelector from '../components/ChipSelector';
 import TruckMap from '../components/TruckMap';
 import SubscriptionCard from '../components/SubscriptionCard';
 import LocationInput from '../components/LocationInput';
-import throttle from 'lodash/throttle';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -33,6 +32,12 @@ const useStyles = makeStyles((theme) => ({
         display: "block",
         margin: "0 auto",
         marginBottom: "10px"
+    },
+    ratingContainer: {
+        display: "flex",
+        height: "50px",
+        alignItems: "center",
+        justifyContent: "center"
     }
 }));
 
@@ -45,14 +50,14 @@ function SearchPage(props) {
     const [trucks, setTrucks] = useState([]);
     const [currentlySelected, setCurrentlySelected] = useState(undefined);
     const [showingResults, setShowingResults] = useState(false);
-    const [preferredRating, setPreferredRating] = useState(undefined);
+    const [preferredRating, setPreferredRating] = useState(null);
     const [location, setLocation] = useState(undefined);
 
     useEffect(() => {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/tags`)
             .then(res => {
                 setTagOptions(res.data);
-                setSelectedTags(res.data);
+                // setSelectedTags(res.data);
             })
             .catch(err => {
                 console.log(err);
@@ -86,14 +91,17 @@ function SearchPage(props) {
                             console.log(value);
                             // TODO: get coordinates on server-side
                         }}/>
-                        <Rating
-                            precision={0.5}
-                            value={preferredRating}
-                            onChange={(event, newValue) => {
-                                setPreferredRating(newValue);
-                            }}
-                            size="large"
-                        />
+                        <div className={classes.ratingContainer}>
+                            <Typography variant="h6" style={{ marginRight: "20px" }}>Minimum Rating</Typography>
+                            <Rating
+                                precision={0.5}
+                                value={preferredRating}
+                                onChange={(event, newValue) => {
+                                    setPreferredRating(newValue);
+                                }}
+                                size="large"
+                            />
+                        </div>
                         <Button
                             className={classes.searchButton}
                             onClick={() => alert("hi")}
