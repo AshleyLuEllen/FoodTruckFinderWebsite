@@ -33,7 +33,7 @@ function TruckCard(props) {
 
     return (
         <Card className={props.className}>
-            <CardHeader 
+            <CardHeader
                 title={<Link href={`/trucks/${props.truck.id}`}>{props.truck.name}</Link>}
                 subheader={props.truck.description}
                 action={

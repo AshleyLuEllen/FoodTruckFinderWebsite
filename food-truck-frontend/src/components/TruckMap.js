@@ -1,14 +1,13 @@
-import React, { Component } from 'react'; 
+import React, { Component } from 'react';
 
 import { Map, InfoWindow, Marker, GoogleApiWrapper } from 'google-maps-react';
 import { withStyles } from '@material-ui/core/styles';
- 
+
 const styles = theme => ({
     tooltipHeader: {
         fontWeight: "bold"
     },
     tooltipDesc: {
-        
     }
 });
 
@@ -23,7 +22,7 @@ export class MapContainer extends Component {
     }
 
     mapListItemIdToMarker = []
-    
+
     onMarkerClick = (props, marker) =>
         this.setState({
             activeMarker: marker,
@@ -90,7 +89,7 @@ export class MapContainer extends Component {
         );
   }
 }
- 
+
 export default GoogleApiWrapper({
   apiKey: process.env.GOOGLE_MAPS_API_KEY
 })(withStyles(styles, { withTheme: true })(MapContainer));
