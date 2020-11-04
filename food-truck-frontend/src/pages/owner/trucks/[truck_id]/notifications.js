@@ -1,19 +1,23 @@
 import React from 'react';
 import Link from 'next/link'
+import axios from "axios";
 import { useRouter } from 'next/router';
+import NotificationCard from "../../../../components/NotificationCard";
 
-function SearchPage(props) {
+function Notifications(props) {
     const router = useRouter();
+    const notifications = axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucls/${router.query.truck_id}/notifications`)
 
     return (
         <ul>
             <h2>Notifications of Truck</h2>
-            TODO: stub
-            <li>
-                <Link href={`/owner/trucks/${router.query.truck_id}`}>Back</Link>
-            </li>
+            {notifications.forEach(n => (
+                <NotificationCard
+                    notification={n}/>
+                ))
+            })
         </ul>
     )
 }
 
-export default SearchPage;
+export default Notifications;
