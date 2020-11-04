@@ -1,10 +1,12 @@
 import React from "react";
 import Link from 'next/link';
+import { useRouter } from 'next/router'
 import { connect } from 'react-redux';
 import { logout as authLogout } from '../redux/actions/auth';
 import { fade, makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
+import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from "@material-ui/core/IconButton";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
@@ -15,7 +17,7 @@ import Menu from "@material-ui/core/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import NotificationsIcon from "@material-ui/icons/Notifications";
-
+import PageviewIcon from '@material-ui/icons/Pageview';
 const useStyles = makeStyles((theme) => ({
     grow: {
         flexGrow: 1
@@ -59,6 +61,14 @@ const useStyles = makeStyles((theme) => ({
         alignItems: "center",
         justifyContent: "center"
     },
+    searchButton: {
+        width: "auto",
+        height: "auto",
+        transition: "0.3s all",
+        "&.hidden": {
+            width: 0
+        }
+    },
     inputRoot: {
         color: "inherit"
     },
@@ -74,10 +84,16 @@ const useStyles = makeStyles((theme) => ({
     },
     sectionDesktop: {
         display: "flex"
+    },
+    loginButton: {
+        marginLeft: theme.spacing(2),
+        height: "auto",
+        width: "100px"
     }
 }));
 
 function PrimarySearchAppBar(props) {
+    const router = useRouter();
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -138,29 +154,41 @@ function PrimarySearchAppBar(props) {
                             inputProps={{ "aria-label": "search" }}
                         />
                     </div>
+                    <Tooltip title="Search">
+                        <IconButton
+                            style={{ color: "white" }}
+                            onClick={e => router.push('/search')}
+                        >
+                            <PageviewIcon />
+                        </IconButton>
+                    </Tooltip>
                     {props.auth.isLoggedIn && (
                         <div className={classes.sectionDesktop}>
-                            <IconButton
-                                aria-label="show 17 new notifications"
-                                color="inherit"
-                            >
-                                <Badge badgeContent={17} color="secondary">
-                                    <NotificationsIcon />
-                                </Badge>
-                            </IconButton>
-                            <IconButton
-                                edge="end"
-                                aria-label="account of current user"
-                                aria-controls={menuId}
-                                aria-haspopup="true"
-                                onClick={handleProfileMenuOpen}
-                                color="inherit"
-                            >
-                                <AccountCircle />
-                            </IconButton>
+                            <Tooltip title="Notifications">
+                                <IconButton
+                                    aria-label="show 17 new notifications"
+                                    color="inherit"
+                                >
+                                    <Badge badgeContent={17} color="secondary">
+                                        <NotificationsIcon />
+                                    </Badge>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="My Profile">
+                                <IconButton
+                                    edge="end"
+                                    aria-label="account of current user"
+                                    aria-controls={menuId}
+                                    aria-haspopup="true"
+                                    onClick={handleProfileMenuOpen}
+                                    color="inherit"
+                                >
+                                    <AccountCircle />
+                                </IconButton>
+                            </Tooltip>
                         </div>
                     )}
-                    {!props.auth.isLoggedIn && <Button href="/login" color="primary" variant="contained">Login</Button>}
+                    {!props.auth.isLoggedIn && <Button href="/login" variant="contained" className={classes.loginButton} >Login</Button>}
                 </Toolbar>
             </AppBar>
             {renderMenu}
@@ -172,9 +200,9 @@ function mapStateToProps(state) {
     const { auth } = state
     return { auth }
 }
-  
+
 const mapDispatchToProps = {
     authLogout
 }
-  
+
 export default connect(mapStateToProps, mapDispatchToProps)(PrimarySearchAppBar);

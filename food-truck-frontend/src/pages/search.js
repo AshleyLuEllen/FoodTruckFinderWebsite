@@ -101,7 +101,7 @@ function mapStateToProps(state) {
     const { auth } = state
     return { auth }
   }
-  
+
 const mapDispatchToProps = {
 }
 

@@ -6,7 +6,6 @@ import { connect, useDispatch } from 'react-redux';
 import { login as authLogin, logout as authLogout } from '../redux/actions/auth';
 
 class Login extends Component {
-
     constructor(props) {
         super(props);
         this.state = {email: '', password: '', loginFailed:false};

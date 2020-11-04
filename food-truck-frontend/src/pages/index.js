@@ -10,6 +10,8 @@ import { Container, Grid, Typography, Box, CircularProgress, Divider } from "@ma
 
 import TruckMap from '../components/TruckMap';
 import SubscriptionCard from '../components/SubscriptionCard';
+import { Search } from '@material-ui/icons';
+import SearchPage from './search';
 
 const dashboardStyles = theme => ({
     root: {
@@ -40,10 +42,6 @@ class DashboardPage extends Component {
     }
 
     componentDidMount() {
-        if (!this.props.auth.isLoggedIn) {
-            this.props.router.push('/search')
-        }
-
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`,
             {
                 auth: {
@@ -76,7 +74,7 @@ class DashboardPage extends Component {
     render() {
         const { classes } = this.props;
 
-        return (
+        return this.props.auth.isLoggedIn ? (
             <Container className={classes.root}>
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={8}>
@@ -108,7 +106,7 @@ class DashboardPage extends Component {
                     }
                 </Grid>
             </Container>
-        );
+        ) : <SearchPage {...this.props}/>;
     }
 }
 
