@@ -45,5 +45,11 @@ public class TruckNotification {
 
     @Column(name = "posted_timestamp", columnDefinition = "TIMESTAMP")
     ZonedDateTime postedTimestamp;
+
+    @Transient
+    boolean saved;
+
+    @Transient
+    boolean unread;
 }
 
