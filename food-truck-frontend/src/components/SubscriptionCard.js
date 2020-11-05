@@ -22,7 +22,7 @@ function TruckCard(props) {
 
     return (
         <Card className={props.className} onClick={props.onClick}>
-            <CardHeader 
+            <CardHeader
                 title={<Link href={`/trucks/${props.truck.id}`}>{props.truck.name}</Link>}
                 subheader={props.truck.description}
                 action={
@@ -32,7 +32,7 @@ function TruckCard(props) {
                 }
             />
             <CardContent className={classes.cardContent}>
-                Currently at {props.truck.locationStr}
+                Currently at {props.truck.currentLocation?.truck_location}
             </CardContent>
         </Card>
     );

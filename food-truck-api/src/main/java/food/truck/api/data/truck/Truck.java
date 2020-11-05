@@ -3,10 +3,12 @@ package food.truck.api.data.truck;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import food.truck.api.data.review.Review;
+import food.truck.api.data.schedule.Schedule;
 import food.truck.api.data.truck_tag.TruckTag;
 import food.truck.api.data.user.User;
 import lombok.Data;
 import org.hibernate.annotations.Formula;
+import org.springframework.data.jpa.repository.Query;
 
 import javax.persistence.*;
 import java.util.List;
@@ -49,5 +51,9 @@ public class Truck {
 
     @Formula("(SELECT AVG(r.review_rating) FROM " + Review.TABLE_NAME + " r WHERE r.truck_id = truck_id)")
     Double rating;
+
+    @Formula("(SELECT * FROM " + Schedule.TABLE_NAME + " s0 WHERE (time_from <= NOW() AND time_from >= ALL(SELECT time_from FROM " + Schedule.TABLE_NAME + " s1 WHERE s0.truck_id = s1.truck_id AND s1.truck_id = truck_id))")
+    @Transient
+    Schedule currentLocation;
 }
 

@@ -24,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const getOptionLabel = option => option.name;
+const getOptionSelected = (option, value) => option.name === value.name
 
 function ChipSelector(props) {
     const classes = useStyles();
@@ -44,6 +45,7 @@ function ChipSelector(props) {
                 id="chip-selector"
                 options={props.options}
                 disableCloseOnSelect
+                getOptionSelected={props.getOptionSelected || getOptionSelected}
                 getOptionLabel={props.getOptionLabel || getOptionLabel}
                 renderOption={(option, { selected }) => (
                     <React.Fragment>

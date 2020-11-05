@@ -9,6 +9,7 @@ import food.truck.api.data.truck_tag.TruckTagService;
 import food.truck.api.data.user.User;
 import food.truck.api.recommendations.impl.TagBasedRecommendationAlgorithm;
 import food.truck.api.util.Location;
+import food.truck.api.util.SearchQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -75,5 +76,16 @@ public class RecommendationService {
 
     public List<Truck> getRecommendationsForUser(User user) {
         return this.getRecommendationsForUser(user, 10);
+    }
+
+    public List<Truck> getSearchResults(SearchQuery query) {
+        return this.getRecommendationComputer().getSearchResults(
+            truckService.findAll(),
+            query.getQuery(),
+            query.getTags(),
+            null,
+            query.getPreferredRating() != null ? query.getPreferredRating() : 0,
+            20
+        );
     }
 }

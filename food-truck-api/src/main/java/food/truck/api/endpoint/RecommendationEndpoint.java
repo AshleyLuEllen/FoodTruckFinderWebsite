@@ -5,12 +5,10 @@ import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.recommendations.RecommendationService;
+import food.truck.api.util.SearchQuery;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -32,5 +30,10 @@ public class RecommendationEndpoint {
         User user = userService.findUser(userId).orElseThrow(ResourceNotFoundException::new);
 
         return recommendationService.getRecommendationsForUser(user);
+    }
+
+    @PostMapping("/search")
+    public List<Truck> getSearchResults(@RequestBody SearchQuery query) {
+        return recommendationService.getSearchResults(query);
     }
 }

@@ -87,12 +87,12 @@ class DashboardPage extends Component {
                             <Box style={{ textAlign: "left", maxHeight: "calc(87vh)", overflow: "auto" }}>
                                 <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>{this.state.user?.firstName}Recommendations</Typography>
                                 {this.state.recommendations.map((tr, i) => (
-                                    <SubscriptionCard className={classes.truckCard} truck={tr} onClick={evt => this.setState({currentlySelected: i})}/>
+                                    <SubscriptionCard key={i} className={classes.truckCard} truck={tr} onClick={evt => this.setState({currentlySelected: i})}/>
                                 ))}
                                 <Divider style={{ marginTop: "10px", marginBottom: "10px" }}/>
                                 <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>{this.state.user?.firstName}Your Subscriptions</Typography>
                                 {this.state.subscriptions.map((tr, i) => (
-                                    <SubscriptionCard className={classes.truckCard} truck={tr} onClick={evt => this.setState({currentlySelected: this.state.recommendations.length + i})}/>
+                                    <SubscriptionCard key={100 + i} className={classes.truckCard} truck={tr} onClick={evt => this.setState({currentlySelected: this.state.recommendations.length + i})}/>
                                 ))}
                             </Box>
                         </Grid>

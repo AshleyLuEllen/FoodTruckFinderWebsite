@@ -64,7 +64,8 @@ const useStyles = makeStyles((theme) => ({
         transition: '0.5s all',
         paddingLeft: '15px',
         paddingRight: '15px',
-        backgroundColor: "#fafafa"
+        backgroundColor: "#3f51b5",
+        color: "white"
     },
     resultsVisible: {
         left: 0
@@ -77,22 +78,19 @@ function SearchPage(props) {
     const [tagOptions, setTagOptions] = useState([]);
     const [selectedTags, setSelectedTags] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
-    const [trucks, setTrucks] = useState([]);
     const [currentlySelected, setCurrentlySelected] = useState(undefined);
     const [showingResults, setShowingResults] = useState(false);
     const [preferredRating, setPreferredRating] = useState(null);
     const [location, setLocation] = useState(undefined);
     const [loading, setLoading] = useState(false);
     const [truckResults, setTruckResults] = useState([]);
-    const timer = React.useRef();
 
     useEffect(() => {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/tags`)
             .then(res => {
                 setTagOptions(res.data);
-                console.log(res.data);
-                const truckTags = [{id: 1, name: "A", description: "Test description"}];
-                setSelectedTags(res.data.filter(t => truckTags.findIndex(tt => tt.id == t.id) != -1));
+                // const truckTags = [{id: 1, name: "A", description: "Test description"}];
+                // setSelectedTags(res.data.filter(t => truckTags.findIndex(tt => tt.id == t.id) != -1));
             })
             .catch(err => {
                 console.log(err);
@@ -107,7 +105,13 @@ function SearchPage(props) {
         if (!loading) {
           setShowingResults(false);
           setLoading(true);
-          axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/1/recommendations`)
+          const queryObj = {
+              query: searchQuery,
+              tags: selectedTags,
+              placeId: location,
+              preferredRating
+          };
+          axios.post(`${process.env.FOOD_TRUCK_API_URL}/search`, queryObj)
             .then(res => {
                 setTruckResults(res.data);
                 // setCurrentlySelected(0);
@@ -137,17 +141,17 @@ function SearchPage(props) {
                                 options={tagOptions}
                                 selectedOptions={selectedTags}
                                 onChange={(event, value) => setSelectedTags(value)}
-                                onSelectOption={t => console.log(t)}
-                                onDeselectOption={t => console.log(t)}
                             />
                         </div>
                         <LocationInput onChange={(event, value) => {
+                            setLocation(value?.place_id);
                             console.log(value);
                             // TODO: get coordinates on server-side
                         }}/>
                         <div className={classes.ratingContainer}>
                             <Typography variant="h6" style={{ marginRight: "20px" }}>Minimum Rating</Typography>
                             <Rating
+                                name="preferredRating"
                                 precision={0.5}
                                 value={preferredRating}
                                 onChange={(event, newValue) => {
@@ -170,14 +174,14 @@ function SearchPage(props) {
                         </div>
                         <Paper className={`${classes.resultsPage} ${resultsPageClass}`} elevation={3}>
                             <Button
-                                color="primary"
-                                style={{ width: "auto", height: "auto", textAlign: "center" }}
+                                // color="primary"
+                                style={{ width: "auto", height: "auto", textAlign: "center", color: "white" }}
                                 onClick={() => setShowingResults(false)}
                             >
                                 <ArrowBackIosIcon/> Back to Search
                             </Button>
                             <Typography variant="h4" style={{ marginTop: "10px", marginBottom: "10px", textAlign: "center" }}>Search Results</Typography>
-                            <Box style={{ textAlign: "left", maxHeight: "calc(87vh)", overflow: "auto" }}>
+                            <Box style={{ textAlign: "left", maxHeight: "calc(75vh)", overflow: "auto" }}>
                             {truckResults.map((tr, i) => (
                                 <SubscriptionCard key={i} className={classes.truckCard} truck={tr} onClick={evt => setCurrentlySelected(i)}/>
                             ))}
@@ -186,7 +190,7 @@ function SearchPage(props) {
                     </Grid>
                     <Grid item xs={12} md={7}>
                         <div className={classes.mapWrapper}>
-                            <TruckMap trucks={trucks} selected={currentlySelected}/>
+                            <TruckMap trucks={truckResults} selected={currentlySelected}/>
                         </div>
                     </Grid>
                 </Grid>

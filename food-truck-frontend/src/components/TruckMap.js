@@ -72,9 +72,10 @@ export class MapContainer extends Component {
                         onClick={this.onMarkerClick}
                         name={tr.name}
                         title={tr.description}
-                        position={tr.location}
+                        position={{lat: tr.currentLocation?.truck_latitude, lng: tr.currentLocation?.truck_longitude}}
                     />
                 ))}
+                <Marker key={-1}/>
 
                 <InfoWindow
                     marker={this.state.activeMarker}
