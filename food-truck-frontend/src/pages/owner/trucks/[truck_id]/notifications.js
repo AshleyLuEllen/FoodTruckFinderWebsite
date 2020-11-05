@@ -12,6 +12,8 @@ import Dialog from "@material-ui/core/Dialog";
 import Button from "@material-ui/core/Button";
 import CardContent from "@material-ui/core/CardContent";
 import CardActions from "@material-ui/core/CardActions";
+import Typography from "@material-ui/core/Typography";
+import Grid from "@material-ui/core/Grid";
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -29,8 +31,11 @@ class NotificationPage extends Component {
 
             openNotification: 1,
             open: false,
+            openCreate: false,
             subject: "",
-            description: ""
+            description: "",
+            published: false,
+            postedTimestamp: null
         };
 
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -38,83 +43,175 @@ class NotificationPage extends Component {
         this.handleClose = this.handleClose.bind(this);
         this.handleCancel = this.handleCancel.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
-        this.getData = this.getData.bind(this);
+        this.clear = this.clear.bind(this);
+        this.fetchData = this.fetchData.bind(this);
     }
 
     handleClick(notification) {
         if(notification !== null) {
             axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.truckID}/notifications/${notification.id}`)
-                .then(res => (
+                .then(res => {
                     this.setState({
                         openNotification: notification.id,
                         open: true,
                         subject: res.data.subject,
-                        description: res.data.description
-                    })
-                ))
+                        description: res.data.description,
+                        published: res.data.published,
+                        postedTimestamp: res.data.postedTimestamp
+                    });
+                    console.log(this.state);
+            }).catch(err => console.log(err.message));
         }
         else {
-            const notification = {
-                id: null,
-                truck: this.state.truck,
-                media: null,
+            this.setState({
+                openCreate: true,
                 subject: "",
                 description: "",
-                type: null,
                 published: false
-            }
-            axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.truckID}/notifications`, notification)
-                .then(res => (
-                    this.setState( {
-                        openNotification: res.data.id,
-                        open: true,
-                        subject: res.data.subject,
-                        description: res.data.description
-                    })
-                ));
+            });
         }
     }
 
     handleClose(option) {
-        this.setState({ open: false });
+        if(this.state.open) {
+            console.log("Saving notification");
 
-        const notification = {
-            id: this.state.openNotification,
-            truck: this.state.truck,
-            media: null,
-            subject: this.state.subject,
-            description: this.state.description,
-            type: null,
-            published: option
+            const notification = {
+                id: this.state.openNotification,
+                truck: this.state.truck,
+                media: null,
+                subject: this.state.subject,
+                description: this.state.description,
+                type: null,
+                published: option,
+                postedTimestamp: this.state.postedTimestamp
+            }
+
+            axios.put(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
+                notification)
+                .then(res => {
+                    console.log("Notification saved!");
+                    this.clear();
+                    this.render();
+                })
+                .catch(err => console.log(err.message));
+
+            this.setState({
+                openNotification: 1,
+                open: false,
+                openCreate: false,
+                subject: "",
+                description: ""
+            });
         }
+        else if(this.state.openCreate) {
+            console.log("Creating notification");
 
-        axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`, notification)
-            .then(res => console.log("Notification saved!"))
-            .catch(err => console.log(err.message));
+            console.log(this.state);
+            const notification = {
+                id: this.state.openNotification,
+                truck: this.state.truck,
+                media: null,
+                subject: this.state.subject,
+                description: this.state.description,
+                type: null,
+                published: option,
+                postedTimestamp: this.state.postedTimestamp
+            }
+            console.log(this.notification);
+
+            axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`,
+                notification)
+                .then(res => {
+                    console.log("Notification saved!");
+                    this.clear();
+                    this.render();
+                })
+                .catch(err => console.log(err.message));
+
+            this.setState({
+                openNotification: 1,
+                open: false,
+                openCreate: false,
+                subject: "",
+                description: ""
+            });
+        }
     }
 
     handleCancel() {
-        this.setState({ open: false });
+        this.setState({ open: false, openCreate:false });
     }
 
-    handleInputChange(event) {
-        this.setState({ [event.target.name]: event.target.value });
+    handleInputChange(event, opt) {
+        event.preventDefault();
+        console.log(event.target.value);
+        console.log(opt);
+        this.setState({
+            [opt]: event.target.value
+        });
+        console.log(this.state);
     }
 
     handleDelete() {
-        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
-            {
-                auth: {
-                    username: this.props.auth.username,
-                    password: this.props.auth.password
-                }
+        console.log(this.props.auth);
+        console.log(this.state.openNotification);
+        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`
+            // {
+            //     auth: {
+            //         username: this.props.auth.username,
+            //         password: this.props.auth.password
+            //     }
+            // })
+        )
+            .then(r => {
+                console.log("Notification deleted!");
+                this.clear();
             })
-            .then(r => console.log("Notification deleted!"))
             .catch(err => console.log(err.message));
+
+        this.setState({
+            openNotification: 1,
+            open: false,
+            openCreate: false,
+            subject: "",
+            description: ""
+        });
     }
 
-    getData() {
+    clear() {
+        this.setState({
+            openNotification: 1,
+            open: false,
+            openCreate: false,
+            subject: "",
+            description: ""
+        });
+        this.fetchData();
+    }
 
+    fetchData() {
+        if(!this.state.truckFound && this.props.router.query.truck_id !== undefined) {
+            axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
+                .then(res => {
+                    console.log("Found the truck!");
+                    this.setState({
+                        truck: res.data,
+                        truckName: res.data.name,
+                        truckID: res.data.id
+                    });
+                    return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`)
+                }).then(res2 => {
+                this.setState( {
+                    notifications: res2.data,
+                    truckFound: true
+                });
+                console.log(this.state);
+            }).catch(err => {
+                console.log(err.message);
+                console.log("Cant't get notifications");
+            });
+        }
     }
 
     /**
@@ -129,89 +226,73 @@ class NotificationPage extends Component {
      * Continuously updates the truck information on the page
      */
     componentDidUpdate() {
-        if(!this.state.truckFound && this.props.router.query.truck_id !== undefined) {
-            axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
-                .then(res => {
-                    this.setState({
-                        truck: res.data,
-                        truckName: res.data.name,
-                        truckID: res.data.id
-                    });
-                    return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`)
-                }).then(res2 => {
-                    this.setState( {
-                        notifications: res2.data,
-                        truckFound: true
-                    });
-                    console.log(this.state);
-                }).catch(err => console.log(err.message));
-        }
+        this.fetchData();
     }
 
     render() {
         return (
             <div>
-                <h2>Notifications of {this.state.truck.name} </h2>
-                {this.state.notifications.map(n =>
-                    <Card onDoubleClick={() => this.handleClick(n)}>
+                <h2>Notifications for {this.state.truckName} </h2>
+                {this.state.notifications.map((n) =>
+                    <Card key={n.id} variant="outlined">
                         <CardContent>
                             <CardHeader
-                                title={<Link href={`owner/trucks/${this.state.truckID}/notifications/${n.id}`}>
-                                    {n.subject}
-                                </Link>}
-                                subheader={n.description}
+                                title={n.subject}
+                                subheader={n.postedTimestamp}
                             />
+                            <Typography align="left" variant="body3" component="p">
+                                {n.description}
+                            </Typography>
                         </CardContent>
                         <CardActions>
-                            <Button onClick={() => this.handleClick(n)}> Manage </Button>
+                            <Button onClick={() => this.handleClick(n)} color="primary" variant="outlined"> Manage </Button>
                         </CardActions>
                     </Card>
                 )}
-                {/*<Dialog open={this.state.open} onClose={this.handleClose} aria-labelledby="form-dialog-title">*/}
-                {/*    <DialogTitle id="form-dialog-title">Manage Notification</DialogTitle>*/}
-                {/*    <DialogContent>*/}
-                {/*        <DialogContentText>*/}
-                {/*            To subscribe to this website, please enter your email address here. We will send updates*/}
-                {/*            occasionally.*/}
-                {/*        </DialogContentText>*/}
-                {/*        <TextField*/}
-                {/*            autoFocus*/}
-                {/*            margin="dense"*/}
-                {/*            id="subject"*/}
-                {/*            label="Subject"*/}
-                {/*            type="email"*/}
-                {/*            defaultValue={this.state.subject}*/}
-                {/*            fullWidth={true}*/}
-                {/*            onChange={e => this.handleInputChange(e, "description")}*/}
-                {/*        />*/}
-                {/*        <InputLabel>*/}
-                {/*        </InputLabel>*/}
-                {/*        <TextField*/}
-                {/*            id="description"*/}
-                {/*            label="Description"*/}
-                {/*            multiline*/}
-                {/*            rows={4}*/}
-                {/*            fullWidth={true}*/}
-                {/*            defaultValue={this.state.description}*/}
-                {/*            onChange={e => this.handleInputChange(e, "description")}*/}
-                {/*        />*/}
-                {/*    </DialogContent>*/}
-                {/*    <DialogActions>*/}
-                {/*        <Button onClick={this.handleCancel} color="primary">*/}
-                {/*            Cancel*/}
-                {/*        </Button>*/}
-                {/*        <Button onClick={this.handleClose(false)} color="primary">*/}
-                {/*            Save*/}
-                {/*        </Button>*/}
-                {/*        <Button onClick={this.handleClose(true)} color="primary">*/}
-                {/*            Publish*/}
-                {/*        </Button>*/}
-                {/*        <Button onClick={this.handleDelete} color="primary">*/}
-                {/*            Delete*/}
-                {/*        </Button>*/}
-                {/*    </DialogActions>*/}
-                {/*</Dialog>*/}
-                {/*<Button onClick={this.handleClick(null)}> + </Button>*/}
+                <Dialog open={this.state.open || this.state.openCreate} aria-labelledby="form-dialog-title">
+                    <DialogTitle id="form-dialog-title">Manage Notification</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Click "Publish" to publish or "Save" to save and publish later. If already published, you may only "Delete".
+                        </DialogContentText>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            id="subject"
+                            label="Subject"
+                            type="email"
+                            defaultValue={this.state.subject}
+                            fullWidth={true}
+                            onChange={e => this.handleInputChange(e, "subject")}
+                        />
+                        <InputLabel>
+                        </InputLabel>
+                        <TextField
+                            id="description"
+                            label="Description"
+                            multiline
+                            rows={4}
+                            fullWidth={true}
+                            defaultValue={this.state.description}
+                            onChange={e => this.handleInputChange(e,"description")}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleCancel} color="primary" variant="outlined">
+                            Cancel
+                        </Button>
+                        {!this.state.published && <Button onClick={() => this.handleClose(false)} color="primary" variant="outlined">
+                            Save
+                        </Button>}
+                        {!this.state.published && <Button onClick={() => this.handleClose(true)} color="primary" variant="outlined">
+                            Publish
+                        </Button>}
+                        <Button onClick={this.handleDelete} color="primary" variant="outlined">
+                            Delete
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+                <Button onClick={() => this.handleClick(null)} variant="outlined"> + </Button>
             </div>
         )
     }

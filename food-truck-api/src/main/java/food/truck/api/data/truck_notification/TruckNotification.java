@@ -5,6 +5,7 @@ import food.truck.api.data.truck.Truck;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 
 @Data
 @Entity
@@ -41,5 +42,8 @@ public class TruckNotification {
 
     @Column(name = "published")
     Boolean published;
+
+    @Column(name = "posted_timestamp", columnDefinition = "TIMESTAMP")
+    ZonedDateTime postedTimestamp;
 }
 
