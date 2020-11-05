@@ -8,7 +8,7 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = food.truck.api.data.subscription.Subscription.TABLE_NAME)
+@Table(name = TruckTag.TABLE_NAME)
 @IdClass(TruckTagId.class)
 public class TruckTag {
     public static final String TABLE_NAME = "truck_tags";
