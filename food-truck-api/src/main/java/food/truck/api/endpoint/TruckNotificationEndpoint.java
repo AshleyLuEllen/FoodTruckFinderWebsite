@@ -6,6 +6,7 @@ import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.truck_notification.TruckNotification;
 import food.truck.api.data.truck_notification.TruckNotificationService;
+import food.truck.api.data.user_notification.UserNotificationService;
 import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
@@ -30,6 +31,9 @@ public class TruckNotificationEndpoint {
 
     @Autowired
     private TruckNotificationService truckNotificationService;
+
+    @Autowired
+    private UserNotificationService userNotificationService;
 
     @Autowired
     private TruckService truckService;
@@ -81,7 +85,13 @@ public class TruckNotificationEndpoint {
             throw new UnauthorizedException();
         }
 
+        Optional<TruckNotification> notif = truckNotificationService.findTruckNotification(notificationId);
+        if(notif.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+
         try {
+            userNotificationService.deleteUserSavedNotification(meUser.get(), notif.get());
             truckNotificationService.deleteTruckNotification(notificationId);
         } catch (Exception e) {
             return new ResponseEntity<>("Fail to delete!", HttpStatus.EXPECTATION_FAILED);
