@@ -273,6 +273,7 @@ class NotificationPage extends Component {
                     </DialogActions>
                 </Dialog>
                 <Button onClick={() => this.handleClick(null)} variant="outlined"> + </Button>
+                <Button href={`/owner/trucks/${this.props.router.query.truck_id}`} variant="outlined"> Back </Button>
             </div>
         )
     }
