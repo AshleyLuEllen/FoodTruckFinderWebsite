@@ -15,6 +15,6 @@ public interface TruckNotificationRepository extends JpaRepository<TruckNotifica
 
     List<TruckNotification> findAllByTruck(Truck truck);
 
-    @Query(value="SELECT * FROM " + TruckNotification.TABLE_NAME + " tn WHERE tn.truck_id IN (SELECT sub.truck_id FROM " + Subscription.TABLE_NAME + " sub WHERE sub.user_id = ?1)", nativeQuery = true)
+    @Query(value="SELECT * FROM " + TruckNotification.TABLE_NAME + " tn WHERE tn.published = b'1' AND tn.truck_id IN (SELECT sub.truck_id FROM " + Subscription.TABLE_NAME + " sub WHERE sub.user_id = ?1)", nativeQuery = true)
     List<TruckNotification> finalAllByUser(Long userId);
 }

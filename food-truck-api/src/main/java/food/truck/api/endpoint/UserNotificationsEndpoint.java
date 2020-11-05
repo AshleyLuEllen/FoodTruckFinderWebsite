@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Log4j2
 @RestController
@@ -52,6 +53,29 @@ public class UserNotificationsEndpoint {
         }
 
         return userNotificationService.findAllNotifications(userOpt.get());
+    }
+
+    @GetMapping("/users/{userId}/notifications/unread")
+    List<TruckNotification> getUserNotificationsUnread(@PathVariable Long userId, Principal principal) {
+        // check if the user exists
+        Optional<User> userOpt = userService.findUser(userId);
+        if (userOpt.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+
+        // Check if user has same id
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
+        Optional<User> userPOpt = userService.findUserByEmailAddress(principal.getName());
+        if (userPOpt.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+        if (!userOpt.get().equals(userPOpt.get())) {
+            throw new UnauthorizedException();
+        }
+
+        return userNotificationService.findAllNotifications(userOpt.get()).stream().filter(TruckNotification::isUnread).collect(Collectors.toList());
     }
 
     @PatchMapping("/users/{userId}/notifications/{notificationId}")

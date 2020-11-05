@@ -339,7 +339,7 @@ class Notifications extends Component {
         })
         .then(res => {
             this.setState({
-                rows: res.data.map(not => createData(not.unread, not.saved, not.truck.name, not.subject, not.postedDate, not.id, not.description))
+                rows: res.data.map(not => createData(not.unread, not.saved, not.truck.name, not.subject, not.postedTimestamp, not.id, not.description))
             })
         })
         .catch(err => console.log(err));
