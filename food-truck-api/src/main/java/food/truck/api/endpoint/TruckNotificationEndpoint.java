@@ -85,13 +85,7 @@ public class TruckNotificationEndpoint {
             throw new UnauthorizedException();
         }
 
-        Optional<TruckNotification> notif = truckNotificationService.findTruckNotification(notificationId);
-        if(notif.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
         try {
-            userNotificationService.deleteUserSavedNotification(meUser.get(), notif.get());
             truckNotificationService.deleteTruckNotification(notificationId);
         } catch (Exception e) {
             return new ResponseEntity<>("Fail to delete!", HttpStatus.EXPECTATION_FAILED);

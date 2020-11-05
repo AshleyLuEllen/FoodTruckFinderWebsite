@@ -14,6 +14,7 @@ import CardContent from "@material-ui/core/CardContent";
 import CardActions from "@material-ui/core/CardActions";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
+import {format} from "date-fns";
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -223,10 +224,8 @@ class NotificationPage extends Component {
                         <CardContent>
                             <CardHeader
                                 title={n.subject}
-                                subheader={n.postedTimestamp}
+                                subheader={format(new Date(n.postedTimestamp), "HH:mm, MM-dd-yyyy")}
                             />
-                            <CardHeader type="datetime-local"
-                            subheader={n.postedTimestamp}/>
                             <Typography align="left" variant="body3" component="p">
                                 {n.description}
                             </Typography>
@@ -248,8 +247,8 @@ class NotificationPage extends Component {
                             id="subject"
                             label="Subject"
                             type="email"
-                            defaultValue={this.state.subject}
                             fullWidth={true}
+                            defaultValue={this.state.subject}
                             onChange={e => this.handleInputChange(e, "subject")}
                         />
                         <InputLabel>
