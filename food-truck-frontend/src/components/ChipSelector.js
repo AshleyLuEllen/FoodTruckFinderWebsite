@@ -58,7 +58,7 @@ function ChipSelector(props) {
                 )}
                 style={{ width: "100%" }}
                 renderInput={(params) => (
-                    <TextField {...params} variant="outlined" label={props.label}/> 
+                    <TextField {...params} variant="outlined" label={props.label}/>
                 )}
                 onChange={(event, newSelectedOptions) => {
                     // Deselect
@@ -78,7 +78,7 @@ function ChipSelector(props) {
                     if (props.onChange) {
                         props.onChange(event, newSelectedOptions);
                     }
-                    
+
                     setSelectedOptions(newSelectedOptions);
                 }}
             />
