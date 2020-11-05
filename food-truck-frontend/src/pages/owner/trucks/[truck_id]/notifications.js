@@ -10,6 +10,8 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from "@material-ui/core/Dialog";
 import Button from "@material-ui/core/Button";
+import CardContent from "@material-ui/core/CardContent";
+import CardActions from "@material-ui/core/CardActions";
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -19,12 +21,13 @@ class NotificationPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            truck: null,
+            truck: "",
             truckName: "",
-            truckID: -1,
+            truckID: 1,
             notifications: [],
+            truckFound: false,
 
-            openNotification: -1,
+            openNotification: 1,
             open: false,
             subject: "",
             description: ""
@@ -33,18 +36,45 @@ class NotificationPage extends Component {
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillUpdate = this.componentWillUpdate.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleClick = this.handleClick.bind(this);
+        this.handleClose = this.handleClose.bind(this);
+        this.handleCancel = this.handleCancel.bind(this);
+        this.handleDelete = this.handleDelete.bind(this);
+        this.getData = this.getData.bind(this);
     }
 
     handleClick(notification) {
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.truckID}/notifications/${notification.id}`)
-            .then(res => (
-                this.setState({
-                    openNotification: notification.id,
-                    open: true,
-                    description: res.data.description,
-                    subject: res.data.subject
-                })
-            ))
+        if(notification !== null) {
+            axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.truckID}/notifications/${notification.id}`)
+                .then(res => (
+                    this.setState({
+                        openNotification: notification.id,
+                        open: true,
+                        subject: res.data.subject,
+                        description: res.data.description
+                    })
+                ))
+        }
+        else {
+            const notification = {
+                id: null,
+                truck: this.state.truck,
+                media: null,
+                subject: "",
+                description: "",
+                type: null,
+                published: false
+            }
+            axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.truckID}/notifications`, notification)
+                .then(res => (
+                    this.setState( {
+                        openNotification: res.data.id,
+                        open: true,
+                        subject: res.data.subject,
+                        description: res.data.description
+                    })
+                ));
+        }
     }
 
     handleClose(option) {
@@ -52,12 +82,15 @@ class NotificationPage extends Component {
 
         const notification = {
             id: this.state.openNotification,
+            truck: this.state.truck,
+            media: null,
             subject: this.state.subject,
             description: this.state.description,
+            type: null,
             published: option
         }
 
-        axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/0`, notification)
+        axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`, notification)
             .then(res => console.log("Notification saved!"))
             .catch(err => console.log(err.message));
     }
@@ -83,24 +116,7 @@ class NotificationPage extends Component {
     }
 
     getData() {
-        console.log(this.props.router.query.truck_id);
-        if (this.props.router.query.truck_id === undefined) {
-            console.log("Router bad");
-            return;
-        }
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`)
-            .then(res => (
-                this.setState({ notifications: res.data })
-            )).catch(err => console.log(err.message));
 
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
-            .then(res => {
-                this.setState( {
-                    truck: res.data,
-                    truckName: res.data.name,
-                    truckID: res.data.truckID
-                })
-            }).catch(err => console.log(err.message));
     }
 
     /**
@@ -108,7 +124,6 @@ class NotificationPage extends Component {
      * used in the URL
      */
     componentDidMount() {
-        this.getData();
 
     }
 
@@ -116,71 +131,93 @@ class NotificationPage extends Component {
      * Continuously updates the truck information on the page
      */
     componentWillUpdate() {
-        this.getData();
+        if(!this.state.truckFound && this.props.router.query.truck_id !== undefined) {
+            axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
+                .then(res => {
+                    this.setState({
+                        truck: res.data,
+                        truckName: res.data.name,
+                        truckID: res.data.id
+                    });
+                    return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}}/notifications`)
+                }).then(res2 => {
+                    this.setState( {
+                        notifications: res2.data,
+                        truckFound: true
+                    });
+                    console.log(this.state);
+                }).catch(err => console.log(err.message));
+        }
+        else {
+            console.log("Router undefined");
+            console.log(this.props.router);
+        }
     }
 
     render() {
         return (
             <div>
-                <h2>Notifications of {this.props.router.query.truck_id} {this.state.truckID}</h2>
+                <h2>Notifications of {this.state.truck.name} </h2>
                 {this.state.notifications.forEach(n =>
-                    <Card onClick={this.onClick}>
-                        <CardHeader
-                            title={<Link href={`owner/trucks/${this.state.truckID}/notifications/${n.id}`}>
-                                {n.subject}
-                            </Link>}
-                            subheader={n.description}
-                            action={
-                                <IconButton aria-label="manage" onClick={this.handleClick(n)}>
-                                </IconButton>
-                            }
-                        />
+                    <Card onDoubleClick={this.handleClick(n)}>
+                        <CardContent>
+                            <CardHeader
+                                title={<Link href={`owner/trucks/${this.state.truckID}/notifications/${n.id}`}>
+                                    {n.subject}
+                                </Link>}
+                                subheader={n.description}
+                            />
+                        </CardContent>
+                        <CardActions>
+                            <Button onClick={this.handleClick(n)}> Manage </Button>
+                        </CardActions>
                     </Card>
                 )}
-                <Dialog open={this.state.open} onClose={this.handleClose} aria-labelledby="form-dialog-title">
-                    <DialogTitle id="form-dialog-title">Manage Notification</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText>
-                            To subscribe to this website, please enter your email address here. We will send updates
-                            occasionally.
-                        </DialogContentText>
-                        <TextField
-                            autoFocus
-                            margin="dense"
-                            id="subject"
-                            label="Subject"
-                            type="email"
-                            defaultValue={this.state.subject}
-                            fullWidth={true}
-                            onChange={e => this.handleInputChange(e, "description")}
-                        />
-                        <InputLabel>
-                        </InputLabel>
-                        <TextField
-                            id="description"
-                            label="Description"
-                            multiline
-                            rows={4}
-                            fullWidth={true}
-                            defaultValue={this.state.description}
-                            onChange={e => this.handleInputChange(e, "description")}
-                        />
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={this.handleCancel} color="primary">
-                            Cancel
-                        </Button>
-                        <Button onClick={this.handleClose(false)} color="primary">
-                            Save
-                        </Button>
-                        <Button onClick={this.handleClose(true)} color="primary">
-                            Publish
-                        </Button>
-                        <Button onClick={this.handleDelete} color="primary">
-                            Delete
-                        </Button>
-                    </DialogActions>
-                </Dialog>
+                {/*<Dialog open={this.state.open} onClose={this.handleClose} aria-labelledby="form-dialog-title">*/}
+                {/*    <DialogTitle id="form-dialog-title">Manage Notification</DialogTitle>*/}
+                {/*    <DialogContent>*/}
+                {/*        <DialogContentText>*/}
+                {/*            To subscribe to this website, please enter your email address here. We will send updates*/}
+                {/*            occasionally.*/}
+                {/*        </DialogContentText>*/}
+                {/*        <TextField*/}
+                {/*            autoFocus*/}
+                {/*            margin="dense"*/}
+                {/*            id="subject"*/}
+                {/*            label="Subject"*/}
+                {/*            type="email"*/}
+                {/*            defaultValue={this.state.subject}*/}
+                {/*            fullWidth={true}*/}
+                {/*            onChange={e => this.handleInputChange(e, "description")}*/}
+                {/*        />*/}
+                {/*        <InputLabel>*/}
+                {/*        </InputLabel>*/}
+                {/*        <TextField*/}
+                {/*            id="description"*/}
+                {/*            label="Description"*/}
+                {/*            multiline*/}
+                {/*            rows={4}*/}
+                {/*            fullWidth={true}*/}
+                {/*            defaultValue={this.state.description}*/}
+                {/*            onChange={e => this.handleInputChange(e, "description")}*/}
+                {/*        />*/}
+                {/*    </DialogContent>*/}
+                {/*    <DialogActions>*/}
+                {/*        <Button onClick={this.handleCancel} color="primary">*/}
+                {/*            Cancel*/}
+                {/*        </Button>*/}
+                {/*        <Button onClick={this.handleClose(false)} color="primary">*/}
+                {/*            Save*/}
+                {/*        </Button>*/}
+                {/*        <Button onClick={this.handleClose(true)} color="primary">*/}
+                {/*            Publish*/}
+                {/*        </Button>*/}
+                {/*        <Button onClick={this.handleDelete} color="primary">*/}
+                {/*            Delete*/}
+                {/*        </Button>*/}
+                {/*    </DialogActions>*/}
+                {/*</Dialog>*/}
+                {/*<Button onClick={this.handleClick(null)}> + </Button>*/}
             </div>
         )
     }

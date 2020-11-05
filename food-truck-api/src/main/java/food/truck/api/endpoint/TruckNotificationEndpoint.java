@@ -54,7 +54,7 @@ public class TruckNotificationEndpoint {
         return truckNotificationService.saveTruckNotification(notification);
     }
 
-    @PostMapping("/trucks/{truckId}/notifications/{notificationId}")
+    @PostMapping("/trucks/{truckId}/notifications")
     public TruckNotification createTruckNotification(@PathVariable Long truckId, @RequestBody TruckNotification truckNotification) {
         if (truckId == null) {
             throw new UnauthorizedException();

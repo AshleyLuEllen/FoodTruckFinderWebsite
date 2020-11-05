@@ -132,18 +132,18 @@ class ManagePage extends Component {
             this.setState({
                 allTags: r.data,
             });
-        }).catch(error => {
-            console.log(error.message);
-        });
-
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`).then(r => {
-            this.setState({
-                truckTags: this.state.allTags.filter(t => r.data.findIndex(tt =>
-                tt.id === t.id) !== -1)
+            axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`).then(r => {
+                this.setState({
+                    truckTags: this.state.allTags.filter(t => r.data.findIndex(tt =>
+                        tt.id === t.id) !== -1)
+                });
+            }).catch(error => {
+                console.log(error.message);
             });
         }).catch(error => {
             console.log(error.message);
         });
+
     }
 
     /**
@@ -182,18 +182,19 @@ class ManagePage extends Component {
                 this.setState({
                     allTags: r.data,
                 })
-            }).catch(error => {
-                console.log(error.message);
-            });
 
-            axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`).then(r => {
-                this.setState({
-                    truckTags: this.state.allTags.filter(t => r.data.findIndex(tt =>
-                        tt.id === t.id) !== -1)
+                axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`).then(r => {
+                    this.setState({
+                        truckTags: this.state.allTags.filter(t => r.data.findIndex(tt =>
+                            tt.id === t.id) !== -1)
+                    });
+                }).catch(error => {
+                    console.log(error.message);
                 });
             }).catch(error => {
                 console.log(error.message);
             });
+
         }
     }
 
