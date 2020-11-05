@@ -61,7 +61,10 @@ const useStyles = makeStyles((theme) => ({
         width: '100%',
         height: '100%',
         zIndex: 10,
-        transition: '0.5s all'
+        transition: '0.5s all',
+        paddingLeft: '15px',
+        paddingRight: '15px',
+        backgroundColor: "#fafafa"
     },
     resultsVisible: {
         left: 0
@@ -80,6 +83,7 @@ function SearchPage(props) {
     const [preferredRating, setPreferredRating] = useState(null);
     const [location, setLocation] = useState(undefined);
     const [loading, setLoading] = useState(false);
+    const [truckResults, setTruckResults] = useState([]);
     const timer = React.useRef();
 
     useEffect(() => {
@@ -103,10 +107,14 @@ function SearchPage(props) {
         if (!loading) {
           setShowingResults(false);
           setLoading(true);
-          timer.current = window.setTimeout(() => {
-            setShowingResults(true);
-            setLoading(false);
-          }, 2000);
+          axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/1/recommendations`)
+            .then(res => {
+                setTruckResults(res.data);
+                // setCurrentlySelected(0);
+                setShowingResults(true);
+                setLoading(false);
+            })
+            .catch(err => console.log(err));
         }
     };
 
@@ -114,7 +122,7 @@ function SearchPage(props) {
         <ul>
             <Container className={classes.root}>
                 <Grid container spacing={3}>
-                    <Grid item xs={12} md={4} style={{position: "relative"}}>
+                    <Grid item xs={12} md={5} style={{position: "relative"}}>
                         <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>Search</Typography>
                         <TextField
                             className={classes.queryField}
@@ -169,9 +177,14 @@ function SearchPage(props) {
                                 <ArrowBackIosIcon/> Back to Search
                             </Button>
                             <Typography variant="h4" style={{ marginTop: "10px", marginBottom: "10px", textAlign: "center" }}>Search Results</Typography>
+                            <Box style={{ textAlign: "left", maxHeight: "calc(87vh)", overflow: "auto" }}>
+                            {truckResults.map((tr, i) => (
+                                <SubscriptionCard key={i} className={classes.truckCard} truck={tr} onClick={evt => setCurrentlySelected(i)}/>
+                            ))}
+                            </Box>
                         </Paper>
                     </Grid>
-                    <Grid item xs={12} md={8}>
+                    <Grid item xs={12} md={7}>
                         <div className={classes.mapWrapper}>
                             <TruckMap trucks={trucks} selected={currentlySelected}/>
                         </div>
