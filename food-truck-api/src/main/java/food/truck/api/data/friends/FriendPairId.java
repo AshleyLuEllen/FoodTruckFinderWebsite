@@ -14,6 +14,6 @@ import java.util.Objects;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class FriendPairId implements Serializable {
-    private User user1;
-    private User user2;
+    private Long user1;
+    private Long user2;
 }
