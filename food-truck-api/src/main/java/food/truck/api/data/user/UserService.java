@@ -4,6 +4,8 @@ import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
+import food.truck.api.data.truck_notification.TruckNotification;
+import food.truck.api.data.user_notification.UserNotification;
 import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.endpoint.error.ResourceConflictException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;

@@ -38,5 +38,11 @@ public class TruckNotification {
 
     @Column(name = "notification_description")
     String description;
+
+    @Transient
+    boolean saved;
+
+    @Transient
+    boolean unread;
 }
 
