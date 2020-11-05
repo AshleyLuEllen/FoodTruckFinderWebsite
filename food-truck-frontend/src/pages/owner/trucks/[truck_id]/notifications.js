@@ -59,6 +59,7 @@ class NotificationPage extends Component {
                         postedTimestamp: res.data.postedTimestamp
                     });
                     console.log(this.state);
+                    this.fetchData();
             }).catch(err => console.log(err.message));
         }
         else {
@@ -90,6 +91,7 @@ class NotificationPage extends Component {
                 notification)
                 .then(res => {
                     console.log("Notification saved!");
+                    this.fetchData();
                 })
                 .catch(err => console.log(err.message));
 
@@ -121,6 +123,7 @@ class NotificationPage extends Component {
                 notification)
                 .then(res => {
                     console.log("Notification saved!");
+                    this.fetchData();
                 })
                 .catch(err => console.log(err.message));
 
@@ -158,6 +161,7 @@ class NotificationPage extends Component {
                 }})
             .then(r => {
                 console.log("Notification deleted!");
+                this.fetchData();
             })
             .catch(err => console.log(err.message));
 
@@ -187,6 +191,7 @@ class NotificationPage extends Component {
                     truckFound: true
                 });
                 console.log(this.state);
+                this.fetchData();
             }).catch(err => {
                 console.log(err.message);
                 console.log("Cant't get notifications");
@@ -220,6 +225,8 @@ class NotificationPage extends Component {
                                 title={n.subject}
                                 subheader={n.postedTimestamp}
                             />
+                            <CardHeader type="datetime-local"
+                            subheader={n.postedTimestamp}/>
                             <Typography align="left" variant="body3" component="p">
                                 {n.description}
                             </Typography>
@@ -267,9 +274,9 @@ class NotificationPage extends Component {
                         {!this.state.published && <Button onClick={() => this.handleClose(true)} color="primary" variant="outlined">
                             Publish
                         </Button>}
-                        <Button onClick={this.handleDelete} color="primary" variant="outlined">
+                        {!this.state.published && <Button onClick={this.handleDelete} color="primary" variant="outlined">
                             Delete
-                        </Button>
+                        </Button>}
                     </DialogActions>
                 </Dialog>
                 <Button onClick={() => this.handleClick(null)} variant="outlined"> + </Button>
