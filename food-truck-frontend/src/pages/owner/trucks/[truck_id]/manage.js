@@ -260,7 +260,7 @@ class ManagePage extends Component {
                             options={this.state.allTags}
                             selectedOptions={this.state.truckTags}
                             onChange={(event, value) => { this.handleTagChange(event, value) }}
-                            onSelectOption={t => axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.id}/tags/${t.id}`,
+                            onSelectOption={t => axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.id}/tags/${t.id}`, {},
                                 { auth: {
                                         username: this.props.auth.email,
                                         password: this.props.auth.password
