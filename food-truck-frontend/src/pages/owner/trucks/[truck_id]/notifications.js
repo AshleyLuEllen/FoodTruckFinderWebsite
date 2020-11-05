@@ -43,7 +43,6 @@ class NotificationPage extends Component {
         this.handleClose = this.handleClose.bind(this);
         this.handleCancel = this.handleCancel.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
-        this.clear = this.clear.bind(this);
         this.fetchData = this.fetchData.bind(this);
     }
 
@@ -91,8 +90,6 @@ class NotificationPage extends Component {
                 notification)
                 .then(res => {
                     console.log("Notification saved!");
-                    this.clear();
-                    this.render();
                 })
                 .catch(err => console.log(err.message));
 
@@ -124,8 +121,6 @@ class NotificationPage extends Component {
                 notification)
                 .then(res => {
                     console.log("Notification saved!");
-                    this.clear();
-                    this.render();
                 })
                 .catch(err => console.log(err.message));
 
@@ -156,17 +151,13 @@ class NotificationPage extends Component {
     handleDelete() {
         console.log(this.props.auth);
         console.log(this.state.openNotification);
-        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`
-            // {
-            //     auth: {
-            //         username: this.props.auth.username,
-            //         password: this.props.auth.password
-            //     }
-            // })
-        )
+        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
+            { auth: {
+                    username: this.props.auth.email,
+                    password: this.props.auth.password
+                }})
             .then(r => {
                 console.log("Notification deleted!");
-                this.clear();
             })
             .catch(err => console.log(err.message));
 
@@ -177,17 +168,6 @@ class NotificationPage extends Component {
             subject: "",
             description: ""
         });
-    }
-
-    clear() {
-        this.setState({
-            openNotification: 1,
-            open: false,
-            openCreate: false,
-            subject: "",
-            description: ""
-        });
-        this.fetchData();
     }
 
     fetchData() {

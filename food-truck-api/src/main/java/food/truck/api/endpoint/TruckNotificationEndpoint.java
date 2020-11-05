@@ -69,29 +69,17 @@ public class TruckNotificationEndpoint {
         return truckNotificationService.createTruckNotification(truckNotification, meTruck.get());
     }
 
-//    @DeleteMapping("/trucks/{truckId}/notifications/{notificationId}")
-//    public ResponseEntity<String> deleteTruckNotification(Principal principal, @PathVariable long notificationId) {
-//        if (principal == null) {
-//            throw new UnauthorizedException();
-//        }
-//
-//        // Get me user
-//        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
-//        if (meUser.isEmpty()) {
-//            throw new UnauthorizedException();
-//        }
-//
-//        try {
-//            truckNotificationService.deleteTruckNotification(notificationId);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>("Fail to delete!", HttpStatus.EXPECTATION_FAILED);
-//        }
-//
-//        return new ResponseEntity<>("Truck Notification has been deleted!", HttpStatus.OK);
-//    }
-
     @DeleteMapping("/trucks/{truckId}/notifications/{notificationId}")
-    public ResponseEntity<String> deleteTruckNotification(@PathVariable long notificationId) {
+    public ResponseEntity<String> deleteTruckNotification(Principal principal, @PathVariable long notificationId, @PathVariable String truckId) {
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
+
+        // Get me user
+        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
+        if (meUser.isEmpty()) {
+            throw new UnauthorizedException();
+        }
 
         try {
             truckNotificationService.deleteTruckNotification(notificationId);
