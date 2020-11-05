@@ -35,11 +35,12 @@ public class TruckNotificationEndpoint {
     private TruckService truckService;
 
     @GetMapping("/trucks/{truckId}/notifications/{notificationId}")
-    public TruckNotification findTruckNotification(@PathVariable Long notificationId, @RequestBody TruckNotification notification, @PathVariable Long truckId) {
-        if(notification.getTruck().getId().equals(truckId)) {
+    public TruckNotification findTruckNotification(@PathVariable Long notificationId, @PathVariable Long truckId) {
+        Optional<TruckNotification> notOpt = truckNotificationService.findTruckNotification(notificationId);
+        if(notOpt.isEmpty() || notOpt.get().getTruck().getId().equals(truckId)) {
             throw new ResourceNotFoundException();
         }
-        return truckNotificationService.findTruckNotification(notificationId).orElseThrow(ResourceNotFoundException::new);
+        return notOpt.get();
     }
 
     @PutMapping("/trucks/{truckId}/notifications/{notificationId}")

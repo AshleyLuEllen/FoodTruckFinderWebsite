@@ -33,8 +33,6 @@ class NotificationPage extends Component {
             description: ""
         };
 
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUpdate = this.componentWillUpdate.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleClick = this.handleClick.bind(this);
         this.handleClose = this.handleClose.bind(this);
@@ -130,7 +128,7 @@ class NotificationPage extends Component {
     /**
      * Continuously updates the truck information on the page
      */
-    componentWillUpdate() {
+    componentDidUpdate() {
         if(!this.state.truckFound && this.props.router.query.truck_id !== undefined) {
             axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
                 .then(res => {
@@ -139,7 +137,7 @@ class NotificationPage extends Component {
                         truckName: res.data.name,
                         truckID: res.data.id
                     });
-                    return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}}/notifications`)
+                    return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`)
                 }).then(res2 => {
                     this.setState( {
                         notifications: res2.data,
@@ -148,18 +146,14 @@ class NotificationPage extends Component {
                     console.log(this.state);
                 }).catch(err => console.log(err.message));
         }
-        else {
-            console.log("Router undefined");
-            console.log(this.props.router);
-        }
     }
 
     render() {
         return (
             <div>
                 <h2>Notifications of {this.state.truck.name} </h2>
-                {this.state.notifications.forEach(n =>
-                    <Card onDoubleClick={this.handleClick(n)}>
+                {this.state.notifications.map(n =>
+                    <Card onDoubleClick={() => this.handleClick(n)}>
                         <CardContent>
                             <CardHeader
                                 title={<Link href={`owner/trucks/${this.state.truckID}/notifications/${n.id}`}>
@@ -169,7 +163,7 @@ class NotificationPage extends Component {
                             />
                         </CardContent>
                         <CardActions>
-                            <Button onClick={this.handleClick(n)}> Manage </Button>
+                            <Button onClick={() => this.handleClick(n)}> Manage </Button>
                         </CardActions>
                     </Card>
                 )}
