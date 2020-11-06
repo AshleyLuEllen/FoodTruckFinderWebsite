@@ -9,7 +9,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { Container, Grid, Typography, Box, CircularProgress, Divider } from "@material-ui/core";
 
 import TruckMap from '../components/TruckMap';
-import SubscriptionCard from '../components/SubscriptionCard';
+import TruckCard from '../components/TruckCard';
 import { Search } from '@material-ui/icons';
 import SearchPage from './search';
 
@@ -85,14 +85,16 @@ class DashboardPage extends Component {
                     {!this.state.loading &&
                         <Grid item xs={12} md={4}>
                             <Box style={{ textAlign: "left", maxHeight: "calc(87vh)", overflow: "auto" }}>
-                                <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>{this.state.user?.firstName}Recommendations</Typography>
-                                {this.state.recommendations.map((tr, i) => (
-                                    <SubscriptionCard key={i} className={classes.truckCard} truck={tr} onClick={evt => this.setState({currentlySelected: i})}/>
-                                ))}
-                                <Divider style={{ marginTop: "10px", marginBottom: "10px" }}/>
+                                {this.state.recommendations.length > 0 && <Fragment>
+                                    <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>{this.state.user?.firstName}Recommendations</Typography>
+                                    {this.state.recommendations.map((tr, i) => (
+                                        <TruckCard key={i} className={classes.truckCard} truck={tr} tags={tr.tags.map(tag => tag.tag.name)} onClick={evt => this.setState({currentlySelected: i})}/>
+                                    ))}
+                                    <Divider style={{ marginTop: "10px", marginBottom: "10px" }}/>
+                                </Fragment>}
                                 <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>{this.state.user?.firstName}Your Subscriptions</Typography>
                                 {this.state.subscriptions.map((tr, i) => (
-                                    <SubscriptionCard key={100 + i} className={classes.truckCard} truck={tr} onClick={evt => this.setState({currentlySelected: this.state.recommendations.length + i})}/>
+                                    <TruckCard key={100 + i} className={classes.truckCard} truck={tr} tags={tr.tags.map(tag => tag.tag.name)} onClick={evt => this.setState({currentlySelected: this.state.recommendations.length + i})}/>
                                 ))}
                             </Box>
                         </Grid>

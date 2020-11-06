@@ -9,7 +9,6 @@ import { Rating } from '@material-ui/lab';
 import { green } from '@material-ui/core/colors';
 import ChipSelector from '../components/ChipSelector';
 import TruckMap from '../components/TruckMap';
-import SubscriptionCard from '../components/SubscriptionCard';
 import TruckCard from '../components/TruckCard';
 import LocationInput from '../components/LocationInput';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';

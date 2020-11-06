@@ -44,6 +44,7 @@ function TruckCard(props) {
     const [subscribed, setSubscribed] = useState(false);
 
     useEffect(() => {
+        if (props.userId)
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/subscriptions/${props.truck.id}`)
         .then(res => {
             setSubscribed(true);
@@ -91,9 +92,9 @@ function TruckCard(props) {
                 title={<Link href={`/trucks/${props.truck.id}`}>{props.truck.name}</Link>}
                 subheader={props.truck.description}
                 action={
-                    <IconButton aria-label="settings" onClick={toggleSubscribe}>
+                    props.userId ? <IconButton aria-label="settings" onClick={toggleSubscribe}>
                     {subscribed ? <NotificationsOff/> : <Notifications />}
-                    </IconButton>
+                    </IconButton> : undefined
                 }
             />
             {props.image && <CardMedia
