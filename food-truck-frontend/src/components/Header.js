@@ -18,6 +18,8 @@ import SearchIcon from "@material-ui/icons/Search";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import PageviewIcon from '@material-ui/icons/Pageview';
+import axios from 'axios';
+
 const useStyles = makeStyles((theme) => ({
     grow: {
         flexGrow: 1
@@ -96,6 +98,7 @@ function PrimarySearchAppBar(props) {
     const router = useRouter();
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const [notificationCount, setNotificationCount] = React.useState(0);
 
     const isMenuOpen = Boolean(anchorEl);
 
@@ -107,6 +110,28 @@ function PrimarySearchAppBar(props) {
         setAnchorEl(null);
         // handleMobileMenuClose();
     };
+
+    React.useEffect(() => {
+        axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
+            auth: {
+                username: props.auth.email,
+                password: props.auth.password
+            }
+        })
+        .then(res => {
+            return axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/notifications/unread`, {
+                auth: {
+                    username: props.auth.email,
+                    password: props.auth.password
+                }
+            });
+        })
+        .then(res => {
+            console.log(res.data);
+            setNotificationCount(res.data.length);
+        })
+        .catch(err => console.log(err));
+    }, []);
 
     const menuId = "primary-search-account-menu";
     const renderMenu = (
@@ -164,28 +189,27 @@ function PrimarySearchAppBar(props) {
                     </Tooltip>
                     {props.auth.isLoggedIn && (
                         <div className={classes.sectionDesktop}>
-                            <Tooltip title="Notifications">
-                                <IconButton
-                                    aria-label="show 17 new notifications"
-                                    color="inherit"
-                                >
-                                    <Badge badgeContent={17} color="secondary">
+                            <IconButton
+                                aria-label={`show ${notificationCount} new notifications`}
+                                color="inherit"
+                                href="/account/notifications"
+                            >
+                                {notificationCount > 0 ?
+                                    <Badge badgeContent={notificationCount} color="secondary">
                                         <NotificationsIcon />
                                     </Badge>
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="My Profile">
-                                <IconButton
-                                    edge="end"
-                                    aria-label="account of current user"
-                                    aria-controls={menuId}
-                                    aria-haspopup="true"
-                                    onClick={handleProfileMenuOpen}
-                                    color="inherit"
-                                >
-                                    <AccountCircle />
-                                </IconButton>
-                            </Tooltip>
+                                    : <NotificationsIcon />}
+                            </IconButton>
+                            <IconButton
+                                edge="end"
+                                aria-label="account of current user"
+                                aria-controls={menuId}
+                                aria-haspopup="true"
+                                onClick={handleProfileMenuOpen}
+                                color="inherit"
+                            >
+                                <AccountCircle />
+                            </IconButton>
                         </div>
                     )}
                     {!props.auth.isLoggedIn && <Button href="/login" variant="contained" className={classes.loginButton} >Login</Button>}
