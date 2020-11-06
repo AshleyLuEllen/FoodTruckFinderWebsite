@@ -12,4 +12,5 @@ import java.util.Optional;
 @Repository
 public interface SubscriptionRepository extends JpaRepository<Subscription, SubscriptionId> {
         List<Subscription> findByUser(User user);
+        List<Subscription> findAllByTruck(Truck truck);
 }

@@ -15,6 +15,7 @@ import Menu from "@material-ui/core/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import NotificationsIcon from "@material-ui/icons/Notifications";
+import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -80,6 +81,7 @@ const useStyles = makeStyles((theme) => ({
 function PrimarySearchAppBar(props) {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const [notificationCount, setNotificationCount] = React.useState(0);
 
     const isMenuOpen = Boolean(anchorEl);
 
@@ -91,6 +93,28 @@ function PrimarySearchAppBar(props) {
         setAnchorEl(null);
         // handleMobileMenuClose();
     };
+
+    React.useEffect(() => {
+        axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
+            auth: {
+                username: props.auth.email,
+                password: props.auth.password
+            }
+        })
+        .then(res => {
+            return axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/notifications/unread`, {
+                auth: {
+                    username: props.auth.email,
+                    password: props.auth.password
+                }
+            });
+        })
+        .then(res => {
+            console.log(res.data);
+            setNotificationCount(res.data.length);
+        })
+        .catch(err => console.log(err));
+    }, []);
 
     const menuId = "primary-search-account-menu";
     const renderMenu = (
@@ -141,12 +165,15 @@ function PrimarySearchAppBar(props) {
                     {props.auth.isLoggedIn && (
                         <div className={classes.sectionDesktop}>
                             <IconButton
-                                aria-label="show 17 new notifications"
+                                aria-label={`show ${notificationCount} new notifications`}
                                 color="inherit"
+                                href="/account/notifications"
                             >
-                                <Badge badgeContent={17} color="secondary">
-                                    <NotificationsIcon />
-                                </Badge>
+                                {notificationCount > 0 ?
+                                    <Badge badgeContent={notificationCount} color="secondary">
+                                        <NotificationsIcon />
+                                    </Badge>
+                                    : <NotificationsIcon />}
                             </IconButton>
                             <IconButton
                                 edge="end"
