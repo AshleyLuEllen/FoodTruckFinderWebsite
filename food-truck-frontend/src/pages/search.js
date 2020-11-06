@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import clsx from 'clsx';
+import { geolocated } from "react-geolocated";
 
 import { makeStyles } from '@material-ui/core/styles'
 import { TextField, Divider, Grid, Container, Typography, Button, Box, CircularProgress, Paper } from '@material-ui/core';
@@ -115,22 +116,48 @@ function SearchPage(props) {
 
     const handleButtonClick = () => {
         if (!loading) {
-          setShowingResults(false);
-          setLoading(true);
-          const queryObj = {
-              query: searchQuery,
-              tags: selectedTags,
-              placeId: location,
-              preferredRating
-          };
-          axios.post(`${process.env.FOOD_TRUCK_API_URL}/search`, queryObj)
-            .then(res => {
-                setTruckResults(res.data);
-                // setCurrentlySelected(0);
-                setShowingResults(true);
-                setLoading(false);
-            })
-            .catch(err => console.log(err));
+            if (!location) {
+                if (!props.isGeolocationAvailable || !props.isGeolocationEnabled) {
+                    alert("User location not available");
+                } else {
+                    setShowingResults(false);
+                    setLoading(true);
+                    const queryObj = {
+                        query: searchQuery,
+                        tags: selectedTags,
+                        location: {
+                            latitude: props.coords.latitude,
+                            longitude: props.coords.longitude
+                        },
+                        preferredRating
+                    };
+                    axios.post(`${process.env.FOOD_TRUCK_API_URL}/search`, queryObj)
+                        .then(res => {
+                            setTruckResults(res.data);
+                            // setCurrentlySelected(0);
+                            setShowingResults(true);
+                            setLoading(false);
+                        })
+                        .catch(err => console.log(err));
+                }
+            } else {
+                setShowingResults(false);
+                setLoading(true);
+                const queryObj = {
+                    query: searchQuery,
+                    tags: selectedTags,
+                    placeId: location,
+                    preferredRating
+                };
+                axios.post(`${process.env.FOOD_TRUCK_API_URL}/search`, queryObj)
+                    .then(res => {
+                        setTruckResults(res.data);
+                        // setCurrentlySelected(0);
+                        setShowingResults(true);
+                        setLoading(false);
+                    })
+                    .catch(err => console.log(err));
+            }
         }
     };
 
@@ -219,4 +246,9 @@ function mapStateToProps(state) {
 const mapDispatchToProps = {
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SearchPage);
+export default geolocated({
+    positionOptions: {
+        enableHighAccuracy: false,
+    },
+    userDecisionTimeout: 5000,
+})(connect(mapStateToProps, mapDispatchToProps)(SearchPage));

@@ -4,10 +4,10 @@ import food.truck.api.data.schedule.ScheduleService;
 import food.truck.api.data.subscription.SubscriptionService;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckService;
-import food.truck.api.data.truck_tag.TruckTag;
 import food.truck.api.data.truck_tag.TruckTagService;
 import food.truck.api.data.user.User;
 import food.truck.api.recommendations.impl.TagBasedRecommendationAlgorithm;
+import food.truck.api.util.GoogleApiService;
 import food.truck.api.util.Location;
 import food.truck.api.util.SearchQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +28,9 @@ public class RecommendationService {
 
     @Autowired
     TruckService truckService;
+
+    @Autowired
+    GoogleApiService googlePlaceService;
 
     private IRecommendationAlgorithm recommendationComputer = null;
 
@@ -83,7 +86,7 @@ public class RecommendationService {
             truckService.findAll(),
             query.getQuery(),
             query.getTags(),
-            null,
+            query.getPlaceId() != null ? googlePlaceService.getLocationFromPlaceId(query.getPlaceId()) : query.getLocation(),
             query.getPreferredRating() != null ? query.getPreferredRating() : 0,
             20
         );

@@ -14,5 +14,6 @@ public class SearchQuery {
     String query;
     List<Tag> tags;
     String placeId;
+    Location location;
     Long preferredRating;
 }

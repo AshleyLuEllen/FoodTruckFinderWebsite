@@ -11,6 +11,7 @@ import food.truck.api.util.Location;
 import food.truck.api.recommendations.IRecommendationAlgorithm;
 import food.truck.api.util.LocationUtils;
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,7 @@ import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Log4j2
 public class TagBasedRecommendationAlgorithm implements IRecommendationAlgorithm {
     private ScheduleService scheduleService;
 
@@ -77,6 +79,7 @@ public class TagBasedRecommendationAlgorithm implements IRecommendationAlgorithm
                         Schedule latest = schedules.stream().max(Comparator.comparing(Schedule::getTimeFrom)).get();
                         currentDistance = LocationUtils.mToMi(LocationUtils.sphericalDistance(location, new Location(latest.getLatitude(), latest.getLongitude())));
                     }
+                    log.info(currentDistance);
 
                     // Compute tag relevance
                     double result = 0.0;
