@@ -176,28 +176,26 @@ class NotificationPage extends Component {
     }
 
     fetchData() {
-        if(!this.state.truckFound && this.props.router.query.truck_id !== undefined) {
-            axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
-                .then(res => {
-                    console.log("Found the truck!");
-                    this.setState({
-                        truck: res.data,
-                        truckName: res.data.name,
-                        truckID: res.data.id
-                    });
-                    return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`)
-                }).then(res2 => {
-                this.setState( {
-                    notifications: res2.data,
-                    truckFound: true
+        axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
+            .then(res => {
+                console.log("Found the truck!");
+                this.setState({
+                    truck: res.data,
+                    truckName: res.data.name,
+                    truckID: res.data.id
                 });
-                console.log(this.state);
-                this.fetchData();
-            }).catch(err => {
-                console.log(err.message);
-                console.log("Cant't get notifications");
+                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`)
+            }).then(res2 => {
+            this.setState( {
+                notifications: res2.data,
+                truckFound: true
             });
-        }
+            console.log(this.state);
+            this.fetchData();
+        }).catch(err => {
+            console.log(err.message);
+            console.log("Cant't get notifications");
+        });
     }
 
     /**
@@ -212,7 +210,9 @@ class NotificationPage extends Component {
      * Continuously updates the truck information on the page
      */
     componentDidUpdate() {
-        this.fetchData();
+        if(!this.state.truckFound && this.props.router.query.truck_id !== undefined) {
+            this.fetchData();
+        }
     }
 
     render() {
@@ -224,8 +224,11 @@ class NotificationPage extends Component {
                         <CardContent>
                             <CardHeader
                                 title={n.subject}
-                                subheader={format(new Date(n.postedTimestamp), "HH:mm, MM-dd-yyyy")}
                             />
+                            {n.published &&
+                            <CardHeader
+                                subheader={format(new Date(n.postedTimestamp), "HH:mm, MM-dd-yyyy")}
+                            />}
                             <Typography align="left" variant="body3" component="p">
                                 {n.description}
                             </Typography>
