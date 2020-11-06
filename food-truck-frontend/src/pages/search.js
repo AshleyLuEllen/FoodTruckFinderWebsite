@@ -85,6 +85,7 @@ function SearchPage(props) {
     const [location, setLocation] = useState(undefined);
     const [loading, setLoading] = useState(false);
     const [truckResults, setTruckResults] = useState([]);
+    const [userId, setUserId] = useState(undefined);
 
     useEffect(() => {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/tags`)
@@ -96,6 +97,17 @@ function SearchPage(props) {
             .catch(err => {
                 console.log(err);
             })
+
+        axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
+            auth: {
+                username: props.auth.email,
+                password: props.auth.password
+            }
+        })
+        .then(res => {
+            setUserId(res.data.id);
+        })
+        .catch(err => console.log(err));
     }, []);
 
     const resultsPageClass = clsx({
@@ -184,7 +196,7 @@ function SearchPage(props) {
                             <Typography variant="h4" style={{ marginTop: "10px", marginBottom: "10px", textAlign: "center" }}>Search Results</Typography>
                             <Box style={{ textAlign: "left", maxHeight: "calc(75vh)", overflow: "auto" }}>
                             {truckResults.map((tr, i) => (
-                                <TruckCard key={i} className={classes.truckCard} tags={tr.tags.map(t => t.tag.name) || []} truck={tr} onClick={evt => setCurrentlySelected(i)}/>
+                                <TruckCard key={i} className={classes.truckCard} userId={userId} tags={tr.tags.map(t => t.tag.name) || []} truck={tr} onClick={evt => setCurrentlySelected(i)}/>
                             ))}
                             </Box>
                         </Paper>
