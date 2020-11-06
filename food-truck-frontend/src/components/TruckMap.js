@@ -72,7 +72,7 @@ export class MapContainer extends Component {
                         onClick={this.onMarkerClick}
                         name={tr.name}
                         title={tr.description}
-                        position={{lat: tr.currentLocation?.truck_latitude, lng: tr.currentLocation?.truck_longitude}}
+                        position={{lat: tr.currentLocation?.latitude, lng: tr.currentLocation?.longitude}}
                     />
                 ))}
                 <Marker key={-1}/>
