@@ -10,6 +10,7 @@ import { green } from '@material-ui/core/colors';
 import ChipSelector from '../components/ChipSelector';
 import TruckMap from '../components/TruckMap';
 import SubscriptionCard from '../components/SubscriptionCard';
+import TruckCard from '../components/TruckCard';
 import LocationInput from '../components/LocationInput';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 
@@ -183,7 +184,7 @@ function SearchPage(props) {
                             <Typography variant="h4" style={{ marginTop: "10px", marginBottom: "10px", textAlign: "center" }}>Search Results</Typography>
                             <Box style={{ textAlign: "left", maxHeight: "calc(75vh)", overflow: "auto" }}>
                             {truckResults.map((tr, i) => (
-                                <SubscriptionCard key={i} className={classes.truckCard} truck={tr} onClick={evt => setCurrentlySelected(i)}/>
+                                <TruckCard key={i} className={classes.truckCard} tags={tr.tags.map(t => t.tag.name) || []} truck={tr} onClick={evt => setCurrentlySelected(i)}/>
                             ))}
                             </Box>
                         </Paper>
