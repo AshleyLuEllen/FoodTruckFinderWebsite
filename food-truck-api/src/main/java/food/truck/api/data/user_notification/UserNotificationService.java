@@ -4,11 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import food.truck.api.data.tag.Tag;
 import food.truck.api.data.truck_notification.TruckNotification;
 import food.truck.api.data.truck_notification.TruckNotificationRepository;
-import food.truck.api.data.truck_tag.TruckTag;
-import food.truck.api.data.truck_tag.TruckTagId;
 import food.truck.api.data.user.User;
 import food.truck.api.util.UnreadSavedPatch;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +48,7 @@ public class UserNotificationService {
     }
 
     public List<TruckNotification> findAllNotifications(User user) {
-        List<TruckNotification> notificationList = truckNotificationRepository.finalAllByUser(user.getId());
+        List<TruckNotification> notificationList = truckNotificationRepository.findAllByUser(user.getId());
 
         return notificationList.parallelStream()
             .peek(truckNotification -> {

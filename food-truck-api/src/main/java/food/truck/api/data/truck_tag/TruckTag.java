@@ -1,5 +1,7 @@
 package food.truck.api.data.truck_tag;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import food.truck.api.data.tag.Tag;
 import food.truck.api.data.truck.Truck;
 import lombok.Data;
@@ -16,6 +18,7 @@ public class TruckTag {
     @Id
     @JoinColumn(name = "truck_id")
     @ManyToOne
+    @JsonIgnoreProperties({ "tags" })
     Truck truck;
 
     @Id

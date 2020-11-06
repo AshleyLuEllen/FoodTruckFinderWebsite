@@ -1,5 +1,6 @@
 package food.truck.api.data.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -29,26 +30,27 @@ public class User {
     @Column(name = "last_name", nullable = false)
     String lastName;
 
-    //    @JsonIgnore
+    @JsonIgnore
     @Column(name = "pass_hash", nullable = false)
     String passwordHash;
 
-    //    @JsonIgnore
+    @JsonIgnore
     @Column(name = "authority", nullable = false)
     String authority;
 
-    //    @JsonIgnore
+    @JsonIgnore
     @Column(name = "enabled", nullable = false)
     boolean enabled;
 
-    //    @JsonIgnore
+    @JsonIgnore
     @Transient
     String password;
 
-    //    @JsonIgnore
+    @JsonIgnore
     @Column(name = "user_location_latitude")
     Double latitude;
 
+    @JsonIgnore
     @Column(name = "user_location_longitude")
     Double longitude;
 

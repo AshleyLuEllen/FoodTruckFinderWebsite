@@ -1,6 +1,7 @@
 package food.truck.api.data.user;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -13,9 +14,11 @@ import food.truck.api.endpoint.error.UnauthorizedException;
 import food.truck.api.security.WebSecurityConfig;
 import food.truck.api.util.Location;
 import food.truck.api.validation.UserValidator;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Log4j2
 @Service
 public class UserService {
     @Autowired
@@ -156,5 +159,9 @@ public class UserService {
         loc.setLongitude(user.getLongitude());
 
         return loc;
+    }
+
+    public List<User> findUsersNearLocation(Location location) {
+        return userRepository.findAllUsersNearLocation(location.getLatitude(), location.getLongitude(), 20.0);
     }
 }

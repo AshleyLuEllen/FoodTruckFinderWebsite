@@ -45,7 +45,6 @@ public class Truck {
 
     @JoinColumn(name = "owner")
     @ManyToOne
-    @JsonIgnoreProperties({ "emailAddress", "passwordHash", "authority", "latitude", "longitude", "sinceTime", "enabled", "password", "description" })
     User owner;
 
     @OneToMany(mappedBy = "truck")
