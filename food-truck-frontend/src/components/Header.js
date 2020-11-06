@@ -142,7 +142,16 @@ function PrimarySearchAppBar(props) {
             console.log(res.data);
             setNotificationCount(res.data.length);
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            if (!err.status && !router.asPath.startsWith('/maintenance')) {
+                router.push({
+                    pathname: "/maintenance",
+                    query: {
+                        next: router.asPath
+                    }
+                })
+            }
+        });
     }, []);
 
     const menuId = "primary-search-account-menu";
