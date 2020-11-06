@@ -4,12 +4,13 @@ import food.truck.api.data.truck.Truck;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 
 @Data
 @Entity
 @Table(name = Schedule.TABLE_NAME)
-public class Schedule {
+public class Schedule implements Serializable {
     public static final String TABLE_NAME = "truck_schedules";
 
     @Id

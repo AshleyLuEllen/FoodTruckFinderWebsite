@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { connect } from 'react-redux';
+import clsx from 'clsx';
 
 import { Card, CardHeader, CardMedia, CardContent, IconButton, Chip } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
@@ -21,12 +22,19 @@ const useStyles = makeStyles((theme) => ({
         '& > *': {
           margin: theme.spacing(0.5),
         },
+        paddingTop: '16px'
     },
     media: {
         height: 0,
         // paddingTop: '56.25%', // 16:9
         paddingTop: '30%',
         margin: "0 20px"
+    },
+    currentLocation: {
+        fontSize: '16px'
+    },
+    noMedia: {
+        paddingTop: '0px'
     }
 }));
 
@@ -73,6 +81,10 @@ function TruckCard(props) {
         }
     }
 
+    const noMediaClass = clsx({
+        [classes.noMedia]: !props.image,
+    });
+
     return (
         <Card className={props.className}>
             <CardHeader
@@ -89,14 +101,14 @@ function TruckCard(props) {
                 image={props.image}
                 title={props.truck.name}
             />}
-            <CardContent>
-                <div className={classes.truckTags}>
+            <CardContent className={noMediaClass}>
+                {props.truck.currentLocation && <div className={classes.currentLocation}>
+                    Currently at <strong>{props.truck.currentLocation?.location}</strong>
+                </div>}
+                {props.tags.length > 0 && <div className={classes.truckTags}>
                     {props.tags.map((t, i) => (
                         <Chip key={i} label={t} href={`/search?tags=${t}`}></Chip>
                     ))}
-                </div>
-                {props.truck.currentLocation && <div>
-                    Currently at {props.truck.currentLocation?.truck_location}
                 </div>}
             </CardContent>
         </Card>
