@@ -42,11 +42,11 @@ function TruckCard(props) {
                     </IconButton>
                 }
             />
-            <CardMedia
+            {props.image && <CardMedia
                 className={classes.media}
                 image={props.image}
                 title={props.truck.name}
-            />
+            />}
             <CardContent>
                 <div className={classes.truckTags}>
                     {props.tags.map((t, i) => (
