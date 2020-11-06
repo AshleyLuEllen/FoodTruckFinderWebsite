@@ -111,6 +111,18 @@ function PrimarySearchAppBar(props) {
         // handleMobileMenuClose();
     };
 
+    const handleTrySearch = e => {
+        if(e.keyCode == 13){
+            console.log('query', e.target.value);
+            if (event.target.value.length > 0) {
+                router.push({
+                    pathname: '/search',
+                    query: { query: e.target.value },
+                })
+            }
+        }
+    }
+
     React.useEffect(() => {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
             auth: {
@@ -176,6 +188,7 @@ function PrimarySearchAppBar(props) {
                                 root: classes.inputRoot,
                                 input: classes.inputInput
                             }}
+                            onKeyDown={handleTrySearch}
                             inputProps={{ "aria-label": "search" }}
                         />
                     </div>

@@ -40,6 +40,7 @@ const useStyles = makeStyles((theme) => ({
 
 function TruckCard(props) {
     const classes = useStyles();
+    const router = useRouter();
 
     const [subscribed, setSubscribed] = useState(false);
 
@@ -108,7 +109,10 @@ function TruckCard(props) {
                 </div>}
                 {props.tags.length > 0 && <div className={classes.truckTags}>
                     {props.tags.map((t, i) => (
-                        <Chip key={i} label={t} href={`/search?tags=${t}`}></Chip>
+                        <Chip key={i} label={t} onClick={() => router.push({
+                            pathname: "/search",
+                            query: { tag: t }
+                        })}></Chip>
                     ))}
                 </div>}
             </CardContent>

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import axios from 'axios';
 import clsx from 'clsx';
 import { geolocated } from "react-geolocated";
+import { useRouter } from "next/router";
 
 import { makeStyles } from '@material-ui/core/styles'
 import { TextField, Divider, Grid, Container, Typography, Button, Box, CircularProgress, Paper } from '@material-ui/core';
@@ -75,6 +76,7 @@ const useStyles = makeStyles((theme) => ({
 
 function SearchPage(props) {
     const classes = useStyles();
+    const router = useRouter();
 
     const [tagOptions, setTagOptions] = useState([]);
     const [selectedTags, setSelectedTags] = useState([]);
@@ -89,14 +91,14 @@ function SearchPage(props) {
 
     useEffect(() => {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/tags`)
-            .then(res => {
-                setTagOptions(res.data);
-                // const truckTags = [{id: 1, name: "A", description: "Test description"}];
-                // setSelectedTags(res.data.filter(t => truckTags.findIndex(tt => tt.id == t.id) != -1));
-            })
-            .catch(err => {
-                console.log(err);
-            })
+        .then(res => {
+            setTagOptions(res.data);
+            // const truckTags = [{id: 1, name: "A", description: "Test description"}];
+            // setSelectedTags(res.data.filter(t => truckTags.findIndex(tt => tt.id == t.id) != -1));
+        })
+        .catch(err => {
+            console.log(err);
+        })
 
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
             auth: {
@@ -109,6 +111,24 @@ function SearchPage(props) {
         })
         .catch(err => console.log(err));
     }, []);
+
+    useEffect(() => {
+        if (router.query.query) {
+            setSearchQuery(router.query.query);
+        }
+    }, [router.query.query]);
+
+    useEffect(() => {
+        if (router.query.tag && tagOptions) {
+            let newSelection = [];
+            for (let tag of router.query.tag) {
+                const selectedTag = tagOptions.find(t => t.name === tag);
+                if (selectedTag)
+                newSelection.push(selectedTag);
+            }
+            setSelectedTags(newSelection);
+        }
+    }, [router.query.tag, tagOptions]);
 
     const resultsPageClass = clsx({
         [classes.resultsVisible]: showingResults,
