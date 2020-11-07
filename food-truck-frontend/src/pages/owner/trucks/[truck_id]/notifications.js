@@ -65,6 +65,7 @@ class NotificationPage extends Component {
         }
         else {
             this.setState({
+                openNotification: undefined,
                 openCreate: true,
                 subject: "",
                 description: "",
@@ -97,7 +98,7 @@ class NotificationPage extends Component {
                 .catch(err => console.log(err.message));
 
             this.setState({
-                openNotification: 1,
+                openNotification: undefined,
                 open: false,
                 openCreate: false,
                 subject: "",
@@ -129,7 +130,7 @@ class NotificationPage extends Component {
                 .catch(err => console.log(err.message));
 
             this.setState({
-                openNotification: 1,
+                openNotification: undefined,
                 open: false,
                 openCreate: false,
                 subject: "",
@@ -191,7 +192,6 @@ class NotificationPage extends Component {
                 truckFound: true
             });
             console.log(this.state);
-            this.fetchData();
         }).catch(err => {
             console.log(err.message);
             console.log("Cant't get notifications");

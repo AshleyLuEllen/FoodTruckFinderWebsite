@@ -13,4 +13,3 @@ public class TruckTagId implements Serializable {
     private Long truck;
     private Long tag;
 }
-

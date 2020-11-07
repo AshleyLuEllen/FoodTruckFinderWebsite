@@ -1,14 +1,17 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import Link from "next/link";
 import { withRouter } from 'next/router'
 import axios from "axios";
 import { connect } from 'react-redux';
 import { login as authLogin, logout as authLogout } from '../redux/actions/auth';
 
-import TruckMap from '../components/TruckMap';
-import SubscriptionCard from '../components/SubscriptionCard';
 import { withStyles } from '@material-ui/core/styles';
-import { Container, Grid, Typography, Box } from "@material-ui/core";
+import { Container, Grid, Typography, Box, CircularProgress, Divider } from "@material-ui/core";
+
+import TruckMap from '../components/TruckMap';
+import TruckCard from '../components/TruckCard';
+import { Search } from '@material-ui/icons';
+import SearchPage from './search';
 
 const dashboardStyles = theme => ({
     root: {
@@ -21,63 +24,99 @@ const dashboardStyles = theme => ({
     },
     truckCard: {
         marginBottom: '5px'
+    },
+    progressContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        height: '87vh'
+    },
+    progress: {
+        margin: '0 auto'
     }
 });
 
 class DashboardPage extends Component {
     constructor(props) {
         super(props);
-        this.state = { trucks: [], currentlySelected: undefined };
+        this.state = { loading: true, user: undefined, subscriptions: [], recommendations: [], currentlySelected: undefined };
     }
-    
+
     componentDidMount() {
-        if (!this.props.auth.isLoggedIn) {
-            this.props.router.push('/search')
-        }
-        // TODO: stub
-        this.setState({
-            trucks: [
-                { name: "Test Food Truck 1", description: "A lighthearted eatery", id: 1, location: {lat: 37.759703, lng: -122.428093}, locationStr: "Sid Rich parking lot" },
-                { name: "Test Food Truck 2", description: "A lighthearted eatery", id: 1, location: {lat: 37.760703, lng: -122.429093}, locationStr: "Sid Rich parking lot" },
-                { name: "Test Food Truck 3", description: "A lighthearted eatery", id: 1, location: {lat: 37.761703, lng: -122.430093}, locationStr: "Sid Rich parking lot" },
-                { name: "Test Food Truck 4", description: "A lighthearted eatery", id: 1, location: {lat: 37.762703, lng: -122.431093}, locationStr: "Sid Rich parking lot" },
-                { name: "Test Food Truck 5", description: "A lighthearted eatery", id: 1, location: {lat: 37.763703, lng: -122.432093}, locationStr: "Sid Rich parking lot" },
-                { name: "Test Food Truck 6", description: "A lighthearted eatery", id: 1, location: {lat: 37.764703, lng: -122.433093}, locationStr: "Sid Rich parking lot" },
-            ],
-            currentlySelected: 0
-        })
+        axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`,
+            {
+                auth: {
+                    username: this.props.auth.email,
+                    password: this.props.auth.password
+                }
+            })
+            .then(userres => {
+                Promise.all([
+                    axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userres.data.id}/recommendations`),
+                    axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userres.data.id}/subscriptions`)
+                ])
+                .then(results => {
+                    this.setState({
+                        recommendations: results[0].data,
+                        subscriptions: results[1].data,
+                        loading: false,
+                        currentlySelected: undefined
+                    });
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+            })
+            .catch(err => {
+                console.log(err);
+            });
     }
 
     render() {
         const { classes } = this.props;
 
-        return (
+        return this.props.auth.isLoggedIn ? (
             <Container className={classes.root}>
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={8}>
                         <div className={classes.mapWrapper}>
-                            <TruckMap trucks={this.state.trucks} selected={this.state.currentlySelected}/>
+                            <TruckMap trucks={this.state.recommendations.concat(this.state.subscriptions)} selected={this.state.currentlySelected}/>
                         </div>
                     </Grid>
-                    <Grid item xs={12} md={4}>
-                        <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>Subscriptions</Typography>
-                        <Box style={{ textAlign: "left", maxHeight: "calc(87vh - 50px)", overflow: "auto" }}>
-                            {this.state.trucks.map((tr, i) => (
-                                <SubscriptionCard className={classes.truckCard} truck={tr} onClick={evt => this.setState({currentlySelected: i})}/>
-                            ))}
-                        </Box>
-                    </Grid>
+                    {!this.state.loading &&
+                        <Grid item xs={12} md={4}>
+                            <Box style={{ textAlign: "left", maxHeight: "calc(87vh)", overflow: "auto" }}>
+                                {this.state.recommendations.length > 0 && <Fragment>
+                                    <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>{this.state.user?.firstName}Recommendations</Typography>
+                                    {this.state.recommendations.map((tr, i) => (
+                                        <TruckCard key={i} className={classes.truckCard} truck={tr} tags={tr.tags.map(tag => tag.tag.name)} onClick={evt => this.setState({currentlySelected: i})}/>
+                                    ))}
+                                    <Divider style={{ marginTop: "10px", marginBottom: "10px" }}/>
+                                </Fragment>}
+                                <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>{this.state.user?.firstName}Your Subscriptions</Typography>
+                                {this.state.subscriptions.map((tr, i) => (
+                                    <TruckCard key={100 + i} className={classes.truckCard} truck={tr} tags={tr.tags.map(tag => tag.tag.name)} onClick={evt => this.setState({currentlySelected: this.state.recommendations.length + i})}/>
+                                ))}
+                            </Box>
+                        </Grid>
+                    }
+                    {this.state.loading &&
+                        <Grid item xs={12} md={4}>
+                            <div className={classes.progressContainer}>
+                                <CircularProgress className={classes.progress} size="3.5rem"/>
+                            </div>
+                        </Grid>
+                    }
                 </Grid>
             </Container>
-        );
+        ) : <SearchPage {...this.props}/>;
     }
 }
 
 function mapStateToProps(state) {
     const { auth } = state
     return { auth }
-  }
-  
+}
+
 const mapDispatchToProps = {
     authLogout
 }

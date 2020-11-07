@@ -1,10 +1,12 @@
 import React from "react";
 import Link from 'next/link';
+import { useRouter } from 'next/router'
 import { connect } from 'react-redux';
 import { logout as authLogout } from '../redux/actions/auth';
 import { fade, makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
+import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from "@material-ui/core/IconButton";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
@@ -15,6 +17,7 @@ import Menu from "@material-ui/core/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import NotificationsIcon from "@material-ui/icons/Notifications";
+import PageviewIcon from '@material-ui/icons/Pageview';
 import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
@@ -60,6 +63,14 @@ const useStyles = makeStyles((theme) => ({
         alignItems: "center",
         justifyContent: "center"
     },
+    searchButton: {
+        width: "auto",
+        height: "auto",
+        transition: "0.3s all",
+        "&.hidden": {
+            width: 0
+        }
+    },
     inputRoot: {
         color: "inherit"
     },
@@ -75,10 +86,16 @@ const useStyles = makeStyles((theme) => ({
     },
     sectionDesktop: {
         display: "flex"
+    },
+    loginButton: {
+        marginLeft: theme.spacing(2),
+        height: "auto",
+        width: "100px"
     }
 }));
 
 function PrimarySearchAppBar(props) {
+    const router = useRouter();
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [notificationCount, setNotificationCount] = React.useState(0);
@@ -93,6 +110,18 @@ function PrimarySearchAppBar(props) {
         setAnchorEl(null);
         // handleMobileMenuClose();
     };
+
+    const handleTrySearch = e => {
+        if(e.keyCode == 13){
+            console.log('query', e.target.value);
+            if (event.target.value.length > 0) {
+                router.push({
+                    pathname: '/search',
+                    query: { query: e.target.value },
+                })
+            }
+        }
+    }
 
     React.useEffect(() => {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
@@ -159,9 +188,18 @@ function PrimarySearchAppBar(props) {
                                 root: classes.inputRoot,
                                 input: classes.inputInput
                             }}
+                            onKeyDown={handleTrySearch}
                             inputProps={{ "aria-label": "search" }}
                         />
                     </div>
+                    <Tooltip title="Search">
+                        <IconButton
+                            style={{ color: "white" }}
+                            onClick={e => router.push('/search')}
+                        >
+                            <PageviewIcon />
+                        </IconButton>
+                    </Tooltip>
                     {props.auth.isLoggedIn && (
                         <div className={classes.sectionDesktop}>
                             <IconButton
@@ -187,7 +225,7 @@ function PrimarySearchAppBar(props) {
                             </IconButton>
                         </div>
                     )}
-                    {!props.auth.isLoggedIn && <Button href="/login" color="primary" variant="contained">Login</Button>}
+                    {!props.auth.isLoggedIn && <Button href="/login" variant="contained" className={classes.loginButton} >Login</Button>}
                 </Toolbar>
             </AppBar>
             {renderMenu}
@@ -199,9 +237,9 @@ function mapStateToProps(state) {
     const { auth } = state
     return { auth }
 }
-  
+
 const mapDispatchToProps = {
     authLogout
 }
-  
+
 export default connect(mapStateToProps, mapDispatchToProps)(PrimarySearchAppBar);

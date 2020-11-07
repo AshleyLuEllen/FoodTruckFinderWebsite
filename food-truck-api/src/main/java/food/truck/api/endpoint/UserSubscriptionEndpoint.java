@@ -1,5 +1,6 @@
 package food.truck.api.endpoint;
 
+import food.truck.api.data.subscription.Subscription;
 import food.truck.api.data.subscription.SubscriptionService;
 import food.truck.api.data.tag.Tag;
 import food.truck.api.data.tag.TagService;
@@ -40,6 +41,14 @@ public class UserSubscriptionEndpoint {
         }
 
         return subscriptionService.findUserSubscriptions(userOpt.get());
+    }
+
+    @GetMapping("/users/{userId}/subscriptions/{truckId}")
+    Subscription getUserSubscription(@PathVariable Long userId, @PathVariable Long truckId) {
+        return subscriptionService.findSubscription(
+            userService.findUser(userId).orElseThrow(ResourceNotFoundException::new),
+            truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new)
+        ).orElseThrow(ResourceNotFoundException::new);
     }
 
     @PostMapping("/users/{userId}/subscriptions/{truckId}")

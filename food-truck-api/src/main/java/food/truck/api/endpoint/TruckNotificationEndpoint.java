@@ -85,6 +85,8 @@ public class TruckNotificationEndpoint {
             throw new UnauthorizedException();
         }
 
+        truckNotificationService.findTruckNotification(notificationId).orElseThrow(ResourceNotFoundException::new);
+
         try {
             truckNotificationService.deleteTruckNotification(notificationId);
         } catch (Exception e) {

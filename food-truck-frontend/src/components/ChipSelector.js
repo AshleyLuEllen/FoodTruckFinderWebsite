@@ -24,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const getOptionLabel = option => option.name;
+const getOptionSelected = (option, value) => option.name === value.name
 
 function ChipSelector(props) {
     const classes = useStyles();
@@ -44,6 +45,7 @@ function ChipSelector(props) {
                 id="chip-selector"
                 options={props.options}
                 disableCloseOnSelect
+                getOptionSelected={props.getOptionSelected || getOptionSelected}
                 getOptionLabel={props.getOptionLabel || getOptionLabel}
                 renderOption={(option, { selected }) => (
                     <React.Fragment>
@@ -56,9 +58,9 @@ function ChipSelector(props) {
                         {props.getOptionLabel ? props.getOptionLabel(option) : getOptionLabel(option)}
                     </React.Fragment>
                 )}
-                style={{ width: 500 }}
+                style={{ width: "100%" }}
                 renderInput={(params) => (
-                    <TextField {...params} variant="outlined" label={props.label}/> 
+                    <TextField {...params} variant="outlined" label={props.label}/>
                 )}
                 onChange={(event, newSelectedOptions) => {
                     // Deselect
@@ -78,7 +80,7 @@ function ChipSelector(props) {
                     if (props.onChange) {
                         props.onChange(event, newSelectedOptions);
                     }
-                    
+
                     setSelectedOptions(newSelectedOptions);
                 }}
             />
