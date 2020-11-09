@@ -5,6 +5,10 @@ import java.util.regex.Pattern;
 
 public class UserValidator {
     public static boolean isPasswordValid(String password) {
+        if (password == null) {
+            return false;
+        }
+
         if (password.length() < 8) {
             return false;
         }
