@@ -52,6 +52,7 @@ public class Truck {
     List<TruckTag> tags;
 
     @Formula("(SELECT AVG(r.review_rating) FROM " + Review.TABLE_NAME + " r WHERE r.truck_id = truck_id)")
+//    @Formula("(SELECT 10)")
     Double rating;
 
     @ManyToOne(fetch=FetchType.LAZY)

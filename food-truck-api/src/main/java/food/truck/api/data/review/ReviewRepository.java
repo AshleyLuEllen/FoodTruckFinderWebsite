@@ -14,7 +14,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     List<Review> findAllByUser(User u);
 
-    @Query (value = "SELECT AVG(review_rating) FROM " + Review.TABLE_NAME + " WHERE truck_id = ?1",
+    @Query (value = "SELECT COALESCE(AVG(review_rating), 0) FROM " + Review.TABLE_NAME + " WHERE truck_id = ?1",
         nativeQuery = true)
     double getAverageReviewByTruckID(long truckID);
 }
