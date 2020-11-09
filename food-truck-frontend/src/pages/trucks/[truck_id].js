@@ -197,7 +197,7 @@ class TruckPage extends Component {
                 {this.state.truckFound && this.state.schedules.length > 0 && <div>
                     {this.state.schedules.map((s, i) => (
                         <Typography key={i} variant="body1">
-                            <ScheduleIconRounded/> {s.location}: {format(new Date(s.time_from), "MM-dd-yyyy, HH:mm")}-{format(new Date(s.time_to), "MM-dd-yyyy, HH:mm")}
+                            <ScheduleIconRounded/> {s.location}: {format(new Date(s.timeFrom), "MM-dd-yyyy, HH:mm")}-{format(new Date(s.timeTo), "MM-dd-yyyy, HH:mm")}
                         </Typography>
                     ))}
                 </div>}
