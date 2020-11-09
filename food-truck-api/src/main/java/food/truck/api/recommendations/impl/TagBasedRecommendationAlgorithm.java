@@ -64,7 +64,7 @@ public class TagBasedRecommendationAlgorithm implements IRecommendationAlgorithm
             .filter(word -> word.length() > 0);
         Set<String> queryWords = List.of(query.strip().toLowerCase().split("\\W+")).stream()
             .filter(word -> word.length() > 0).collect(Collectors.toSet());
-        return (double) baseWords.filter(queryWords::contains).count() / baseWordsRaw.length;
+        return (double) baseWords.filter(queryWords::contains).count() / queryWords.size();
     }
 
     @Override
@@ -100,8 +100,15 @@ public class TagBasedRecommendationAlgorithm implements IRecommendationAlgorithm
                     result += Math.max(0, (this.maxDistance * 2 - currentDistance) / (this.maxDistance * 2) * this.distanceWeight);
 
                     // Compute rating relevance
-                    double rating = t.getRating() == null ? 0 : t.getRating();
-                    result += Math.min(1, Math.max(0, (rating - minRating) / (this.getMaxRating() - minRating) * this.getRatingWeight()));
+                    if (minRating > this.getMaxRating()) {
+                        result += 0.0;
+                    } else {
+                        log.info("here");
+                        double rating = this.reviewService.getAverageReviewByTruckID(t.getId());
+                        double comp = (rating - minRating) / (this.getMaxRating() - minRating);
+                        result += Math.min(1, Math.max(0, Double.isNaN(comp) ? 1.0 : comp)) * this.getRatingWeight();
+                    }
+                    log.info(t.getName() + " " + result);
 
                     return result;
                 }

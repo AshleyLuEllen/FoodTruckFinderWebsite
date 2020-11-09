@@ -152,7 +152,7 @@ class RecommendationServiceTest {
         Schedule testSchedule = new Schedule();
         testSchedule.setLatitude(0.0);
         testSchedule.setLongitude(1.0);
-        testSchedule.setLocation("Location 2");
+        testSchedule.setLocation("Location 3");
         testSchedule.setTimeFrom(ZonedDateTime.now().minusDays(1));
         testSchedule.setTimeTo(ZonedDateTime.now().plusDays(1));
         return testSchedule;
@@ -196,7 +196,7 @@ class RecommendationServiceTest {
 
         // Create further truck
         Truck furtherTruck = new Truck();
-        furtherTruck.setName("Far Truck");
+        furtherTruck.setName("Further Truck");
         furtherTruck.setDescription("This is the truck that is further.");
         final long furtherTruckId = this.truckService.createTruck(furtherTruck, this.owner).getId();
         this.scheduleService.createSchedule(this.createTooFarTestSchedule(), furtherTruck);
@@ -376,9 +376,5 @@ class RecommendationServiceTest {
         }).map(Truck::getName).toArray(), recommendationsWithoutSubscriptions.stream().map(Truck::getName).toArray());
 
         this.cleanUpRecommendationTest();
-    }
-
-    @Test
-    void getSearchResults() {
     }
 }

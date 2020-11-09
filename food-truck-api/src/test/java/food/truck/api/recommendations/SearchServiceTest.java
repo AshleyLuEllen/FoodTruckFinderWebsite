@@ -18,6 +18,7 @@ import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserRepository;
 import food.truck.api.data.user.UserService;
 import food.truck.api.util.Location;
+import food.truck.api.util.SearchQuery;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,8 +81,11 @@ class SearchServiceTest {
     private Tag tagA;
     private Tag tagB;
     private Tag tagC;
+    private Truck closeTruck;
+    private Truck farTruck;
+    private Truck furtherTruck;
 
-    private void setupRecommendationTest() {
+    private void setupSearchTest() {
         // Test user
         User testUser = new User();
         testUser.setPassword("B@yl0rR0cks!");
@@ -129,9 +133,63 @@ class SearchServiceTest {
         Optional<Tag> tagCOpt = this.tagService.findTag(tagCId);
         assertTrue(tagCOpt.isPresent());
         this.tagC = tagCOpt.get();
+
+        // Create test trucks
+        int numTrucks = 0;
+
+        // Create close truck
+        Truck closeTruck = new Truck();
+        closeTruck.setName("Close Truck");
+        closeTruck.setDescription("This is the truck that is close ABC DEF");
+        final long closeTruckId = this.truckService.createTruck(closeTruck, this.owner).getId();
+        this.scheduleService.createSchedule(this.createTestSchedule(), closeTruck);
+        this.truckTagService.addTruckTag(closeTruck, this.tagA);
+        this.truckTagService.addTruckTag(closeTruck, this.tagB);
+        ++numTrucks;
+        log.info("Created close truck");
+
+        // Create far truck
+        Truck farTruck = new Truck();
+        farTruck.setName("Far Truck ABC DEF");
+        farTruck.setDescription("This is the truck that is far");
+        final long farTruckId = this.truckService.createTruck(farTruck, this.owner).getId();
+        this.scheduleService.createSchedule(this.createFarSchedule(), farTruck);
+        this.truckTagService.addTruckTag(closeTruck, this.tagA);
+        this.reviewService.createReview(this.createLowReview(), this.owner, farTruck);
+        ++numTrucks;
+        log.info("Created far truck");
+
+        // Create further truck
+        Truck furtherTruck = new Truck();
+        furtherTruck.setName("Further Truck GHI");
+        furtherTruck.setDescription("This is the truck that is further ABC DEF");
+        final long furtherTruckId = this.truckService.createTruck(furtherTruck, this.owner).getId();
+        this.scheduleService.createSchedule(this.createFurtherSchedule(), furtherTruck);
+        this.reviewService.createReview(this.createHighReview(), this.owner, furtherTruck);
+        ++numTrucks;
+        log.info("Created further truck");
+
+        // Ensure that trucks were created
+        assertEquals(numTrucks, this.truckService.findAll().size());
+
+        // Ensure that all schedules were created
+        assertEquals(numTrucks, this.scheduleRepository.findAll().size());
+
+        // Get DAOs
+        Optional<Truck> closeTruckOpt = this.truckService.findTruck(closeTruckId);
+        assertTrue(closeTruckOpt.isPresent());
+        this.closeTruck = closeTruckOpt.get();
+
+        Optional<Truck> farTruckOpt = this.truckService.findTruck(farTruckId);
+        assertTrue(farTruckOpt.isPresent());
+        this.farTruck = farTruckOpt.get();
+
+        Optional<Truck> furtherTruckOpt = this.truckService.findTruck(furtherTruckId);
+        assertTrue(furtherTruckOpt.isPresent());
+        this.furtherTruck = furtherTruckOpt.get();
     }
 
-    private void cleanUpRecommendationTest() {
+    private void cleanUpSearchTest() {
         this.userRepository.deleteAll();
         this.tagRepository.deleteAll();
     }
@@ -146,7 +204,7 @@ class SearchServiceTest {
         return testSchedule;
     }
 
-    private Schedule createFurtherTestSchedule() {
+    private Schedule createFarSchedule() {
         Schedule testSchedule = new Schedule();
         testSchedule.setLatitude(0.0);
         testSchedule.setLongitude(0.01);
@@ -156,11 +214,11 @@ class SearchServiceTest {
         return testSchedule;
     }
 
-    private Schedule createTooFarTestSchedule() {
+    private Schedule createFurtherSchedule() {
         Schedule testSchedule = new Schedule();
         testSchedule.setLatitude(0.0);
-        testSchedule.setLongitude(1.0);
-        testSchedule.setLocation("Location 2");
+        testSchedule.setLongitude(0.02);
+        testSchedule.setLocation("Location 3");
         testSchedule.setTimeFrom(ZonedDateTime.now().minusDays(1));
         testSchedule.setTimeTo(ZonedDateTime.now().plusDays(1));
         return testSchedule;
@@ -168,225 +226,85 @@ class SearchServiceTest {
 
     private Review createHighReview() {
         Review review = new Review();
-        review.setRating((short) 4);
+        review.setRating((short) 5);
         return review;
     }
 
     private Review createLowReview() {
         Review review = new Review();
-        review.setRating((short) 2);
+        review.setRating((short) 3);
         return review;
     }
 
     @Test
-    public void testRecommendationsLocation() {
-        this.setupRecommendationTest();
+    public void testSearchByLocation() {
+        this.setupSearchTest();
 
-        int numTrucks = 0;
-
-        // Create close truck
-        Truck closeTruck = new Truck();
-        closeTruck.setName("Close Truck");
-        closeTruck.setDescription("This is the truck that is close.");
-        final long closeTruckId = this.truckService.createTruck(closeTruck, this.owner).getId();
-        this.scheduleService.createSchedule(this.createTestSchedule(), closeTruck);
-        ++numTrucks;
-        log.info("Created close truck");
-
-        // Create far truck
-        Truck farTruck = new Truck();
-        farTruck.setName("Far Truck");
-        farTruck.setDescription("This is the truck that is far.");
-        final long farTruckId = this.truckService.createTruck(farTruck, this.owner).getId();
-        this.scheduleService.createSchedule(this.createFurtherTestSchedule(), farTruck);
-        ++numTrucks;
-        log.info("Created far truck");
-
-        // Create further truck
-        Truck furtherTruck = new Truck();
-        furtherTruck.setName("Far Truck");
-        furtherTruck.setDescription("This is the truck that is further.");
-        final long furtherTruckId = this.truckService.createTruck(furtherTruck, this.owner).getId();
-        this.scheduleService.createSchedule(this.createTooFarTestSchedule(), furtherTruck);
-        ++numTrucks;
-        log.info("Created further truck");
-
-        // Ensure that trucks were created
-        assertEquals(numTrucks, this.truckService.findAll().size());
-
-        // Ensure that all schedules were created
-        assertEquals(numTrucks, this.scheduleRepository.findAll().size());
-
-        // Get list of applicable trucks
-        List<Truck> subscribedTrucks = this.subscriptionService.findUserSubscriptions(this.owner);
-
-        // Get recommendations
-        List<Truck> recommendationsWithoutSubscriptions = this.recommendationService.getRecommendations(subscribedTrucks, Location.fromUser(this.owner), false, 5);
+        // Get search results
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setPreferredRating(6L);
+        searchQuery.setLocation(new Location(0.0, 0.0));
+        List<Truck> searchResults = this.recommendationService.getSearchResults(searchQuery);
         assertArrayEquals(Stream.of(new Truck[] {
-            closeTruck,
-            farTruck
-        }).map(Truck::getName).toArray(), recommendationsWithoutSubscriptions.stream().map(Truck::getName).toArray());
+            this.closeTruck,
+            this.farTruck,
+            this.furtherTruck,
+        }).map(Truck::getName).toArray(), searchResults.stream().map(Truck::getName).toArray());
 
-
-        this.cleanUpRecommendationTest();
-    }
-
-
-    @Test
-    public void testRecommendationsRating() {
-        this.setupRecommendationTest();
-
-        int numTrucks = 0;
-
-        // Create no rating truck
-        Truck noRatingTruck = new Truck();
-        noRatingTruck.setName("No Rating Truck");
-        noRatingTruck.setDescription("This is the truck with no rating.");
-        final long noRatingTruckId = this.truckService.createTruck(noRatingTruck, this.owner).getId();
-        this.scheduleService.createSchedule(this.createTestSchedule(), noRatingTruck);
-        ++numTrucks;
-        assertDoesNotThrow(() -> assertNull(this.truckService.findTruck(noRatingTruckId).get().getRating()));
-        log.info("Created no rating truck");
-
-        // Create high rating Truck
-        Truck highRatingTruck = new Truck();
-        highRatingTruck.setName("High Rating Truck");
-        highRatingTruck.setDescription("This is the truck with a high rating.");
-        final long highRatingTruckId = this.truckService.createTruck(highRatingTruck, this.owner).getId();
-        this.scheduleService.createSchedule(this.createTestSchedule(), highRatingTruck);
-        this.reviewService.createReview(this.createHighReview(), this.owner, highRatingTruck);
-        ++numTrucks;
-        assertDoesNotThrow(() -> assertEquals(4.0, this.reviewService.getAverageReviewByTruckID(highRatingTruckId), 0.1));
-        log.info("Created high rating truck");
-
-        // Create low rating Truck
-        Truck lowRatingTruck = new Truck();
-        lowRatingTruck.setName("Low Rating Truck");
-        lowRatingTruck.setDescription("This is the truck with a low rating.");
-        final long lowRatingTruckId = this.truckService.createTruck(lowRatingTruck, this.owner).getId();
-        this.scheduleService.createSchedule(this.createTestSchedule(), lowRatingTruck);
-        this.reviewService.createReview(this.createLowReview(), this.owner, lowRatingTruck);
-        assertDoesNotThrow(() -> assertEquals(2.0, this.reviewService.getAverageReviewByTruckID(lowRatingTruckId), 0.1));
-        ++numTrucks;
-        log.info("Created low rating truck");
-
-        // Ensure that trucks were created
-        assertEquals(numTrucks, this.truckService.findAll().size());
-
-        // Ensure that all schedules were created
-        assertEquals(numTrucks, this.scheduleRepository.findAll().size());
-
-        // Get list of applicable trucks
-        List<Truck> subscribedTrucks = this.subscriptionService.findUserSubscriptions(this.owner);
-
-        // Get recommendations
-        List<Truck> recommendationsWithoutSubscriptions = this.recommendationService.getRecommendations(subscribedTrucks, Location.fromUser(this.owner), false, 5);
-        assertArrayEquals(Stream.of(new Truck[] {
-            highRatingTruck,
-            lowRatingTruck,
-            noRatingTruck
-        }).map(Truck::getName).toArray(), recommendationsWithoutSubscriptions.stream().map(Truck::getName).toArray());
-
-
-        this.cleanUpRecommendationTest();
+        this.cleanUpSearchTest();
     }
 
     @Test
-    public void testRecommendationsTags() {
-        this.setupRecommendationTest();
+    public void testSearchByRating() {
+        this.setupSearchTest();
 
-        int numTrucks = 0;
-
-        // Create subscribed truck
-        Truck subscribedTruck = new Truck();
-        subscribedTruck.setName("Subscribed Truck");
-        subscribedTruck.setDescription("This is the subscribed truck.");
-        this.truckService.createTruck(subscribedTruck, this.owner);
-        this.truckTagService.addTruckTag(subscribedTruck, this.tagA);
-        this.truckTagService.addTruckTag(subscribedTruck, this.tagB);
-        this.scheduleService.createSchedule(this.createTestSchedule(), subscribedTruck);
-        this.subscriptionService.addUserSubscription(this.owner, subscribedTruck);
-        ++numTrucks;
-        log.info("Created subscribed truck 1");
-
-        // Create other subscribed truck
-        Truck otherSubscribedTruck = new Truck();
-        otherSubscribedTruck.setName("Other Subscribed Truck");
-        otherSubscribedTruck.setDescription("This is the other subscribed truck.");
-        this.truckService.createTruck(otherSubscribedTruck, this.owner);
-        this.truckTagService.addTruckTag(otherSubscribedTruck, this.tagB);
-        this.scheduleService.createSchedule(this.createTestSchedule(), otherSubscribedTruck);
-        this.subscriptionService.addUserSubscription(this.owner, otherSubscribedTruck);
-        ++numTrucks;
-        log.info("Created subscribed truck 2");
-
-        // Create no tag truck
-        Truck noTagTruck = new Truck();
-        noTagTruck.setName("No Tag Truck");
-        noTagTruck.setDescription("This is the truck with no tags.");
-        this.truckService.createTruck(noTagTruck, this.owner);
-        this.scheduleService.createSchedule(this.createTestSchedule(), noTagTruck);
-        ++numTrucks;
-        log.info("Created no tag truck");
-
-        // Create one tag truck
-        Truck oneTagTruck = new Truck();
-        oneTagTruck.setName("One Tag Truck");
-        oneTagTruck.setDescription("This is the truck with one tag.");
-        this.truckService.createTruck(oneTagTruck, this.owner);
-        this.scheduleService.createSchedule(this.createTestSchedule(), oneTagTruck);
-        this.truckTagService.addTruckTag(oneTagTruck, this.tagA);
-        this.truckTagService.addTruckTag(oneTagTruck, this.tagC);
-        ++numTrucks;
-        log.info("Created one tag truck");
-
-        // Create other one tag truck
-        Truck otherOneTagTruck = new Truck();
-        otherOneTagTruck.setName("Other One Tag Truck");
-        otherOneTagTruck.setDescription("This is the other truck with one tag.");
-        this.truckService.createTruck(otherOneTagTruck, this.owner);
-        this.scheduleService.createSchedule(this.createTestSchedule(), otherOneTagTruck);
-        this.truckTagService.addTruckTag(otherOneTagTruck, this.tagB);
-        ++numTrucks;
-        log.info("Created other tag truck");
-
-        // Create two tag truck
-        Truck twoTagTruck = new Truck();
-        twoTagTruck.setName("Two Tag Truck");
-        twoTagTruck.setDescription("This is the other truck with two tags.");
-        this.truckService.createTruck(twoTagTruck, this.owner);
-        this.scheduleService.createSchedule(this.createTestSchedule(), twoTagTruck);
-        this.truckTagService.addTruckTag(twoTagTruck, this.tagA);
-        this.truckTagService.addTruckTag(twoTagTruck, this.tagB);
-        ++numTrucks;
-        log.info("Created two tag truck");
-
-        // Ensure that trucks were created
-        assertEquals(numTrucks, this.truckService.findAll().size());
-
-        // Ensure that all schedules were created
-        assertEquals(numTrucks, this.scheduleRepository.findAll().size());
-
-        // Get list of applicable trucks
-        List<Truck> subscribedTrucks = this.subscriptionService.findUserSubscriptions(this.owner);
-
-        // Get recommendations with subscriptions
-        List<Truck> recommendationsWithSubscriptions = this.recommendationService.getRecommendations(subscribedTrucks, Location.fromUser(this.owner), true, 5);
-        assertEquals(5, recommendationsWithSubscriptions.size());
-
-        // Get recommendations without subscriptions
-        List<Truck> recommendationsWithoutSubscriptions = this.recommendationService.getRecommendations(subscribedTrucks, Location.fromUser(this.owner), false, 5);
+        // Get search results
+        SearchQuery searchQuery = new SearchQuery();
+        List<Truck> searchResults = this.recommendationService.getSearchResults(searchQuery);
         assertArrayEquals(Stream.of(new Truck[] {
-            twoTagTruck,
-            otherOneTagTruck,
-            oneTagTruck,
-            noTagTruck
-        }).map(Truck::getName).toArray(), recommendationsWithoutSubscriptions.stream().map(Truck::getName).toArray());
+            this.furtherTruck,
+            this.farTruck,
+            this.closeTruck,
+        }).map(Truck::getName).toArray(), searchResults.stream().map(Truck::getName).toArray());
 
-        this.cleanUpRecommendationTest();
+        this.cleanUpSearchTest();
     }
 
     @Test
-    void getSearchResults() {
+    public void testSearchByQuery() {
+        this.setupSearchTest();
+
+        // Get search results
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setQuery("abc ghi def");
+        searchQuery.setPreferredRating(6L);
+        searchQuery.setLocation(new Location(0.0, 0.0));
+        List<Truck> searchResults = this.recommendationService.getSearchResults(searchQuery);
+        assertArrayEquals(Stream.of(new Truck[] {
+            this.furtherTruck,
+            this.closeTruck,
+            this.farTruck,
+        }).map(Truck::getName).toArray(), searchResults.stream().map(Truck::getName).toArray());
+
+        this.cleanUpSearchTest();
+    }
+
+    @Test
+    public void testSearchByTags() {
+        this.setupSearchTest();
+
+        // Get search results
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setTags(List.of(this.tagA, this.tagB, this.tagC));
+        searchQuery.setPreferredRating(6L);
+        searchQuery.setLocation(new Location(0.0,0.0));
+        List<Truck> searchResults = this.recommendationService.getSearchResults(searchQuery);
+        assertArrayEquals(Stream.of(new Truck[] {
+            this.closeTruck,
+            this.farTruck,
+            this.furtherTruck,
+        }).map(Truck::getName).toArray(), searchResults.stream().map(Truck::getName).toArray());
+
+        this.cleanUpSearchTest();
     }
 }
