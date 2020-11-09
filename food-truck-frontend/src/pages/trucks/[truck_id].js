@@ -4,7 +4,7 @@ import axios from "axios";
 import { withRouter } from 'next/router';
 import { connect } from "react-redux";
 import Typography from "@material-ui/core/Typography";
-import {CardContent, Chip} from "@material-ui/core";
+import {CardContent, Chip, InputLabel, TextField} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import MyLocationIcon from '@material-ui/icons/MyLocation';
@@ -14,6 +14,11 @@ import Card from "@material-ui/core/Card";
 import CardHeader from "@material-ui/core/CardHeader";
 import {Rating} from "@material-ui/lab";
 import Divider from "@material-ui/core/Divider";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogActions from "@material-ui/core/DialogActions";
+import Dialog from "@material-ui/core/Dialog";
 
 const useStyles = makeStyles((theme) => ({
     text: {
@@ -51,7 +56,11 @@ class TruckPage extends Component {
             schedules: [],
             avg_rating: -1,
             reviews: [],
-            truckFound: false
+            truckFound: false,
+            openReview: false,
+
+            reviewComment: "",
+            rating: -1
         };
 
     }
@@ -75,16 +84,10 @@ class TruckPage extends Component {
                 schedules: res3.data,
                 truckFound: true
             });
-            return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/rating`);
-
+            return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`);
         }).then(res4 => {
             this.setState({
-                avg_rating: res4.data
-            });
-            return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`);
-        }).then(res5 => {
-            this.setState({
-                reviews: res5.data
+                reviews: res4.data
             });
             console.log(this.state);
             console.log("Got all information!");
@@ -95,6 +98,12 @@ class TruckPage extends Component {
                 tags: []
             });
         });
+    }
+
+    writeReview() {
+        this.setState( {
+            openReview: true
+        })
     }
 
     /**
@@ -134,9 +143,9 @@ class TruckPage extends Component {
                 </div>}
 
                 {/**RATING*/}
-                {this.state.truckFound && this.state.avg_rating !== -1 &&
+                {this.state.truckFound && this.state.truck.rating !== null &&
                 <div align="center">
-                    <Rating name="rating" precision={0.5} value={this.state.avg_rating} size="medium" readOnly />
+                    <Rating name="rating" precision={0.5} value={this.state.truck.rating} size="medium" readOnly />
                 </div>}
 
                 {/**DESCRIPTION*/}
@@ -158,18 +167,6 @@ class TruckPage extends Component {
                     <CardContent>
                         <Typography variant="body1" component="p" gutterbottom className={useStyles.text}>
                             {this.state.truck.licensePlate}
-                        </Typography>
-                    </CardContent>
-                </div>}
-                <Divider variant="inset"/>
-
-                {/**PAYMENT*/}
-                {this.state.truckFound &&
-                <div>
-                    <CardHeader title={"Payment Types"}/>
-                    <CardContent>
-                        <Typography variant="body1" component="p" gutterbottom className={useStyles.text}>
-                            {this.state.truck.paymentTypes}
                         </Typography>
                     </CardContent>
                 </div>}
@@ -205,7 +202,7 @@ class TruckPage extends Component {
 
                 {/**REVIEWS*/}
                 <Divider/>
-                {this.state.truckFound &&
+                {this.state.truckFound && this.state.reviews.length > 0 &&
                 <Card>
                     <CardHeader title="Reviews"/>
                     <CardContent>
@@ -226,6 +223,57 @@ class TruckPage extends Component {
                     ))}
                     </CardContent>
                 </Card>}
+                {this.state.truckFound && this.state.reviews.length === 0 &&
+                <Typography variant="h8" component="h3" gutterBottom>
+
+                </Typography>
+                }
+
+                {this.state.truckFound &&
+                <Button variant="outline" onClick={this.writeReview}>
+                    <Typography variant="button" gutterBottom display="block">
+                        Write Review
+                    </Typography>
+                </Button>}
+
+                <Dialog open={this.state.openReview} aria-labelledby="form-dialog-title">
+                    <DialogTitle id="form-dialog-title">Review for {this.state.truck.name}</DialogTitle>
+                    <DialogContent>
+                        <InputLabel>
+                            Rating
+                        </InputLabel>
+                        <div align="left">
+                            <Rating name="rating" precision={0.5} value={this.state.avg_rating}
+                                    size="medium" onChange={this.handleInputChange}/>
+                        </div>
+                        <InputLabel>
+                            Comment (optional)
+                        </InputLabel>
+                        <TextField
+                            id="reviewComment"
+                            label="Review Comment"
+                            multiline
+                            rows={4}
+                            fullWidth={true}
+                            defaultValue=""
+                            onChange={this.handleInputChange}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleCancel} color="primary" variant="outlined">
+                            Cancel
+                        </Button>
+                        {!this.state.published && <Button onClick={() => this.handleClose(false)} color="primary" variant="outlined">
+                            Save
+                        </Button>}
+                        {!this.state.published && <Button onClick={() => this.handleClose(true)} color="primary" variant="outlined">
+                            Publish
+                        </Button>}
+                        {!this.state.published && <Button onClick={this.handleDelete} color="primary" variant="outlined">
+                            Delete
+                        </Button>}
+                    </DialogActions>
+                </Dialog>
 
                 {/**BACK*/}
                 <br/>
