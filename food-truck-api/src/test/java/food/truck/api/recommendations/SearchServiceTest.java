@@ -1,6 +1,7 @@
 package food.truck.api.recommendations;
 
 import food.truck.api.data.review.Review;
+import food.truck.api.data.review.ReviewRepository;
 import food.truck.api.data.review.ReviewService;
 import food.truck.api.data.schedule.Schedule;
 import food.truck.api.data.schedule.ScheduleRepository;
@@ -10,6 +11,7 @@ import food.truck.api.data.tag.Tag;
 import food.truck.api.data.tag.TagRepository;
 import food.truck.api.data.tag.TagService;
 import food.truck.api.data.truck.Truck;
+import food.truck.api.data.truck.TruckRepository;
 import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.truck_tag.TruckTagService;
 import food.truck.api.data.user.User;
@@ -34,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase
 @Transactional
 @Log4j2
-class RecommendationServiceTest {
+class SearchServiceTest {
     @Autowired
     private RecommendationService recommendationService;
 
@@ -54,6 +56,9 @@ class RecommendationServiceTest {
     private TruckService truckService;
 
     @Autowired
+    private TruckRepository truckRepository;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
@@ -67,6 +72,9 @@ class RecommendationServiceTest {
 
     @Autowired
     private ReviewService reviewService;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     private User owner;
     private Tag tagA;
