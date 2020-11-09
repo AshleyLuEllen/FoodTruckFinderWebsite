@@ -1,13 +1,7 @@
 package food.truck.api.data.truck_notification;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import food.truck.api.data.schedule.Schedule;
 import food.truck.api.data.schedule.ScheduleService;
-import food.truck.api.data.subscription.Subscription;
 import food.truck.api.data.subscription.SubscriptionRepository;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckService;
@@ -19,6 +13,11 @@ import food.truck.api.util.Location;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Service

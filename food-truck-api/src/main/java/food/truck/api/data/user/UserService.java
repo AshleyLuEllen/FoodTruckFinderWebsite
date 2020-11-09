@@ -1,12 +1,5 @@
 package food.truck.api.data.user;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
-import food.truck.api.data.truck_notification.TruckNotification;
-import food.truck.api.data.user_notification.UserNotification;
 import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.endpoint.error.ResourceConflictException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
@@ -17,6 +10,11 @@ import food.truck.api.validation.UserValidator;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Log4j2
 @Service
@@ -162,6 +160,7 @@ public class UserService {
     }
 
     public List<User> findUsersNearLocation(Location location) {
+        System.out.println(location.getLatitude() + " " + location.getLongitude());
         return userRepository.findAllUsersNearLocation(location.getLatitude(), location.getLongitude(), 20.0);
     }
 }
