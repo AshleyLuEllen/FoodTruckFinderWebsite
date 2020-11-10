@@ -119,6 +119,6 @@ class TruckServiceTest {
 
         List<Truck> trucks = truckService.getTrucksOwnedByUser(user1);
         assertNotNull(trucks);
-        assertEquals(trucks.size(), 3);
+        assertEquals(trucks.size(), 4);
     }
 }
