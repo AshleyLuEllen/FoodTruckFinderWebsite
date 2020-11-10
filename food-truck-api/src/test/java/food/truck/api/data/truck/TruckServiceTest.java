@@ -48,13 +48,13 @@ class TruckServiceTest {
     }
 
     @Test
-    void findTruck() {
+    void testFindTruck() {
         Optional<Truck> found = truckService.findTruck(truck.getId());
         assertThat(found.get().getId() == truck.getId());
     }
 
     @Test
-    void createTruck() {
+    void testCreateTruck() {
         Truck truck = new Truck();
         truck.setName("Harry");
         truck.setDescription("Best truck ever");
@@ -66,7 +66,7 @@ class TruckServiceTest {
     }
 
     @Test
-    void saveTruck() {
+    void testSaveTruck() {
         truck.setLicensePlate("BIG LICENSE");
 
         Truck found = truckService.saveTruck(truck);
@@ -75,7 +75,7 @@ class TruckServiceTest {
     }
 
     @Test
-    void deleteTruck() {
+    void testDeleteTruck() {
         System.out.println("Truck being deleted");
         truckService.deleteTruck(truck.getId());
 
@@ -84,7 +84,7 @@ class TruckServiceTest {
 
     @Test
     @Cascade(CascadeType.ALL)
-    void getTrucksOwnedByUser() {
+    void testGetTrucksOwnedByUser() {
         Truck t1 = new Truck();
         t1.setDescription("truck 1");
         t1.setName("t1");

@@ -73,7 +73,7 @@ class TruckTagServiceTest {
     }
 
     @Test
-    void findTruckTag() {
+    void testFindTruckTag() {
         Optional<TruckTag> tt = truckTagService.findTruckTag(truck, tags[0]);
         assertTrue(tt.isPresent());
         assertEquals("desc 1", tt.get().tag.getDescription(), tt.get().getTag().getDescription());
@@ -81,7 +81,7 @@ class TruckTagServiceTest {
     }
 
     @Test
-    void addTruckTag() {
+    void testAddTruckTag() {
         Tag t = new Tag();
         t.setName("new tag");
         t.setDescription("new desc");
@@ -93,7 +93,7 @@ class TruckTagServiceTest {
     }
 
     @Test
-    void deleteTruckTag() {
+    void testDeleteTruckTag() {
         truckTagService.deleteTruckTag(truck, tags[0]);
         assertTrue(truckTagService.findTruckTag(truck, tags[0]).isEmpty());
     }
