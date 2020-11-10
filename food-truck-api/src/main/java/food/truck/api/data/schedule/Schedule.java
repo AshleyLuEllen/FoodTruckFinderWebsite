@@ -1,5 +1,6 @@
 package food.truck.api.data.schedule;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import food.truck.api.data.truck.Truck;
 import lombok.Data;
 
@@ -22,8 +23,9 @@ public class Schedule implements Serializable {
     @Column(name = "schedule_id")
     Long id;
 
-    @JoinColumn(name = "truck_id")
+    @JoinColumn(name = "truck_id", nullable = false)
     @ManyToOne
+        @JsonIgnoreProperties({"currentLocation"})
     Truck truck;
 
     @Column(name = "truck_location")
