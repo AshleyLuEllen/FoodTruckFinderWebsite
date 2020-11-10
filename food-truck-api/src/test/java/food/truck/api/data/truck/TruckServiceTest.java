@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -65,62 +65,37 @@ class TruckServiceTest {
 
         truck1.setCurrentLocation(currLoc);
         truck = truckService.createTruck(truck1, user1);
+
+        assertEquals(truck.getName(), "Harry");
+        assertEquals(truck.getOwner().getFirstName(), ("Bob"));
+
         truckID = truck.getId();
     }
 
     @Test
-    void findTruck() {
+    void testFindTruck() {
         Optional<Truck> found = truckService.findTruck(truckID);
-        assertThat(found.get().getId() == truckID);
+        assertEquals(Optional.ofNullable(found.get().getId()), Optional.ofNullable(truckID));
     }
 
     @Test
-    void createTruck() {
-        Truck found = truckService.createTruck(truck,user1);
-        assert(found.getName().equals("Harry"));
-        assert(found.getOwner().getFirstName().equals("Bob"));
-    }
-
-    @Test
-    void saveTruck() {
+    void testSaveTruck() {
         Truck found = truckService.saveTruck(truck);
-        assert(found != null);
-        assert(found.getName().equals("Harry"));
+        assertNotNull(found);
+        assertEquals(found.getName(), "Harry");
     }
 
     @Test
-    void deleteTruck() {
+    void testDeleteTruck() {
         System.out.println("Truck being deleted");
         truckService.deleteTruck(truckID);
 
-        assertThat(truckRepository.findById(truckID).isEmpty());
+        assertTrue(truckRepository.findById(truckID).isEmpty());
     }
 
     @Test
     @Cascade(CascadeType.ALL)
-    void getTrucksOwnedByUser() {
-        /*
-        User user1 = new User();
-        user1.setFirstName("Bob");
-        user1.setLastName("Ross");
-        user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo5543vr");
-
-        Truck t1 = new Truck();
-        Truck t2 = new Truck();
-        Truck t3 = new Truck();
-        t1.setOwner(user1);
-        t2.setOwner(user1);
-        t3.setOwner(user1);
-        truckRepository.save(t1);
-        truckRepository.save(t2);
-        truckRepository.save(t3);
-
-        List<Truck> trucks = truckService.getTrucksOwnedByUser(user1);
-        assertThat(trucks != null);
-        assertThat(trucks.size() == 3);
-
-         */
+    void testGetTrucksOwnedByUser() {
         Truck truck1 = new Truck();
         truck1.setName("Harry");
         truck1.setDescription("Best truck ever");
@@ -143,7 +118,7 @@ class TruckServiceTest {
         Truck found3 = truckService.createTruck(truck3,user1);
 
         List<Truck> trucks = truckService.getTrucksOwnedByUser(user1);
-        assertThat(trucks != null);
-        assertThat(trucks.size() == 3);
+        assertNotNull(trucks);
+        assertEquals(trucks.size(), 3);
     }
 }

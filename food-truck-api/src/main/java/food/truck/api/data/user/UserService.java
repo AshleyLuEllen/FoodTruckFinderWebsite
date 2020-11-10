@@ -160,7 +160,6 @@ public class UserService {
     }
 
     public List<User> findUsersNearLocation(Location location) {
-        System.out.println(location.getLatitude() + " " + location.getLongitude());
         return userRepository.findAllUsersNearLocation(location.getLatitude(), location.getLongitude(), 20.0);
     }
 }

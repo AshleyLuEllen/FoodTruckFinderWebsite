@@ -15,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -77,13 +78,13 @@ public class TruckNotificationServiceTest {
     }
 
     @Test
-    void findNotification(){
+    void testFindNotification(){
         Optional<TruckNotification> found = truckNotificationService.findTruckNotification(notID);
-        assertThat(found.get().getId() == notID);
+        assertEquals(Optional.of(found.get().getId()), Optional.of(notID));
     }
 
     @Test
-    void saveNotification(){
+    void testSaveNotification(){
         TruckNotification not2 = new TruckNotification();
         not2.setTruck(truck);
         not2.setSubject("This is a second test.");
@@ -92,11 +93,11 @@ public class TruckNotificationServiceTest {
         long not2ID = truckNotificationRepository.save(not2).getId();
 
         Optional<TruckNotification> found = truckNotificationService.findTruckNotification(not2ID);
-        assertThat(found.get().getId() == not2ID);
+        assertEquals(Optional.of(found.get().getId()), Optional.of(not2ID));
     }
 
     @Test
-    void createNotification(){
+    void testCreateNotification(){
         TruckNotification not2 = new TruckNotification();
         not2.setTruck(truck);
         not2.setSubject("This is a second test.");
@@ -105,18 +106,18 @@ public class TruckNotificationServiceTest {
         long not2ID = truckNotificationRepository.save(not2).getId();
 
         TruckNotification set = truckNotificationService.createTruckNotification(not2, truck);
-        assertThat(set.getDescription() == not2.getDescription());
+        assertEquals(set.getDescription(), not2.getDescription());
     }
 
     @Test
-    void getNots(){
-        assert(!truckNotificationService.getNotsOwnedByTruck(truck).isEmpty());
-        assertThat(truckNotificationService.getNotsOwnedByTruck(truck).get(0) == not);
+    void testGetAllTruckNotificationsByTruck(){
+        assertTrue(!truckNotificationService.getNotsOwnedByTruck(truck).isEmpty());
+        assertEquals(truckNotificationService.getNotsOwnedByTruck(truck).get(0), not);
     }
 
     @Test
-    void deleteNotification(){
+    void testDeleteNotification(){
         truckNotificationService.deleteTruckNotification(notID);
-        assert(truckNotificationService.getNotsOwnedByTruck(truck).isEmpty());
+        assertTrue(truckNotificationService.getNotsOwnedByTruck(truck).isEmpty());
     }
 }
