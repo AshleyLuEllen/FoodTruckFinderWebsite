@@ -2,11 +2,13 @@ package food.truck.api.endpoint;
 
 import food.truck.api.data.schedule.Schedule;
 import food.truck.api.data.schedule.ScheduleRepository;
+import food.truck.api.data.schedule.ScheduleService;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckRepository;
 import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -16,52 +18,44 @@ import java.security.Principal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
 @Transactional
 class ScheduleEndpointTest {
     @Autowired
-    private TruckEndpoint truckEndpoint;
-
-    @Autowired
-    private TruckRepository truckRepository;
-
-    @Autowired
     private ScheduleEndpoint scheduleEndpoint;
 
     @Autowired
-    private ScheduleRepository scheduleRepository;
+    private ScheduleService scheduleService;
 
     @Autowired
     private TruckService truckService;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private AuthEndpoint authEndpoint;
 
-    long truckID = -1l;
+    private Truck truck;
+    private Schedule schedule;
+    private User user1;
 
-    @Test
-    void findScheduleById() {
-        User user1 = new User();
+    @BeforeEach
+    void setup(){
+        user1 = new User();
         user1.setFirstName("Bob");
         user1.setLastName("Ross");
         user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo$$43vr");
+        user1.setPassword("B0bRo5543vr");
 
-        Truck truck = new Truck();
+        truck = new Truck();
         truck.setName("Harry");
         truck.setDescription("Best truck ever");
         truck.setLicensePlate("LVN 6982");
         truck.setOwner(user1);
-        truckID = truckRepository.save(truck).getId();
+        truckService.createTruck(truck, user1);
 
-        Schedule schedule = new Schedule();
-        schedule.setTruck(truck);
+        schedule = new Schedule();
         schedule.setLatitude(31.5489);
         schedule.setLongitude(97.1131);
         schedule.setLocation("Baylor University");
@@ -70,70 +64,34 @@ class ScheduleEndpointTest {
         schedule.setTimeFrom(timeFrom);
         ZonedDateTime timeTo = ZonedDateTime.of(2020, 12, 1, 4, 30, 00, 00, zoneId );
         schedule.setTimeTo(timeTo);
+        schedule.setTruck(truck);
+        scheduleService.createSchedule(schedule, truck);
+    }
 
-        Schedule s = scheduleRepository.save(schedule);
-
-        Optional<Schedule> found = Optional.ofNullable(scheduleEndpoint.findScheduleById(truckID, s.getId()));
-        assert(!found.isEmpty());
-        assertThat(s.getId() == found.get().getId());
+    @Test
+    void findScheduleById() {
+        Optional<Schedule> found = Optional.ofNullable(scheduleEndpoint.findScheduleById(truck.getId(), schedule.getId()));
+        assert(found.isPresent());
+        assertEquals(schedule.getId(), found.get().getId());
     }
 
     @Test
     void createSchedule() {
-        User user1 = new User();
-        user1.setFirstName("Bob");
-        user1.setLastName("Ross");
-        user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo$$43vr");
-        User user = userService.createUser(user1);
-
-        Truck truck = new Truck();
-        truck.setName("Harry");
-        truck.setDescription("Best truck ever");
-        truck.setLicensePlate("LVN 6982");
-        truck.setOwner(user);
-        Truck found = truckRepository.save(truck);
-
-        Schedule schedule = new Schedule();
-        schedule.setTruck(truck);
-        schedule.setLatitude(31.5489);
-        schedule.setLongitude(97.1131);
-        schedule.setLocation("Baylor University");
-        ZoneId zoneId = ZoneId.of("UTC-6");
-        ZonedDateTime timeFrom = ZonedDateTime.of(2020, 12, 1, 10, 30, 00, 00, zoneId );
-        schedule.setTimeFrom(timeFrom);
-        ZonedDateTime timeTo = ZonedDateTime.of(2020, 12, 1, 4, 30, 00, 00, zoneId );
-        schedule.setTimeTo(timeTo);
-
         Principal p = new Principal() {
             @Override
             public String getName() {
-                return user.getEmailAddress();
+                return user1.getEmailAddress();
             }
         };
 
         authEndpoint.authenticate();
-        Schedule f = scheduleEndpoint.createSchedule(found.getId(), schedule);
+        Schedule f = scheduleEndpoint.createSchedule(truck.getId(), schedule);
 
-        assertThat(f.getTruck().getOwner().equals(user1));
+        assertEquals(user1, f.getTruck().getOwner());
     }
 
     @Test
     void saveTruck() {
-        User user1 = new User();
-        user1.setFirstName("Bob");
-        user1.setLastName("Ross");
-        user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo$$43vr");
-
-        Truck truck = new Truck();
-        truck.setName("Harry");
-        truck.setDescription("Best truck ever");
-        truck.setLicensePlate("LVN 6982");
-        truck.setOwner(user1);
-        Truck found = truckRepository.save(truck);
-
-        Schedule schedule = new Schedule();
         schedule.setTruck(truck);
         schedule.setLatitude(31.5489);
         schedule.setLongitude(97.1131);
@@ -144,11 +102,15 @@ class ScheduleEndpointTest {
         ZonedDateTime timeTo = ZonedDateTime.of(2020, 12, 1, 4, 30, 00, 00, zoneId );
         schedule.setTimeTo(timeTo);
 
-        Schedule s = scheduleRepository.save(schedule);
+        Schedule s2 = scheduleEndpoint.saveTruck(truck.getId(), schedule.getId(), schedule);
 
-        Schedule s2 = scheduleEndpoint.saveTruck(found.getId(), s.getId(), schedule);
+        assertEquals(schedule.getId(), s2.getId());
+        assertEquals(schedule.getTruck().getName(), s2.getTruck().getName());
+    }
 
-        assertThat(s.getId() == s2.getId());
-        assertThat(!s.getTruck().getName().equals(s2.getTruck().getName()));
+    @Test
+    void deleteScheduleById() {
+        scheduleEndpoint.deleteScheduleById(truck.getId(), schedule.getId());
+        assert(scheduleService.findSchedule(schedule.getId()).isEmpty());
     }
 }
