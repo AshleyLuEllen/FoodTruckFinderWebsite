@@ -1,5 +1,6 @@
 package food.truck.api.data.truck;
 import food.truck.api.data.user.User;
+import food.truck.api.data.user.UserService;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,7 @@ import javax.persistence.OneToMany;
 import java.util.List;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -23,9 +25,10 @@ class TruckServiceTest {
     private TruckService truckService;
 
     @Autowired
-    private TruckRepository truckRepository;
+    private UserService userService;
 
-    long truckID = -1l;
+    Truck truck;
+    User u;
 
     @BeforeEach
     void setup() {
@@ -33,87 +36,73 @@ class TruckServiceTest {
         user1.setFirstName("Bob");
         user1.setLastName("Ross");
         user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo5543vr");
+        user1.setPassword("B0bRo$$43vr");
+        u = userService.createUser(user1);
 
-        Truck truck = new Truck();
-        truck.setName("Harry");
-        truck.setDescription("Best truck ever");
-        truck.setLicensePlate("LVN 6982");
-        truck.setOwner(user1);
-        truckID = truckRepository.save(truck).getId();
+        Truck truck1 = new Truck();
+        truck1.setName("Harry");
+        truck1.setDescription("Best truck ever");
+        truck1.setLicensePlate("LVN 6982");
+        truck1.setOwner(user1);
+        truck = truckService.createTruck(truck1, u);
     }
 
     @Test
     void findTruck() {
-        Optional<Truck> found = truckService.findTruck(truckID);
-        assertThat(found.get().getId() == truckID);
+        Optional<Truck> found = truckService.findTruck(truck.getId());
+        assertThat(found.get().getId() == truck.getId());
     }
 
     @Test
     void createTruck() {
-        User user1 = new User();
-        user1.setFirstName("Bob");
-        user1.setLastName("Ross");
-        user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo5543vr");
-
         Truck truck = new Truck();
         truck.setName("Harry");
         truck.setDescription("Best truck ever");
         truck.setLicensePlate("LVN 6982");
 
-        Truck found = truckService.createTruck(truck,user1);
+        Truck found = truckService.createTruck(truck,u);
         assert(found.getName().equals("Harry"));
         assert(found.getOwner().getFirstName().equals("Bob"));
     }
 
     @Test
     void saveTruck() {
-        User user1 = new User();
-        user1.setFirstName("Bob");
-        user1.setLastName("Ross");
-        user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo5543vr");
-
-        Truck truck = new Truck();
-        truck.setName("Bob");
-        truck.setDescription("Worst truck ever");
-        truck.setLicensePlate("LVN 6982");
+        truck.setLicensePlate("BIG LICENSE");
 
         Truck found = truckService.saveTruck(truck);
         assert(found != null);
-        assert(found.getName().equals("Bob"));
+        assert(found.getLicensePlate().equals("BIG LICENSE"));
     }
 
     @Test
     void deleteTruck() {
         System.out.println("Truck being deleted");
-        truckService.deleteTruck(truckID);
+        truckService.deleteTruck(truck.getId());
 
-        assertThat(truckRepository.findById(truckID).isEmpty());
+        assertThat(truckService.findTruck(truck.getId()).isEmpty());
     }
 
-//    @Test
-//    @Cascade(CascadeType.ALL)
-//    void getTrucksOwnedByUser() {
-//        User user1 = new User();
-//        user1.setFirstName("Bob");
-//        user1.setLastName("Ross");
-//        user1.setEmailAddress("bob.ross@example.com");
-//        user1.setPassword("B0bRo5543vr");
-//
-//        Truck t1 = new Truck();
-//        Truck t2 = new Truck();
-//        Truck t3 = new Truck();
-//        t1.setOwner(user1);
-//        t2.setOwner(user1);
-//        t3.setOwner(user1);
-//        truckRepository.save(t1);
-//        truckRepository.save(t2);
-//        truckRepository.save(t3);
-//
-//        List<Truck> trucks = truckService.getTrucksOwnedByUser(user1);
-//        assertThat(trucks != null);
-//        assertThat(trucks.size() == 3);
-//    }
+    @Test
+    @Cascade(CascadeType.ALL)
+    void getTrucksOwnedByUser() {
+        Truck t1 = new Truck();
+        t1.setDescription("truck 1");
+        t1.setName("t1");
+
+        Truck t2 = new Truck();
+        t2.setDescription("truck 2");
+        t2.setName("t2");
+
+        Truck t3 = new Truck();
+        t1.setDescription("truck 3");
+        t1.setName("t3");
+
+        truckService.createTruck(t1, u);
+        truckService.createTruck(t2, u);
+        truckService.createTruck(t3, u);
+
+        List<Truck> trucks = truckService.getTrucksOwnedByUser(u);
+        assertThat(trucks != null);
+        assertArrayEquals(new Truck[]{truck, t1, t2, t3}, trucks.toArray());
+    }
 }

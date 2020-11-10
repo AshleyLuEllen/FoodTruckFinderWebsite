@@ -41,9 +41,5 @@ public class ReviewService {
     public void deleteReview(long reviewID) {
         reviewRepository.deleteById(reviewID);
     }
-
-    public double getAverageReviewByTruckID(long truckID) {
-        return reviewRepository.getAverageReviewByTruckID(truckID);
-    }
 }
 

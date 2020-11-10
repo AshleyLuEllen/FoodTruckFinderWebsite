@@ -3,10 +3,12 @@ package food.truck.api.data.truck_tag;
 import food.truck.api.data.review.Review;
 import food.truck.api.data.tag.Tag;
 import food.truck.api.data.tag.TagRepository;
+import food.truck.api.data.tag.TagService;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckRepository;
 import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.user.User;
+import food.truck.api.data.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,39 +26,39 @@ import static org.junit.jupiter.api.Assertions.*;
 class TruckTagServiceTest {
 
     @Autowired
-    private TagRepository tagRepository;
+    private TagService tagService;
 
     @Autowired
-    private TruckRepository truckRepository;
+    private TruckService truckService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private TruckTagService truckTagService;
 
-    @Autowired
-    private TruckTagRepository truckTagRepository;
-
-    private TruckTag []truckTags;
     private Tag []tags;
-    private Truck truck1;
+    private Truck truck;
+    private User user;
 
     @BeforeEach
     void setup() {
-        truck1 = new Truck();
+        Truck truck1 = new Truck();
         User user1 = new User();
 
         user1.setFirstName("Bob");
         user1.setLastName("Ross");
         user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo5543vr");
+        user1.setPassword("B0bRo$$43vr");
 
-        truck1.setOwner(user1);
         truck1.setName("Trucky");
         truck1.setDescription("Best truck ever");
         truck1.setLicensePlate("LVN 6982");
         truck1.setOwner(user1);
-        truck1 = truckRepository.save(truck1);
 
-        truckTags = new TruckTag[5];
+        user = userService.createUser(user1);
+        truck = truckService.createTruck(truck1, user);
+
         String []tagNames = {"food", "health", "kids", "drinks", "fresh"};
         String []tagDesc = {"desc 1", "desc 2", "desc 3", "desc 4", "desc 5"};
         tags = new Tag[5];
@@ -65,18 +67,15 @@ class TruckTagServiceTest {
             tags[i] = new Tag();
             tags[i].setName(tagNames[i]);
             tags[i].setDescription(tagDesc[i]);
-            tags[i] = tagRepository.save(tags[i]);
-            truckTags[i] = new TruckTag();
-            truckTags[i].setTag(tags[i]);
-            truckTags[i].setTruck(truck1);
-            truckTags[i] = truckTagRepository.save(truckTags[i]);
+            tags[i] = tagService.createTag(tags[i]);
+            tags[i] = truckTagService.addTruckTag(truck, tags[i]);
         }
     }
 
     @Test
     void findTruckTag() {
-        Optional<TruckTag> tt = truckTagService.findTruckTag(truck1, tags[0]);
-        assert(tt.isPresent());
+        Optional<TruckTag> tt = truckTagService.findTruckTag(truck, tags[0]);
+        assertTrue(tt.isPresent());
         assertEquals("desc 1", tt.get().tag.getDescription(), tt.get().getTag().getDescription());
         assertEquals("food", tt.get().tag.getName());
     }
@@ -86,17 +85,16 @@ class TruckTagServiceTest {
         Tag t = new Tag();
         t.setName("new tag");
         t.setDescription("new desc");
-        t = tagRepository.save(t);
-        truckTagService.addTruckTag(truck1, t);
+        t = tagService.createTag(t);
+        truckTagService.addTruckTag(truck, t);
 
-        assertEquals("new tag", truckTagService.findTruckTag(truck1, t).get().getTag().getName());
-        assertEquals("new desc", truckTagService.findTruckTag(truck1, t).get().getTag().getDescription());
+        assertEquals("new tag", truckTagService.findTruckTag(truck, t).get().getTag().getName());
+        assertEquals("new desc", truckTagService.findTruckTag(truck, t).get().getTag().getDescription());
     }
 
     @Test
     void deleteTruckTag() {
-        truckTagService.deleteTruckTag(truck1, tags[0]);
-        TruckTagId ttt = new TruckTagId();
-        assertTrue(truckTagService.findTruckTag(truck1, tags[0]).isEmpty());
+        truckTagService.deleteTruckTag(truck, tags[0]);
+        assertTrue(truckTagService.findTruckTag(truck, tags[0]).isEmpty());
     }
 }

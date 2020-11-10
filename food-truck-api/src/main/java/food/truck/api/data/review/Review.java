@@ -31,7 +31,7 @@ public class Review {
     Truck truck;
 
     @Column(name = "review_rating")
-    short rating;
+    Double rating;
 
     @Column(name = "review_comment")
     String comment;
