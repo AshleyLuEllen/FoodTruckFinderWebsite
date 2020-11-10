@@ -73,7 +73,6 @@ class TruckPage extends Component {
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleCancel = this.handleCancel.bind(this);
         this.createReview = this.createReview.bind(this);
-
     }
 
     fetchData() {
