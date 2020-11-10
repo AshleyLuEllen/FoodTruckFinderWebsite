@@ -21,14 +21,6 @@ public class SubscriptionService {
         return subscriptionRepository.findById(new SubscriptionId(user.getId(), truck.getId()));
     }
 
-    public Subscription saveSubscription(Subscription subscription) {
-        return subscriptionRepository.save(subscription);
-    }
-
-    public Subscription createSubscription(Subscription subscription) {
-        return subscriptionRepository.save(subscription);
-    }
-
     public List<Truck> findUserSubscriptions(User user) {
         return subscriptionRepository.findByUser(user).stream().map(Subscription::getTruck).collect(Collectors.toList());
     }
