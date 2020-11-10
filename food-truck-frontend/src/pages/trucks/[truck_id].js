@@ -36,6 +36,12 @@ const useStyles = makeStyles((theme) => ({
     currentLocation: {
         fontSize: '16px'
     },
+    ratingContainer: {
+        display: "flex",
+        height: "50px",
+        alignItems: "center",
+        justifyContent: "center"
+    },
     review: {
         fontSize: '14 px',
         marginBottom: 10,
@@ -63,6 +69,11 @@ class TruckPage extends Component {
             rating: -1
         };
 
+        this.writeReview = this.writeReview.bind(this);
+        this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleCancel = this.handleCancel.bind(this);
+        this.createReview = this.createReview.bind(this);
+
     }
 
     fetchData() {
@@ -70,26 +81,22 @@ class TruckPage extends Component {
             this.setState({
                 truck: res.data
             });
-            console.log(this.state);
             return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`);
         }).then(res2 => {
             this.setState({
-                tags: res2.data,
-                truckFound: true
+                tags: res2.data
             });
-            console.log(this.state);
             return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`);
         }).then(res3 => {
             this.setState({
-                schedules: res3.data,
-                truckFound: true
+                schedules: res3.data
             });
             return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`);
         }).then(res4 => {
             this.setState({
-                reviews: res4.data
+                reviews: res4.data,
+                truckFound: true
             });
-            console.log(this.state);
             console.log("Got all information!");
         })
         .catch(err => {
@@ -106,6 +113,50 @@ class TruckPage extends Component {
         })
     }
 
+    handleCancel() {
+        this.setState( {
+            openReview: false,
+            rating: 0,
+            comment: ""
+        })
+    }
+
+    createReview() {
+        const review = {
+            comment: this.state.reviewComment,
+            rating: this.state.rating
+        }
+        console.log(this.state.reviewComment);
+        console.log(review.comment);
+        axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`, review,
+            { auth: {
+                    username: this.props.auth.email,
+                    password: this.props.auth.password
+                }}).then (res => {
+                console.log("created review!");
+        }).catch(err => console.log(err.message));
+
+        this.setState({
+            openReview: false,
+            truckFound: false,
+            rating: 0,
+            comment: ""
+        });
+    }
+
+    handleInputChange(e, value) {
+        if(value == null) {
+            this.setState( {
+                reviewComment: e.target.value
+            });
+        }
+        else {
+            this.setState({
+                rating: value
+            });
+        }
+    }
+
     /**
      * Displays all the information about the truck who's id is being
      * used in the URL
@@ -117,8 +168,8 @@ class TruckPage extends Component {
     /**
      * Continuously updates the truck information on the page
      */
-    componentWillUpdate() {
-        if(!this.state.truckFound) {
+    componentDidUpdate() {
+        if(!this.state.truckFound && this.props.router.query.truck_id !== undefined) {
             this.fetchData();
         }
     }
@@ -223,15 +274,21 @@ class TruckPage extends Component {
                     ))}
                     </CardContent>
                 </Card>}
-                {this.state.truckFound && this.state.reviews.length === 0 &&
-                <Typography variant="h8" component="h3" gutterBottom>
 
-                </Typography>
+                {this.state.truckFound && this.state.reviews.length === 0 &&
+                <Card>
+                    <CardHeader title={"Reviews"}/>
+                    <CardContent>
+                        <Typography variant="body1" component="p" gutterbottom className={useStyles.text}>
+                            No reviews for <strong>{this.state.truck.name}</strong>
+                        </Typography>
+                    </CardContent>
+                </Card>
                 }
 
                 {this.state.truckFound &&
-                <Button variant="outline" onClick={this.writeReview}>
-                    <Typography variant="button" gutterBottom display="block">
+                <Button variant={"outline"} onClick={this.writeReview}>
+                    <Typography variant="button" gutterBottom display="block" color={"primary"}>
                         Write Review
                     </Typography>
                 </Button>}
@@ -242,36 +299,27 @@ class TruckPage extends Component {
                         <InputLabel>
                             Rating
                         </InputLabel>
-                        <div align="left">
-                            <Rating name="rating" precision={0.5} value={this.state.avg_rating}
-                                    size="medium" onChange={this.handleInputChange}/>
+                        <div className={useStyles.ratingContainer}>
+                            <Rating
+                                name="preferredRating" precision={0.5} value={this.state.rating}
+                                onChange={(event, newValue) => {
+                                    this.handleInputChange(event, newValue);
+                                }}
+                                size="medium"
+                            />
                         </div>
-                        <InputLabel>
-                            Comment (optional)
-                        </InputLabel>
-                        <TextField
-                            id="reviewComment"
-                            label="Review Comment"
-                            multiline
-                            rows={4}
-                            fullWidth={true}
-                            defaultValue=""
-                            onChange={this.handleInputChange}
+                        <TextField id="reviewComment" label="Review Comment (optional)"
+                            multiline rows={4} fullWidth={true} defaultValue=""
+                            onChange={e => this.handleInputChange(e, null)}
                         />
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleCancel} color="primary" variant="outlined">
                             Cancel
                         </Button>
-                        {!this.state.published && <Button onClick={() => this.handleClose(false)} color="primary" variant="outlined">
+                        <Button onClick={this.createReview} color="primary" variant="outlined">
                             Save
-                        </Button>}
-                        {!this.state.published && <Button onClick={() => this.handleClose(true)} color="primary" variant="outlined">
-                            Publish
-                        </Button>}
-                        {!this.state.published && <Button onClick={this.handleDelete} color="primary" variant="outlined">
-                            Delete
-                        </Button>}
+                        </Button>
                     </DialogActions>
                 </Dialog>
 
