@@ -77,10 +77,10 @@ public class ReviewServiceTest {
         review4.setComment("COMMENT 4");
         review4.setRating(4.0);
 
-        theReviews[0] = reviewService.saveReview(review1, truck, user);
-        theReviews[1] = reviewService.saveReview(review2, truck, user);
-        theReviews[2] = reviewService.saveReview(review3, truck, user);
-        theReviews[3] = reviewService.saveReview(review4, truck, user);
+        theReviews[0] = reviewService.createReview(review1, user, truck);
+        theReviews[1] = reviewService.createReview(review2, user, truck);
+        theReviews[2] = reviewService.createReview(review3, user, truck);
+        theReviews[3] = reviewService.createReview(review4, user, truck);
 
         reviewIDs[0] = theReviews[0].getId();
         reviewIDs[1] = theReviews[1].getId();
