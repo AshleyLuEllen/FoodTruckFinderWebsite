@@ -27,9 +27,6 @@ class TruckServiceTest {
     private TruckService truckService;
 
     @Autowired
-    private TruckRepository truckRepository;
-
-    @Autowired
     private ScheduleService scheduleService;
 
     @Autowired
@@ -90,7 +87,7 @@ class TruckServiceTest {
         System.out.println("Truck being deleted");
         truckService.deleteTruck(truckID);
 
-        assertTrue(truckRepository.findById(truckID).isEmpty());
+        assertTrue(truckService.findTruck(truckID).isEmpty());
     }
 
     @Test

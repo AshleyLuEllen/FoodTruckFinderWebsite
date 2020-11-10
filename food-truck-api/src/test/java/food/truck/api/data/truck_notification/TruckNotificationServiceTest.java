@@ -26,9 +26,6 @@ public class TruckNotificationServiceTest {
     private TruckNotificationService truckNotificationService;
 
     @Autowired
-    private TruckNotificationRepository truckNotificationRepository;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
@@ -74,7 +71,7 @@ public class TruckNotificationServiceTest {
         not.setSubject("This is a test.");
         not.setDescription("This is only a test.");
         not.setPublished(false);
-        notID = truckNotificationRepository.save(not).getId();
+        notID = truckNotificationService.saveTruckNotification(not).getId();
     }
 
     @Test
@@ -90,7 +87,7 @@ public class TruckNotificationServiceTest {
         not2.setSubject("This is a second test.");
         not2.setDescription("This is only a second test.");
         not2.setPublished(false);
-        long not2ID = truckNotificationRepository.save(not2).getId();
+        long not2ID = truckNotificationService.saveTruckNotification(not2).getId();
 
         Optional<TruckNotification> found = truckNotificationService.findTruckNotification(not2ID);
         assertEquals(Optional.of(found.get().getId()), Optional.of(not2ID));
@@ -103,7 +100,7 @@ public class TruckNotificationServiceTest {
         not2.setSubject("This is a second test.");
         not2.setDescription("This is only a second test.");
         not2.setPublished(true);
-        long not2ID = truckNotificationRepository.save(not2).getId();
+        long not2ID = truckNotificationService.saveTruckNotification(not2).getId();
 
         TruckNotification set = truckNotificationService.createTruckNotification(not2, truck);
         assertEquals(set.getDescription(), not2.getDescription());
