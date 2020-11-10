@@ -25,7 +25,7 @@ public class Schedule implements Serializable {
 
     @JoinColumn(name = "truck_id", nullable = false)
     @ManyToOne
-        @JsonIgnoreProperties({"currentLocation"})
+    @JsonIgnoreProperties({ "currentLocation" })
     Truck truck;
 
     @Column(name = "truck_location")
@@ -43,7 +43,7 @@ public class Schedule implements Serializable {
     @Column(name = "time_to", columnDefinition = "TIMESTAMP")
     ZonedDateTime timeTo;
 
-    @Column(name = "override")
-    Boolean override;
+    @Transient
+    String placeId;
 }
 

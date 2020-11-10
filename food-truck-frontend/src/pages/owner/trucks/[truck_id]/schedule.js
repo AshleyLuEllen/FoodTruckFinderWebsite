@@ -3,9 +3,10 @@ import Link from "next/link";
 import axios from "axios";
 import { withRouter } from "next/router";
 import { connect } from "react-redux";
-import { format, parse } from 'date-fns';
+import { format, parse, parseISO } from 'date-fns';
 
-import { Container, Grid, CircularProgress } from '@material-ui/core';
+import { Container, Grid, CircularProgress, Typography, Box } from '@material-ui/core';
+import { DataGrid } from '@material-ui/data-grid';
 
 import TruckMap from '../../../../components/TruckMap';
 
@@ -86,26 +87,34 @@ const scheduleStyles = theme => ({
     progressContainer: {
         display: 'flex',
         alignItems: 'center',
-        height: '87vh'
+        height: 'calc(87vh - 51px)'
     },
     progress: {
         margin: '0 auto'
     }
 });
 
+const columns = [
+    { field: "location", headerName: "Location", width: 200 },
+    { field: "fromTime", headerName: "Start Time", width: 200, type: "dateTime" },
+    { field: "toTime", headerName: "End Time", width: 200, type: "dateTime" },
+  ];
+
 class ScheduleManagementPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            schedules: [],
             location: '',
             time_from: '',
             time_to: '',
             truckFound: false,
             editing: false,
             editingSchedule: undefined,
-            loading: true,
+            loading: false,
+            upcoming: [],
+            past: [],
         };
+
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.updateTruckSchedule = this.updateTruckSchedule.bind(this);
@@ -131,8 +140,17 @@ class ScheduleManagementPage extends Component {
         }
 
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`).then(res => {
+            const schedules = res.data.map(schedule => ({
+                id: schedule.id,
+                latitude: schedule.latitude,
+                longitude: schedule.longitude,
+                location: schedule.location,
+                timeFrom: parseISO(schedule.timeFrom),
+                timeTo: parseISO(schedule.timeTo),
+            }))
             this.setState({
-                schedules: res.data
+                upcoming: schedules.filter(s => s.timeFrom > Date.now()),
+                past: schedules.filter(s => s.timeFrom <= Date.now()),
             });
         }).catch(err => {
             console.log(err);
@@ -204,7 +222,7 @@ class ScheduleManagementPage extends Component {
             schedule.truck = this.state.editingSchedule.truck;
 
             // Update
-            axios.put(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${schedule.id}`, schedule, {
+            axios.patch(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${schedule.id}`, schedule, {
                 auth: {
                     username: this.props.auth.email,
                     password: this.props.auth.password
@@ -245,30 +263,25 @@ class ScheduleManagementPage extends Component {
             <Container className={classes.root}>
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={6}>
-                    {!this.state.loading &&
-                        <Grid item xs={12} md={4}>
-                            <Box style={{ textAlign: "left", maxHeight: "calc(87vh)", overflow: "auto" }}>
-                                {this.state.recommendations.length > 0 && <Fragment>
-                                    <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>{this.state.user?.firstName}Recommendations</Typography>
-                                    {this.state.recommendations.map((tr, i) => (
-                                        <TruckCard key={i} className={classes.truckCard} truck={tr} tags={tr.tags.map(tag => tag.tag.name)} onClick={evt => this.setState({currentlySelected: i})}/>
-                                    ))}
-                                    <Divider style={{ marginTop: "10px", marginBottom: "10px" }}/>
-                                </Fragment>}
-                                <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>{this.state.user?.firstName}Your Subscriptions</Typography>
-                                {this.state.subscriptions.map((tr, i) => (
-                                    <TruckCard key={100 + i} className={classes.truckCard} truck={tr} tags={tr.tags.map(tag => tag.tag.name)} onClick={evt => this.setState({currentlySelected: this.state.recommendations.length + i})}/>
-                                ))}
+                        <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>Manage Truck Schedule</Typography>
+                        {!this.state.loading &&
+                            <Box style={{ textAlign: "left", maxHeight: "calc(87vh - 51px)", overflow: "auto" }}>
+                                <Typography variant="h5" style={{ marginBottom: "10px", textAlign: "center" }}>Upcoming Schedules</Typography>
+                                <div style={{ height: 400, width: '100%' }}>
+                                    <DataGrid rows={this.state.upcoming} columns={columns} pageSize={5} checkboxSelection />
+                                </div>
+
+                                <Typography variant="h5" style={{ marginTop: "10px", marginBottom: "10px", textAlign: "center" }}>Past Schedules</Typography>
+                                <div style={{ height: 400, width: '100%' }}>
+                                    <DataGrid rows={this.state.past} columns={columns} pageSize={5} checkboxSelection />
+                                </div>
                             </Box>
-                        </Grid>
-                    }
-                    {this.state.loading &&
-                        <Grid item xs={12} md={4}>
+                        }
+                        {this.state.loading &&
                             <div className={classes.progressContainer}>
-                                <CircularProgress className={classes.progress} size="3.5rem"/>
+                                <CircularProgress className={classes.progress} size="3.5rem" />
                             </div>
-                        </Grid>
-                    }
+                        }
                     </Grid>
                     <Grid item xs={12} md={6}>
                         <div className={classes.mapWrapper}>

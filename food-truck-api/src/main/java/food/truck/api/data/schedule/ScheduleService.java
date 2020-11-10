@@ -1,5 +1,6 @@
 package food.truck.api.data.schedule;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckRepository;
 import food.truck.api.util.Location;
@@ -15,9 +16,6 @@ import java.util.stream.Collectors;
 public class ScheduleService {
     @Autowired
     private ScheduleRepository scheduleRepository;
-
-    @Autowired
-    private TruckRepository truckRepository;
 
     public Optional<Schedule> findSchedule(Long scheduleId) {
         return scheduleRepository.findById(scheduleId);
