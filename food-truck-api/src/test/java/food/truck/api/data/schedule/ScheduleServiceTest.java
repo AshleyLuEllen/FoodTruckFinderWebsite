@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
-import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -34,8 +34,8 @@ class ScheduleServiceTest {
     @Autowired
     private ScheduleRepository scheduleRepository;
 
-    long scheduleID = -1l;
-    long truckID = -1l;
+    private Truck truck;
+    private Schedule schedule;
 
     @BeforeEach
     void setup() {
@@ -45,14 +45,13 @@ class ScheduleServiceTest {
         user1.setEmailAddress("bob.ross@example.com");
         user1.setPassword("B0bRo5543vr");
 
-        Truck truck = new Truck();
+        truck = new Truck();
         truck.setName("Harry");
         truck.setDescription("Best truck ever");
         truck.setLicensePlate("LVN 6982");
         truck.setOwner(user1);
-        truckID = truckRepository.save(truck).getId();
 
-        Schedule schedule = new Schedule();
+        schedule = new Schedule();
         schedule.setLatitude(31.5489);
         schedule.setLongitude(97.1131);
         schedule.setLocation("Baylor University");
@@ -62,58 +61,38 @@ class ScheduleServiceTest {
         ZonedDateTime timeTo = ZonedDateTime.of(2020, 12, 1, 4, 30, 00, 00, zoneId );
         schedule.setTimeTo(timeTo);
         schedule.setTruck(truck);
-        scheduleID = scheduleRepository.save(schedule).getId();
+        scheduleService.createSchedule(schedule, truck);
     }
 
     @Test
     void findSchedule() {
-        Optional<Schedule> found = scheduleService.findSchedule(scheduleID);
-        assertThat(found.get().getId() == scheduleID);
+        Optional<Schedule> found = scheduleService.findSchedule(schedule.getId());
+        assert(found.isPresent());
+        assertEquals(31.5489, found.get().getLatitude());
+        assertEquals(97.1131, found.get().getLongitude());
+        assertEquals("Baylor University", found.get().getLocation());
     }
 
     @Test
     void createSchedule() {
-        User user1 = new User();
-        user1.setFirstName("Bob");
-        user1.setLastName("Ross");
-        user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo5543vr");
-
-        Truck truck = new Truck();
-        truck.setName("Harry");
-        truck.setDescription("Best truck ever");
-        truck.setLicensePlate("LVN 6982");
-        Truck found = truckService.createTruck(truck,user1);
-
-        Schedule schedule = new Schedule();
-        schedule.setLatitude(31.5489);
-        schedule.setLongitude(97.1131);
-        schedule.setLocation("Baylor University");
+        Schedule s = new Schedule();
+        s.setLatitude(31.5489);
+        s.setLongitude(97.1131);
+        s.setLocation("Baylor University");
         ZoneId zoneId = ZoneId.of("UTC-6");
         ZonedDateTime timeFrom = ZonedDateTime.of(2020, 12, 1, 10, 30, 00, 00, zoneId );
-        schedule.setTimeFrom(timeFrom);
+        s.setTimeFrom(timeFrom);
         ZonedDateTime timeTo = ZonedDateTime.of(2020, 12, 1, 4, 30, 00, 00, zoneId );
-        schedule.setTimeTo(timeTo);
-        schedule.setTruck(truck);
-        Schedule s = scheduleService.createSchedule(schedule, truck);
-        assert(s.getLatitude().equals(31.5489));
-        assert(s.getLocation().equals("Baylor University"));
+        s.setTimeTo(timeTo);
+        s.setTruck(truck);
+        Schedule s1 = scheduleService.createSchedule(schedule, truck);
+        assertEquals(31.5489, s1.getLatitude());
+        assertEquals(97.1131, s1.getLongitude());
+        assertEquals("Baylor University", s1.getLocation());
     }
 
     @Test
     void saveSchedule() {
-        User user1 = new User();
-        user1.setFirstName("Bob");
-        user1.setLastName("Ross");
-        user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo5543vr");
-
-        Truck truck = new Truck();
-        truck.setName("Bob");
-        truck.setDescription("Worst truck ever");
-        truck.setLicensePlate("LVN 6982");
-
-        Schedule schedule = new Schedule();
         schedule.setTruck(truck);
         schedule.setLatitude(31.5489);
         schedule.setLongitude(97.1131);
@@ -123,16 +102,16 @@ class ScheduleServiceTest {
         schedule.setTimeFrom(timeFrom);
         ZonedDateTime timeTo = ZonedDateTime.of(2020, 12, 1, 4, 30, 00, 00, zoneId );
         schedule.setTimeTo(timeTo);
-
         Schedule s = scheduleService.saveSchedule(schedule);
-        assert(s != null);
-        assert(s.getLocation().equals("Baylor University"));
+        assertNotNull(s);
+        assertEquals(31.5489, s.getLatitude());
+        assertEquals(97.1131, s.getLongitude());
+        assertEquals("Baylor University", s.getLocation());
     }
 
     @Test
     void deleteSchedule() {
-        System.out.println("Truck being deleted");
-        scheduleService.deleteSchedule(scheduleID);
-        assertThat(scheduleRepository.findById(scheduleID).isEmpty());
+        scheduleService.deleteSchedule(schedule.getId());
+        assertTrue(scheduleService.findSchedule(schedule.getId()).isEmpty());
     }
 }
