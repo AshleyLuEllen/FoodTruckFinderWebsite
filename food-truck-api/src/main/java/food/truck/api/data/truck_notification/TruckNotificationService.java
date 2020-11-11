@@ -89,7 +89,7 @@ public class TruckNotificationService {
         boolean notifySubscribers = false;
 
         truckNotification.setTruck(truck);
-        if (truckNotification.published) {
+        if (truckNotification.published != null && truckNotification.getPublished()) {
             truckNotification.setPostedTimestamp(ZonedDateTime.now());
             notifySubscribers = true;
         }
@@ -109,17 +109,19 @@ public class TruckNotificationService {
                     }).collect(Collectors.toList())
             );
             Schedule currentLocation = truck.getCurrentLocation();
-            userNotificationRepository.saveAll(
-                userService.findUsersNearLocation(new Location(currentLocation.getLatitude(), currentLocation.getLongitude())).stream()
-                    .map(user -> {
-                        var un = new UserNotification();
-                        un.setNotification(truckNotification);
-                        un.setUser(user);
-                        un.setSaved(true);
-                        un.setUnread(true);
-                        return un;
-                    }).peek(un -> log.info(un.getUser().getLastName())).collect(Collectors.toList())
-            );
+            if (currentLocation != null) {
+                userNotificationRepository.saveAll(
+                    userService.findUsersNearLocation(new Location(currentLocation.getLatitude(), currentLocation.getLongitude())).stream()
+                        .map(user -> {
+                            var un = new UserNotification();
+                            un.setNotification(truckNotification);
+                            un.setUser(user);
+                            un.setSaved(true);
+                            un.setUnread(true);
+                            return un;
+                        }).peek(un -> log.info(un.getUser().getLastName())).collect(Collectors.toList())
+                );
+            }
         }
 
         return tn;
