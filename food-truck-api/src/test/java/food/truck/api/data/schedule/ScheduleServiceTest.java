@@ -3,6 +3,7 @@ import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckRepository;
 import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.user.User;
+import food.truck.api.data.user.UserService;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneId;
@@ -29,10 +31,7 @@ class ScheduleServiceTest {
     private TruckService truckService;
 
     @Autowired
-    private TruckRepository truckRepository;
-
-    @Autowired
-    private ScheduleRepository scheduleRepository;
+    private UserService userService;
 
     private Truck truck;
     private Schedule schedule;
@@ -43,13 +42,14 @@ class ScheduleServiceTest {
         user1.setFirstName("Bob");
         user1.setLastName("Ross");
         user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo5543vr");
+        user1.setPassword("#B0bRo5543vr");
+        userService.createUser(user1);
 
         truck = new Truck();
         truck.setName("Harry");
         truck.setDescription("Best truck ever");
         truck.setLicensePlate("LVN 6982");
-        truck.setOwner(user1);
+        truckService.createTruck(truck, user1);
 
         schedule = new Schedule();
         schedule.setLatitude(31.5489);
@@ -67,7 +67,7 @@ class ScheduleServiceTest {
     @Test
     void findSchedule() {
         Optional<Schedule> found = scheduleService.findSchedule(schedule.getId());
-        assert(found.isPresent());
+        assertTrue(found.isPresent());
         assertEquals(31.5489, found.get().getLatitude());
         assertEquals(97.1131, found.get().getLongitude());
         assertEquals("Baylor University", found.get().getLocation());

@@ -34,6 +34,9 @@ class ScheduleEndpointTest {
     private TruckService truckService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private AuthEndpoint authEndpoint;
 
     private Truck truck;
@@ -46,7 +49,8 @@ class ScheduleEndpointTest {
         user1.setFirstName("Bob");
         user1.setLastName("Ross");
         user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo5543vr");
+        user1.setPassword("#B0bRo5543vr");
+        userService.createUser(user1);
 
         truck = new Truck();
         truck.setName("Harry");
@@ -71,7 +75,7 @@ class ScheduleEndpointTest {
     @Test
     void findScheduleById() {
         Optional<Schedule> found = Optional.ofNullable(scheduleEndpoint.findScheduleById(truck.getId(), schedule.getId()));
-        assert(found.isPresent());
+        assertTrue(found.isPresent());
         assertEquals(schedule.getId(), found.get().getId());
     }
 
@@ -111,6 +115,6 @@ class ScheduleEndpointTest {
     @Test
     void deleteScheduleById() {
         scheduleEndpoint.deleteScheduleById(truck.getId(), schedule.getId());
-        assert(scheduleService.findSchedule(schedule.getId()).isEmpty());
+        assertTrue(scheduleService.findSchedule(schedule.getId()).isEmpty());
     }
 }
