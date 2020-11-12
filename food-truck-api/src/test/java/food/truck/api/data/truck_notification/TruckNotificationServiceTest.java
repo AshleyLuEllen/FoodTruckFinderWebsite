@@ -15,8 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -90,7 +89,7 @@ public class TruckNotificationServiceTest {
         long not2ID = truckNotificationService.saveTruckNotification(not2).getId();
 
         Optional<TruckNotification> found = truckNotificationService.findTruckNotification(not2ID);
-        assertEquals(Optional.of(found.get().getId()), Optional.of(not2ID));
+        assertTrue(found.isPresent());
     }
 
     @Test
@@ -103,13 +102,13 @@ public class TruckNotificationServiceTest {
         long not2ID = truckNotificationService.saveTruckNotification(not2).getId();
 
         TruckNotification set = truckNotificationService.createTruckNotification(not2, truck);
-        assertEquals(set.getDescription(), not2.getDescription());
+        assertEquals(not2.getDescription(), set.getDescription());
     }
 
     @Test
     void testGetAllTruckNotificationsByTruck(){
-        assertTrue(!truckNotificationService.getNotsOwnedByTruck(truck).isEmpty());
-        assertEquals(truckNotificationService.getNotsOwnedByTruck(truck).get(0), not);
+        assertFalse(truckNotificationService.getNotsOwnedByTruck(truck).isEmpty());
+        assertEquals(not, truckNotificationService.getNotsOwnedByTruck(truck).get(0));
     }
 
     @Test

@@ -72,14 +72,14 @@ class TruckServiceTest {
     @Test
     void testFindTruck() {
         Optional<Truck> found = truckService.findTruck(truckID);
-        assertEquals(Optional.ofNullable(found.get().getId()), Optional.ofNullable(truckID));
+        assertTrue(found.isPresent());
     }
 
     @Test
     void testSaveTruck() {
         Truck found = truckService.saveTruck(truck);
         assertNotNull(found);
-        assertEquals(found.getName(), "Harry");
+        assertEquals("Harry", found.getName());
     }
 
     @Test
@@ -116,6 +116,6 @@ class TruckServiceTest {
 
         List<Truck> trucks = truckService.getTrucksOwnedByUser(user1);
         assertNotNull(trucks);
-        assertEquals(trucks.size(), 4);
+        assertEquals(4, trucks.size());
     }
 }
