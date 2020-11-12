@@ -64,6 +64,9 @@ public class Truck {
     @JsonIgnoreProperties("truck")
     private Schedule currentLocation;
 
+    @Transient
+    private Double currentDistance;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

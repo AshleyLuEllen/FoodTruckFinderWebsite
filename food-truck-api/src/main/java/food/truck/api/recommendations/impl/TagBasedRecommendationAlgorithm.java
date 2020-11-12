@@ -82,6 +82,7 @@ public class TagBasedRecommendationAlgorithm implements IRecommendationAlgorithm
                     } else {
                         Schedule latest = schedules.stream().max(Comparator.comparing(Schedule::getTimeFrom)).get();
                         currentDistance = LocationUtils.mToMi(LocationUtils.sphericalDistance(location, new Location(latest.getLatitude(), latest.getLongitude())));
+                        t.setCurrentDistance(currentDistance);
                     }
                     log.info(currentDistance);
 
@@ -148,6 +149,7 @@ public class TagBasedRecommendationAlgorithm implements IRecommendationAlgorithm
                     } else {
                         Schedule latest = schedules.stream().max(Comparator.comparing(Schedule::getTimeFrom)).get();
                         currentDistance = LocationUtils.mToMi(LocationUtils.sphericalDistance(location, new Location(latest.getLatitude(), latest.getLongitude())));
+                        t.setCurrentDistance(currentDistance);
                     }
 
                     // Compute tag relevance

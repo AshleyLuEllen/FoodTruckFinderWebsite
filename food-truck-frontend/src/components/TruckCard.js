@@ -116,7 +116,7 @@ function TruckCard(props) {
             />}
             <CardContent className={noMediaClass}>
                 {props.truck.currentLocation && <div className={classes.currentLocation}>
-                    Currently at <strong>{props.truck.currentLocation?.location}</strong>
+                    Currently at <strong>{props.truck.currentLocation?.location}</strong> {props.truck.currentDistance !== undefined && props.truck.currentDistance !== null ? `(${props.truck.currentDistance.toFixed(2)} mi)` : ""}
                 </div>}
                 {props.tags.length > 0 && <div className={classes.truckTags}>
                     {props.tags.map((t, i) => (
