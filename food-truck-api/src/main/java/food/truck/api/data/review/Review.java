@@ -33,7 +33,7 @@ public class Review {
     @Column(name = "review_rating")
     Double rating;
 
-    @Column(name = "review_comment", columnDefinition = "VARCHAR(2000)")
+    @Column(name = "review_comment", length=2000)
     String comment;
 
     @Column(name = "review_timestamp", columnDefinition = "TIMESTAMP")
