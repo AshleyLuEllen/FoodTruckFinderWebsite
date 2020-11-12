@@ -47,12 +47,8 @@ class UserPage extends Component {
                 { firstName: "Remy", lastName: "Sharp", avatarURL: "/static/images/avatar/1.jpg", id: 1 },
                 { firstName: "Remy", lastName: "Sharp", avatarURL: "/static/images/avatar/1.jpg", id: 1 },
                 { firstName: "Remy", lastName: "Sharp", avatarURL: "/static/images/avatar/1.jpg", id: 1 },
-            ], subscribedTrucks: [
-                { name: "Test Food Truck", description: "A lighteharted eatery", id: 1 },
-                { name: "Test Food Truck", description: "A lighteharted eatery", id: 1 },
-                { name: "Test Food Truck", description: "A lighteharted eatery", id: 1 },
-                { name: "Test Food Truck", description: "A lighteharted eatery", id: 1 },
-            ]
+            ],
+            subscribedTrucks: []
         };
         this.fetchData = this.fetchData.bind(this);
     }
@@ -71,21 +67,27 @@ class UserPage extends Component {
                     user: res.data,
                     found: true
                 });
-                axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
+                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
                     auth: {
                         username: this.props.auth.email,
                         password: this.props.auth.password
                     }
                 })
-                    .then(res => {
-                        console.log(res.data);
-                        if (this.state.userID == res.data.id) {
-                            this.setState({
-                                isMe: true
-                            });
-                        }
-                    })
-                    .catch(err => {})
+            })
+            .then(res => {
+                console.log(res.data);
+                if (this.state.userID == res.data.id) {
+                    this.setState({
+                        isMe: true
+                    });
+                }
+
+                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/subscriptions`)
+            })
+            .then(res => {
+                this.setState({
+                    subscribedTrucks: res.data
+                })
             })
             .catch(err => {
                 console.log(err);
@@ -135,9 +137,9 @@ class UserPage extends Component {
                     <Grid item xs={12} md={6}>
                         <Typography variant="h4" style={{ marginTop: "20px", marginBottom: "5px" }}>{this.state.user?.firstName}'s Subscriptions</Typography>
                         <Box style={{ textAlign: "left", maxHeight: 700, overflow: "auto" }}>
-                            {this.state.subscribedTrucks.map(t => (
-                                // Todo: dynamically fetch infos 
-                                <TruckCard className={classes.truckCard} truck={t} subscribed={true} tags={["$$", "Cajun", "Comfort Food", "Lighthearted", "Fast"]} image="https://miro.medium.com/max/8064/1*5_J_YlYTmwRvigEr3JKCZg.jpeg" />
+                            {this.state.subscribedTrucks.map((tr, i) => (
+                                // <TruckCard className={classes.truckCard} truck={t} subscribed={true} tags={["$$", "Cajun", "Comfort Food", "Lighthearted", "Fast"]} image="https://miro.medium.com/max/8064/1*5_J_YlYTmwRvigEr3JKCZg.jpeg" />
+                                <TruckCard key={i} className={classes.truckCard} truck={tr} tags={tr.tags.map(tag => tag.tag.name)}/>
                             ))}
                         </Box>
                     </Grid>
