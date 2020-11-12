@@ -9,7 +9,11 @@ import { Container, Grid, CircularProgress, Typography, Box, TablePagination} fr
 import { DataGrid } from '@material-ui/data-grid';
 import { Add, Delete } from '@material-ui/icons';
 
+import { DateTimePicker } from "@material-ui/pickers";
+
+
 import TruckMap from '../../../../components/TruckMap';
+import LocationInput from '../../../../components/LocationInput';
 
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -32,40 +36,102 @@ function PaperComponent(props) {
   );
 }
 
-function DraggableDialog(props) {
-    const [open, setOpen] = React.useState(false);
+const useStyles = makeStyles((theme) => ({
+    dateTimeInput : {
+        width: '100%',
+        "& > button": {
+            width: 'auto',
+            height: 'auto'
+        }
+    }
+}));
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
+function DraggableDialog(props) {
+    const classes = useStyles();
+
+    const [startDate, setStartDate] = useState(undefined);
+    const [endDate, setEndDate] = useState(undefined);
+    const [locationStr, setLocationStr] = useState('');
+    const [locationChanged, setLocationChanged] = useState(false);
+    const [placeId, setPlaceId] = useState(undefined);
+
+    useEffect(() => {
+        if (props.open === true) {
+            setStartDate(props.initialData?.timeFrom || new Date());
+            setEndDate(props.initialData?.timeTo || new Date());
+            setLocationStr(props.initialData?.location || "");
+            setLocationChanged(!props.editing);
+            setPlaceId(undefined)
+        }
+    }, [props.open]);
 
     const handleClose = () => {
-        setOpen(false);
+        props.onClose && props.onClose();
+    };
+
+    const handleSave = () => {
+        if (locationChanged && !placeId) {
+            return;
+        }
+
+        props.onSave && props.onSave({
+            placeId,
+            timeFrom: startDate,
+            timeTo: endDate
+        });
     };
 
     return (
         <div>
             <Dialog
-                open={open}
+                open={props.open}
                 onClose={handleClose}
                 PaperComponent={PaperComponent}
                 aria-labelledby="draggable-dialog-title"
             >
                 <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
-                    Subscribe
+                    {props.editing ? "Edit" : "Create"} Schedule
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        To subscribe to this website, please enter your email address here. We will send updates
-                        occasionally.
+                        {props.editing ? "Edit" : "Specify"} the start and end dates/times here, as well as the location where your truck will be during this interval of time. All of these individual "schedules" will consist your truck's hours.
                     </DialogContentText>
+                    <LocationInput
+                        initialValue={locationStr}
+                        onChange={(event, newValue) => {
+                            setPlaceId(newValue?.place_id);
+                            setLocationChanged(true);
+                        }}
+                        required
+                    />
+                    <br/>
+                    <DateTimePicker
+                        className={classes.dateTimeInput}
+                        value={startDate}
+                        inputVariant="outlined"
+                        onChange={setStartDate}
+                        label="Start Date/Time"
+                        showTodayButton
+                        required
+                    />
+                    <br/>
+                    <br/>
+                    <DateTimePicker
+                        className={classes.dateTimeInput}
+                        value={endDate}
+                        inputVariant="outlined"
+                        onChange={setEndDate}
+                        label="End Date/Time"
+                        showTodayButton
+                        required
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button autoFocus onClick={handleClose} color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={handleClose} color="primary">
-                        Subscribe
+                    <Button onClick={handleSave} color="primary">
+                        {props.editing ? "Save Changes" : "Create New Schedule"}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -99,12 +165,18 @@ class ScheduleManagementPage extends Component {
         this.state = {
             loading: true,
             upcoming: [],
-            past: []
+            past: [],
+            editorOpen: false,
+            editing: false,
+            initialData: undefined
         };
 
         this.fetchData = this.fetchData.bind(this);
         this.setSchedules = this.setSchedules.bind(this);
         this.deleteScheduleById = this.deleteScheduleById.bind(this);
+        this.handleSave = this.handleSave.bind(this);
+        this.triggerEdit = this.triggerEdit.bind(this);
+        this.triggerCreation = this.triggerCreation.bind(this);
     }
 
     fetchData() {
@@ -151,17 +223,40 @@ class ScheduleManagementPage extends Component {
         this.setSchedules([...this.state.upcoming, ...this.state.past].filter(s => s.id != id));
     }
 
+    triggerCreation() {
+        this.setState({
+            open: true,
+            editing: false,
+            initialData: undefined
+        });
+    }
+
+    triggerEdit(event, id) {
+        this.setState({
+            open: true,
+            editing: true,
+            initialData: this.state.upcoming.find(s => s.id == id)
+        });
+    }
+
+    handleSave(savedData) {
+        this.setState({
+            open: false
+        });
+        console.log(savedData);
+    }
+
     render() {
         const {classes} = this.props;
 
         const columns = [
             { id: 'location', align: 'left', width: '175px', disablePadding: false, label: 'Location' },
-            { id: 'timeFrom', align: 'left', width: '200px', disablePadding: false, label: 'Start Time', renderer: (val) => format(val, 'Pp') },
-            { id: 'timeTo', align: 'left', width: '200px', disablePadding: false, label: 'End Time', renderer: (val) => format(val, 'Pp') },
+            { id: 'timeFrom', align: 'left', width: '225px', disablePadding: false, label: 'Start Time', renderer: (val) => format(val, 'Pp') },
+            { id: 'timeTo', align: 'left', width: '225px', disablePadding: false, label: 'End Time', renderer: (val) => format(val, 'Pp') },
         ];
 
         const rowActions = [
-            { references: 'id', color: 'primary', label: 'Edit', action: (event, id) => alert(`Edit ${id}`) },
+            { references: 'id', color: 'primary', label: 'Edit', action: this.triggerEdit },
             { references: 'id', color: 'secondary', label: 'Delete', action: this.deleteScheduleById }
         ]
 
@@ -170,13 +265,13 @@ class ScheduleManagementPage extends Component {
         ]
 
         const unselectedActions = [
-            { title: "Add", icon: <Add/>, action: () => alert("new") },
+            { title: "Add", icon: <Add/>, action: this.triggerCreation },
         ]
 
         return (
             <div>
                 <Container className={classes.root}>
-                    <Grid container spacing={3}>
+                    <Grid container spacing={0}>
                         <Grid item xs={12} md={6}>
                             <Box style={{ textAlign: "left", overflow: "auto" }}>
                                 <EnhancedTable
@@ -195,9 +290,8 @@ class ScheduleManagementPage extends Component {
                             <Box style={{ textAlign: "left", overflow: "auto" }}>
                             <EnhancedTable
                                     columns={columns}
-                                    rowActions={rowActions}
+                                    rowActions={rowActions.slice(1)}
                                     selectedActions={selectedActions}
-                                    unselectedActions={unselectedActions}
                                     title="Past Schedules"
                                     rows={this.state.past}
                                     order="desc"
@@ -212,7 +306,13 @@ class ScheduleManagementPage extends Component {
                         </Grid>
                     </Grid>
                 </Container>
-                <DraggableDialog/>
+                <DraggableDialog
+                    open={this.state.open}
+                    editing={this.state.editing}
+                    initialData={this.state.initialData}
+                    onClose={() => this.setState({ open: false })}
+                    onSave={this.handleSave}
+                />
             </div>
         );
     }
