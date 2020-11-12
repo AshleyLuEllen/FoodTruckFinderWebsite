@@ -173,58 +173,6 @@ class CreateNewTruck extends Component {
             </Container>
         </div>)
     }
-
-    // render() {
-    //     return (
-    //         <div className="create-truck-form">
-    //             <h2>Create New Truck</h2>
-    //             <form onSubmit={this.handleSubmit} method="post">
-    //                 <table className="truck-form-details">
-    //                     <tbody>
-    //                     <tr>
-    //                         <td>
-    //                             <label htmlFor="description">
-    //                                 Description:
-    //                             </label>
-    //                         </td>
-    //                         <td>
-    //                             <input name="description" type="text" value={this.state.description} onChange={this.handleInputChange}/>
-    //                         </td>
-    //                     </tr>
-    //                     <tr>
-    //                         <td>
-    //                             <label htmlFor="truck_name">
-    //                                 Truck Name:
-    //                             </label>
-    //                         </td>
-    //                         <td>
-    //                             <input name="truck_name" type="text" value={this.state.truck_name} onChange={this.handleInputChange} />
-    //                         </td>
-    //                     </tr>
-    //                     <tr>
-    //                         <td>
-    //                             <label htmlFor="license_plate">
-    //                                 Plate Number:
-    //                             </label>
-    //                         </td>
-    //                         <td>
-    //                             <input name="license_plate" type="text" value={this.state.license_plate} onChange={this.handleInputChange} />
-    //                         </td>
-    //                     </tr>
-    //                     </tbody>
-    //                 </table>
-    //                 <button className="login-submit-button" onClick={this.createNewTruck}>Create Truck</button>
-    //             </form>
-    //             <br />
-    //             <label>{this.state.message}</label>
-    //             <li>
-    //                 <Link href="/owner/trucks">
-    //                     <a>Cancel</a>
-    //                 </Link>
-    //             </li>
-    //         </div>
-    //     );
-    // }
 }
 function mapStateToProps(state) {
     const { auth } = state
