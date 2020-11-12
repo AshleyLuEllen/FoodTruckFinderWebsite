@@ -5,7 +5,7 @@ import { withRouter } from 'next/router';
 import { connect } from "react-redux";
 import Typography from "@material-ui/core/Typography";
 import {CardContent, Chip, InputLabel, TextField} from "@material-ui/core";
-import {makeStyles} from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import ScheduleIconRounded from '@material-ui/icons/ScheduleRounded';
@@ -24,18 +24,20 @@ import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import TableBody from "@material-ui/core/TableBody";
 
-const useStyles = makeStyles((theme) => ({
+const truckPageStyles = (theme) => ({
     text: {
-        padding: '30px',
         marginLeft: theme.spacing(2),
         margin: theme.spacing(1)
     },
     truckTags: {
         display: 'flex',
         alignContent: 'center',
+        justifyContent: 'center',
         flexWrap: 'wrap',
-        paddingTop: '20px',
-        paddingLeft: '30px'
+    },
+    truckTag: {
+        marginLeft: '5px',
+        marginRight: '5px'
     },
     currentLocation: {
         fontSize: '20px'
@@ -50,8 +52,11 @@ const useStyles = makeStyles((theme) => ({
         fontSize: '14 px',
         marginBottom: 10,
         margin: theme.spacing(1)
+    },
+    reviewDialog: {
+        maxWidth: '500px'
     }
-}));
+});
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -196,7 +201,7 @@ class TruckPage extends Component {
      * used in the URL
      */
     componentDidMount() {
-
+        this.fetchData();
     }
 
     /**
@@ -243,6 +248,7 @@ class TruckPage extends Component {
     }
 
     render() {
+        const { classes } = this.props;
         /**
          * display the information
          */
@@ -255,9 +261,9 @@ class TruckPage extends Component {
                 </Typography>}
 
                 {/**TAGS*/}
-                {this.state.truckFound && this.state.tags.length > 0 && <div align="center" className={useStyles.truckTags}>
+                {this.state.truckFound && this.state.tags.length > 0 && <div align="center" className={classes.truckTags}>
                     {this.state.tags.map((t, i) => (
-                        <Chip key={i} label={t.name}/>
+                        <Chip className={classes.truckTag} key={i} label={t.name}/>
                     ))}
                 </div>}
 
@@ -268,50 +274,53 @@ class TruckPage extends Component {
                 </div>}
 
                 {/**SUBSCRIBE BUTTON*/}
-                {this.state.userId &&
+                {this.state.truckFound && this.state.userId &&
                 <div align="center">
                     <Button color={this.state.subscribed ? "secondary" : "primary"} variant="contained" onClick={this.toggleSubscribe}>{this.state.subscribed ? "Unsubscribe" : "Subscribe"}</Button>
                 </div>}
 
                 {/**DESCRIPTION*/}
                 {this.state.truckFound &&
-                    <div>
-                        <CardHeader title="Description"/>
-                        <CardContent>
-                            <Typography variant="body1" component="p" gutterbottom className={useStyles.text}>
-                                {this.state.truck.description}
-                            </Typography>
-                        </CardContent>
-                    </div>}
-                <Divider variant="inset"/>
+                    <React.Fragment>
+                        <Typography variant="title" component="h2" gutterbottom>
+                            Description
+                        </Typography>
+                        <Typography variant="body1" component="p" gutterbottom className={classes.text}>
+                            {this.state.truck.description}
+                        </Typography>
+                        <Divider/>
+                    </React.Fragment>
+                }
 
                 {/**LICENSE*/}
                 {this.state.truckFound &&
-                <div>
-                    <CardHeader title={"License Plate"}/>
-                    <CardContent>
-                        <Typography variant="body1" component="p" gutterbottom className={useStyles.text}>
+                    <React.Fragment>
+                        <Typography variant="title" component="h2" gutterbottom>
+                            License Plate
+                        </Typography>
+                        <Typography variant="body1" component="p" gutterbottom className={classes.text}>
                             {this.state.truck.licensePlate}
                         </Typography>
-                    </CardContent>
-                </div>}
-                <Divider variant="inset"/>
+                        <Divider/>
+                    </React.Fragment>
+                }
 
                 {/**OWNER*/}
                 {this.state.truckFound &&
-                <div>
-                    <CardHeader title={"Owner"}/>
-                    <CardContent>
-                        <Typography variant="body1" component="p" gutterbottom className={useStyles.text}>
+                    <React.Fragment>
+                        <Typography variant="title" component="h2" gutterbottom>
+                            Owner
+                        </Typography>
+                        <Typography variant="body1" component="p" gutterbottom className={classes.text}>
                             {this.state.truck.owner.firstName} {this.state.truck.owner.lastName}
                         </Typography>
-                    </CardContent>
-                </div>}
-                <Divider variant="inset"/>
+                        <Divider/>
+                    </React.Fragment>
+                }
 
                 <br/>
                 {/**CURRENT LOCATION*/}
-                {this.state.truckFound && this.state.truck.currentLocation && <div className={useStyles.currentLocation}>
+                {this.state.truckFound && this.state.truck.currentLocation && <div className={classes.currentLocation}>
                     <CardHeader title={"Current Location"}/>
                     <MyLocationIcon/>  <strong>{this.state.truck.currentLocation?.location}</strong>
                 </div>}
@@ -351,15 +360,13 @@ class TruckPage extends Component {
                                 {format(new Date(r.reviewTimestamp), "MM-dd-yyyy, HH:mm")}
                             </Typography>
                             <Link href={`/user/${r.user.id}`}>
-                                <Typography variant="subtitle 1" component="h5" className={useStyles.review} gutterBottom>
+                                <Typography variant="subtitle 1" component="h5" className={classes.review} gutterBottom>
                                     By: {r.user.firstName} {r.user.lastName}
                                 </Typography>
                             </Link>
 
                             <Rating precision={0.5} value={r.rating} size="small" readOnly/>
-                            <Typography variant="subtitle 2" component="h4" >
-                                {r.comment}
-                            </Typography>
+                                {r.comment?.split('\n').map(line => <p>{line}</p>)}
                             <Divider/>
                         </div>
                     ))}
@@ -370,7 +377,7 @@ class TruckPage extends Component {
                 <Card>
                     <CardHeader title={"Reviews"}/>
                     <CardContent>
-                        <Typography variant="body1" component="p" gutterbottom className={useStyles.text}>
+                        <Typography variant="body1" component="p" gutterbottom className={classes.text}>
                             No reviews for <strong>{this.state.truck.name}</strong>
                         </Typography>
                     </CardContent>
@@ -384,13 +391,13 @@ class TruckPage extends Component {
                     </Typography>
                 </Button>}
 
-                <Dialog open={this.state.openReview} aria-labelledby="form-dialog-title">
+                <Dialog fullWidth maxWidth="md" open={this.state.openReview} aria-labelledby="form-dialog-title">
                     <DialogTitle id="form-dialog-title">Review for {this.state.truck.name}</DialogTitle>
                     <DialogContent>
                         <InputLabel>
                             Rating
                         </InputLabel>
-                        <div className={useStyles.ratingContainer}>
+                        <div className={classes.ratingContainer}>
                             <Rating
                                 name="preferredRating" precision={0.5} value={this.state.rating}
                                 onChange={(event, newValue) => {
@@ -433,4 +440,4 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
 }
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(TruckPage));
+export default withStyles(truckPageStyles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(TruckPage)));
