@@ -164,13 +164,13 @@ class RecommendationServiceTest {
 
     private Review createHighReview() {
         Review review = new Review();
-        review.setRating((short) 4);
+        review.setRating(4.0);
         return review;
     }
 
     private Review createLowReview() {
         Review review = new Review();
-        review.setRating((short) 2);
+        review.setRating(2.0);
         return review;
     }
 
