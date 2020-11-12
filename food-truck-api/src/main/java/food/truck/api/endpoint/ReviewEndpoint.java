@@ -66,16 +66,6 @@ public class ReviewEndpoint {
         return reviewService.getReviewsByTruck(truck.get());
     }
 
-    @GetMapping("/trucks/{truckID}/rating")
-    public double getAverageReviewsByTruck(@PathVariable long truckID) {
-        Optional<Truck> truck = truckService.findTruck(truckID);
-        if(truck.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        return reviewService.getAverageReviewByTruckID(truckID);
-    }
-
     // Checked
     @GetMapping("/trucks/{truckID}/reviews/{reviewID}")
     public Review findReviewById(@PathVariable Long reviewID, @PathVariable Long truckID) {
@@ -91,43 +81,7 @@ public class ReviewEndpoint {
         return rev;
     }
 
-    // Checked
-    @PutMapping("/trucks/{truckID}/reviews/{reviewID}")
-    public Review saveReview(Principal principal, @PathVariable Long reviewID, @PathVariable long truckID, @RequestBody Review review) {
-        // If the review doesn't match the reviewID provided
-        if (!review.getId().equals(reviewID)) {
-            throw new BadRequestException("Review IDs don't match");
-        }
-
-        // Get the associated Truck
-        Optional<Truck> truck = truckService.findTruck(truckID);
-        if(truck.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        // Get the associated User
-        if (principal == null) {
-            throw new UnauthorizedException();
-        }
-        log.info(principal.getName());
-        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
-        if (!Objects.equals(principal.getName(), user.getEmailAddress())) {
-            throw new UnauthorizedException();
-        }
-
-        Review rev = reviewService.saveReview(review, truck.get(), user);
-
-        // If the review's truck id doesn't match the path variable
-        if(rev.getTruck().getId() != truckID) {
-            throw new BadRequestException("Truck ID's don't match");
-        }
-
-        return rev;
-    }
-
-
     /** User Reviews Endpoints **/
-
     // Checked
     @GetMapping("/users/{userID}/reviews")
     public List<Review> findReviewsByUser(@PathVariable Long userID) {

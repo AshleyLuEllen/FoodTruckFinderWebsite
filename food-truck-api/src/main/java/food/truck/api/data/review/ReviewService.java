@@ -18,12 +18,6 @@ public class ReviewService {
         return reviewRepository.findById(reviewId);
     }
 
-    public Review saveReview(Review review, Truck truck, User user) {
-        review.setUser(user);
-        review.setTruck(truck);
-        return reviewRepository.save(review);
-    }
-
     public Review createReview(Review review, User user, Truck truck) {
         review.setUser(user);
         review.setTruck(truck);
@@ -40,10 +34,6 @@ public class ReviewService {
 
     public void deleteReview(long reviewID) {
         reviewRepository.deleteById(reviewID);
-    }
-
-    public double getAverageReviewByTruckID(long truckID) {
-        return reviewRepository.getAverageReviewByTruckID(truckID);
     }
 }
 
