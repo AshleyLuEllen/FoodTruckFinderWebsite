@@ -81,7 +81,7 @@ public class UserSubscriptionEndpoint {
     }
 
     @DeleteMapping("/users/{userId}/subscriptions/{truckId}")
-    void deleteTruckTag(@PathVariable Long userId, @PathVariable Long truckId, Principal principal){
+    void deleteUserSubscription(@PathVariable Long userId, @PathVariable Long truckId, Principal principal){
         Optional<User> userOpt = userService.findUser(userId);
         if (userOpt.isEmpty()) {
             throw new ResourceNotFoundException();

@@ -85,7 +85,7 @@ class TruckServiceTest {
     @Test
     void testDeleteTruck() {
         System.out.println("Truck being deleted");
-        truckService.deleteTruck(truckID);
+        truckService.deleteTruck(truck.getId());
 
         assertTrue(truckService.findTruck(truckID).isEmpty());
     }

@@ -42,15 +42,15 @@ public class User {
     @Column(name = "enabled", nullable = false)
     boolean enabled;
 
-    @JsonIgnore
+//    @JsonIgnore
     @Transient
     String password;
 
-    @JsonIgnore
+//    @JsonIgnore
     @Column(name = "user_location_latitude")
     Double latitude;
 
-    @JsonIgnore
+//    @JsonIgnore
     @Column(name = "user_location_longitude")
     Double longitude;
 
