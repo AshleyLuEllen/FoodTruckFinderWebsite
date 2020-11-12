@@ -67,6 +67,11 @@ public class ScheduleEndpoint {
             throw new ResourceNotFoundException();
         }
 
+        Location location = googleApiService.getLocationFromPlaceId(schedule.getPlaceId());
+//        schedule.setLocation(location.getName());
+        schedule.setLatitude(location.getLatitude());
+        schedule.setLongitude(location.getLongitude());
+
         return scheduleService.createSchedule(schedule, truck.get());
     }
 
@@ -88,12 +93,14 @@ public class ScheduleEndpoint {
         Schedule schedule = scheduleOpt.get();
         schedule.setTimeTo(newSchedule.getTimeTo());
         schedule.setTimeFrom(newSchedule.getTimeFrom());
-        Location location = googleApiService.getLocationFromPlaceId(newSchedule.getPlaceId());
-        schedule.setLocation(location.getName());
-        schedule.setLatitude(location.getLatitude());
-        schedule.setLongitude(location.getLongitude());
+        if (newSchedule.getPlaceId() != null) {
+            Location location = googleApiService.getLocationFromPlaceId(newSchedule.getPlaceId());
+            schedule.setLocation(newSchedule.getLocation());
+            schedule.setLatitude(location.getLatitude());
+            schedule.setLongitude(location.getLongitude());
+        }
 
-        return scheduleService.saveSchedule(newSchedule);
+        return scheduleService.saveSchedule(schedule);
     }
 
     @DeleteMapping("/trucks/{truckId}/schedules/{scheduleId}")

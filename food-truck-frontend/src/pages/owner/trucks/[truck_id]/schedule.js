@@ -54,12 +54,14 @@ function DraggableDialog(props) {
     const [locationStr, setLocationStr] = useState('');
     const [locationChanged, setLocationChanged] = useState(false);
     const [placeId, setPlaceId] = useState(undefined);
+    const [resultLocationStr, setResultLocationStr] = useState('');
 
     useEffect(() => {
         if (props.open === true) {
             setStartDate(props.initialData?.timeFrom || new Date());
             setEndDate(props.initialData?.timeTo || new Date());
             setLocationStr(props.initialData?.location || "");
+            setResultLocationStr(props.initialData?.location || "");
             setLocationChanged(!props.editing);
             setPlaceId(undefined)
         }
@@ -74,10 +76,14 @@ function DraggableDialog(props) {
             return;
         }
 
+        console.log(resultLocationStr)
+
         props.onSave && props.onSave({
             placeId,
             timeFrom: startDate,
-            timeTo: endDate
+            timeTo: endDate,
+            id: props?.initialData?.id,
+            location: resultLocationStr
         });
     };
 
@@ -101,6 +107,8 @@ function DraggableDialog(props) {
                         onChange={(event, newValue) => {
                             setPlaceId(newValue?.place_id);
                             setLocationChanged(true);
+                            console.log(newValue);
+                            setResultLocationStr(newValue?.structured_formatting?.main_text || newValue?.description);
                         }}
                         required
                     />
@@ -168,7 +176,9 @@ class ScheduleManagementPage extends Component {
             past: [],
             editorOpen: false,
             editing: false,
-            initialData: undefined
+            initialData: undefined,
+            upcomingSelected: [],
+            pastSelected: []
         };
 
         this.fetchData = this.fetchData.bind(this);
@@ -177,6 +187,7 @@ class ScheduleManagementPage extends Component {
         this.handleSave = this.handleSave.bind(this);
         this.triggerEdit = this.triggerEdit.bind(this);
         this.triggerCreation = this.triggerCreation.bind(this);
+        this.deleteAll = this.deleteAll.bind(this);
     }
 
     fetchData() {
@@ -216,11 +227,20 @@ class ScheduleManagementPage extends Component {
             upcoming: sl.filter(s => s.timeFrom > Date.now()).map(s => Object.assign({}, s)),
             past: sl.filter(s => s.timeFrom <= Date.now()).map(s => Object.assign({}, s)),
             loading: false
-        }, () => console.log(this.state.past));
+        });
     }
 
     deleteScheduleById(event, id) {
-        this.setSchedules([...this.state.upcoming, ...this.state.past].filter(s => s.id != id));
+        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${id}`, {
+            auth: {
+                username: this.props.auth.email,
+                password: this.props.auth.password
+            }
+        })
+        .then(res => {
+            this.setSchedules([...this.state.upcoming, ...this.state.past].filter(s => s.id != id))
+        })
+        .catch(err => console.log(err));
     }
 
     triggerCreation() {
@@ -239,11 +259,75 @@ class ScheduleManagementPage extends Component {
         });
     }
 
+    deleteAll(table) {
+        const toDelete = table === 'upcoming' ? this.state.upcomingSelected : this.state.pastSelected;
+        console.log("todelete", toDelete);
+
+        Promise.all(
+            toDelete.map(s => {
+                return axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${s}`, {
+                    auth: {
+                        username: this.props.auth.email,
+                        password: this.props.auth.password
+                    }
+                })
+            })
+        )
+        .then(res => {
+            this.setSchedules([...this.state.past, ...this.state.upcoming].filter(s => !toDelete.some(td => s.id == td)));
+        })
+        .catch(err => console.log(err))
+    }
+
     handleSave(savedData) {
-        this.setState({
-            open: false
-        });
-        console.log(savedData);
+        console.log(savedData)
+        if (this.state.editing) {
+            let schedule = {
+                id: savedData.id,
+                timeFrom: savedData.timeFrom,
+                timeTo: savedData.timeTo
+            };
+
+            if (savedData.placeId) {
+                schedule.placeId = savedData.placeId;
+                schedule.location = savedData.location;
+            }
+
+            axios.patch(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${savedData.id}`, schedule, {
+                auth: {
+                    username: this.props.auth.email,
+                    password: this.props.auth.password
+                }
+            })
+            .then(res => {
+                this.setState({
+                    open: false
+                });
+                this.fetchData();
+            })
+            .catch(err => console.log(err));
+        } else {
+            let schedule = {
+                timeFrom: savedData.timeFrom,
+                timeTo: savedData.timeTo,
+                placeId: savedData.placeId,
+                location: savedData.location,
+            };
+
+            axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`, schedule, {
+                auth: {
+                    username: this.props.auth.email,
+                    password: this.props.auth.password
+                }
+            })
+            .then(res => {
+                this.setState({
+                    open: false
+                });
+                this.fetchData();
+            })
+            .catch(err => console.log(err));
+        }
     }
 
     render() {
@@ -260,8 +344,12 @@ class ScheduleManagementPage extends Component {
             { references: 'id', color: 'secondary', label: 'Delete', action: this.deleteScheduleById }
         ]
 
-        const selectedActions = [
-            { title: "Delete All", icon: <Delete/>, action: () => alert("delete all") },
+        const selectedActionsUpcoming = [
+            { title: "Delete All", icon: <Delete/>, action: () => this.deleteAll("upcoming") },
+        ]
+
+        const selectedActionsPast = [
+            { title: "Delete All", icon: <Delete/>, action: () => this.deleteAll("past") },
         ]
 
         const unselectedActions = [
@@ -277,12 +365,13 @@ class ScheduleManagementPage extends Component {
                                 <EnhancedTable
                                     columns={columns}
                                     rowActions={rowActions}
-                                    selectedActions={selectedActions}
+                                    selectedActions={selectedActionsUpcoming}
                                     unselectedActions={unselectedActions}
                                     title="Upcoming Schedules"
                                     rows={this.state.upcoming}
                                     order="asc"
                                     orderBy="timeFrom"
+                                    onSelectionChange={data => {console.log(data);this.setState({ upcomingSelected: data })}}
                                 />
                             </Box>
                         </Grid>
@@ -291,19 +380,20 @@ class ScheduleManagementPage extends Component {
                             <EnhancedTable
                                     columns={columns}
                                     rowActions={rowActions.slice(1)}
-                                    selectedActions={selectedActions}
+                                    selectedActions={selectedActionsPast}
                                     title="Past Schedules"
                                     rows={this.state.past}
                                     order="desc"
                                     orderBy="timeFrom"
+                                    onSelectionChange={data => this.setState({ pastSelected: data })}
                                 />
                             </Box>
                         </Grid>
-                        <Grid item xs={12} md={12}>
+                        {/* <Grid item xs={12} md={12}>
                             <div className={classes.mapWrapper}>
                                 <TruckMap trucks={[]} selected={0}/>
                             </div>
-                        </Grid>
+                        </Grid> */}
                     </Grid>
                 </Container>
                 <DraggableDialog

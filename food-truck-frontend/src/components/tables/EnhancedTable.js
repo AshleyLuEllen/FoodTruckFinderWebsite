@@ -56,6 +56,12 @@ class EnhancedTable extends Component {
         if (prevProps.order !== this.props.order || prevProps.orderBy !== this.props.orderBy) {
             this.setInitialSort();
         }
+
+        if (prevProps.rows.length > this.props.rows.length) {
+            this.setState({
+                selected: []
+            });
+        }
     }
 
     setInitialSort() {
@@ -79,11 +85,19 @@ class EnhancedTable extends Component {
           this.setState({
               selected: newSelecteds
           });
+
+          if (this.props.onSelectionChange) {
+              this.props.onSelectionChange(newSelecteds);
+          }
           return;
         }
         this.setState({
             selected: []
         });
+
+        if (this.props.onSelectionChange) {
+            this.props.onSelectionChange([]);
+        }
     };
 
     handleClick = (event, id) => {
@@ -114,6 +128,10 @@ class EnhancedTable extends Component {
         this.setState({
             selected: newSelected
         });
+
+        if (this.props.onSelectionChange) {
+            this.props.onSelectionChange(newSelected);
+        }
     };
 
     handleChangePage = (event, newPage) => {
