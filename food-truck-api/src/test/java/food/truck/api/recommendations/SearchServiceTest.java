@@ -226,13 +226,13 @@ class SearchServiceTest {
 
     private Review createHighReview() {
         Review review = new Review();
-        review.setRating((short) 5);
+        review.setRating(5.0);
         return review;
     }
 
     private Review createLowReview() {
         Review review = new Review();
-        review.setRating((short) 3);
+        review.setRating(3.0);
         return review;
     }
 
