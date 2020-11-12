@@ -28,18 +28,6 @@ public class UserNotificationService {
             .collect(Collectors.toList());
     }
 
-//    public void addUserSavedNotification(User user, TruckNotification notification) {
-//        UserNotification savedNotification = new UserNotification();
-//        savedNotification.setNotification(notification);
-//        savedNotification.setUser(user);
-//
-//        userNotificationRepository.save(savedNotification);
-//    }
-//
-//    public void deleteUserSavedNotification(User user, TruckNotification notification) {
-//        userNotificationRepository.deleteById(new UserNotificationId(user.getId(), notification.getId()));
-//    }
-
     public List<TruckNotification> findAllNotifications(User user) {
         List<TruckNotification> notificationList = truckNotificationRepository.findAllByUser(user.getId());
 

@@ -98,7 +98,6 @@ public class UserNotificationServiceTest {
         TruckNotification testNotification = new TruckNotification();
         testNotification.setDescription("This is the description");
         testNotification.setSubject("SALE");
-//        testNotification.setPublished(true);
         final long notId = truckNotificationService.createTruckNotification(testNotification, truck).getId();
 
         Optional<TruckNotification> notificationOpt = this.truckNotificationService.findTruckNotification(notId);
@@ -119,7 +118,6 @@ public class UserNotificationServiceTest {
         TruckNotification testNotification2 = new TruckNotification();
         testNotification2.setDescription("This is the description");
         testNotification2.setSubject("SALE");
-//        testNotification2.setPublished(true);
         final long notId2 = truckNotificationService.createTruckNotification(testNotification2, truck).getId();
 
         Optional<TruckNotification> notification2Opt = this.truckNotificationService.findTruckNotification(notId2);
