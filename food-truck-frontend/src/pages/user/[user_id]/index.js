@@ -48,7 +48,7 @@ class UserPage extends Component {
                 { firstName: "Remy", lastName: "Sharp", avatarURL: "/static/images/avatar/1.jpg", id: 1 },
                 { firstName: "Remy", lastName: "Sharp", avatarURL: "/static/images/avatar/1.jpg", id: 1 },
             ],
-            subscribedTrucks: []
+            subscribedTrucks: [],viewerId: undefined
         };
         this.fetchData = this.fetchData.bind(this);
     }
@@ -78,7 +78,8 @@ class UserPage extends Component {
                 console.log(res.data);
                 if (this.state.userID == res.data.id) {
                     this.setState({
-                        isMe: true
+                        isMe: true,
+                        viewerId: res.data.id
                     });
                 }
 
@@ -139,7 +140,7 @@ class UserPage extends Component {
                         <Box style={{ textAlign: "left", maxHeight: 700, overflow: "auto" }}>
                             {this.state.subscribedTrucks.map((tr, i) => (
                                 // <TruckCard className={classes.truckCard} truck={t} subscribed={true} tags={["$$", "Cajun", "Comfort Food", "Lighthearted", "Fast"]} image="https://miro.medium.com/max/8064/1*5_J_YlYTmwRvigEr3JKCZg.jpeg" />
-                                <TruckCard key={i} className={classes.truckCard} truck={tr} tags={tr.tags.map(tag => tag.tag.name)}/>
+                                <TruckCard key={i} className={classes.truckCard} truck={tr} tags={tr.tags.map(tag => tag.tag.name)} userId={this.state.viewerId}/>
                             ))}
                         </Box>
                     </Grid>

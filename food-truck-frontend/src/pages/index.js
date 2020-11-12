@@ -38,7 +38,7 @@ const dashboardStyles = theme => ({
 class DashboardPage extends Component {
     constructor(props) {
         super(props);
-        this.state = { loading: true, user: undefined, subscriptions: [], recommendations: [], currentlySelected: undefined };
+        this.state = { userId: undefined, loading: true, user: undefined, subscriptions: [], recommendations: [], currentlySelected: undefined };
     }
 
     componentDidMount() {
@@ -50,6 +50,9 @@ class DashboardPage extends Component {
                 }
             })
             .then(userres => {
+                this.setState({
+                    userId: userres.data.id
+                });
                 Promise.all([
                     axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userres.data.id}/recommendations`),
                     axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userres.data.id}/subscriptions`)
@@ -88,13 +91,13 @@ class DashboardPage extends Component {
                                 {this.state.recommendations.length > 0 && <Fragment>
                                     <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>{this.state.user?.firstName}Recommendations</Typography>
                                     {this.state.recommendations.map((tr, i) => (
-                                        <TruckCard key={i} className={classes.truckCard} truck={tr} tags={tr.tags.map(tag => tag.tag.name)} onClick={evt => this.setState({currentlySelected: i})}/>
+                                        <TruckCard key={i} className={classes.truckCard} truck={tr} tags={tr.tags.map(tag => tag.tag.name)} onClick={evt => this.setState({currentlySelected: i})} userId={this.state.userId}/>
                                     ))}
                                     <Divider style={{ marginTop: "10px", marginBottom: "10px" }}/>
                                 </Fragment>}
                                 <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>{this.state.user?.firstName}Your Subscriptions</Typography>
                                 {this.state.subscriptions.map((tr, i) => (
-                                    <TruckCard key={100 + i} className={classes.truckCard} truck={tr} tags={tr.tags.map(tag => tag.tag.name)} onClick={evt => this.setState({currentlySelected: this.state.recommendations.length + i})}/>
+                                    <TruckCard key={100 + i} className={classes.truckCard} truck={tr} tags={tr.tags.map(tag => tag.tag.name)} onClick={evt => this.setState({currentlySelected: this.state.recommendations.length + i})} userId={this.state.userId}/>
                                 ))}
                             </Box>
                         </Grid>
