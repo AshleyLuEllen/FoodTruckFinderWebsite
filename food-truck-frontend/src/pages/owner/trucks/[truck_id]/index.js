@@ -18,6 +18,10 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableRow from "@material-ui/core/TableRow";
+import TableCell from "@material-ui/core/TableCell";
 
 const useStyles = makeStyles((theme) => ({
     text: {
@@ -177,18 +181,31 @@ class Information extends Component {
 
                 {/**CURRENT LOCATION*/}
                 {this.state.truckFound && this.state.truck.currentLocation && <div className={useStyles.currentLocation}>
-                    <MyLocationIcon/>
-                    <strong>{this.state.truck.currentLocation?.location}</strong>
+                    <CardHeader title={"Current Location"}/>
+                    <MyLocationIcon/>  <strong>{this.state.truck.currentLocation?.location}</strong>
                 </div>}
 
+                <br/>
                 {/**SCHEDULE*/}
-                {this.state.truckFound && this.state.schedules.length > 0 && <div>
-                    {this.state.schedules.map((s, i) => (
-                        <Typography key={i} variant="body1">
-                            <ScheduleIconRounded/> {s.location}: {format(new Date(s.timeFrom), "MM-dd-yyyy, HH:mm")}-{format(new Date(s.timeTo), "MM-dd-yyyy, HH:mm")}
-                        </Typography>
-                    ))}
-                </div>}
+                {this.state.truckFound && this.state.schedules.length > 0 && <Card>
+                    <CardHeader title={"Schedule"}/>
+                    <CardContent>
+                        <Table size="small">
+                            <TableBody>
+                                {this.state.schedules.map((s, i) => (
+                                    <TableRow>
+                                        <TableCell>
+                                            <Typography key={i} variant="body1">
+                                                <ScheduleIconRounded/> {s.location}: {format(new Date(s.timeFrom), "MM/dd/yyyy HH:mm")} to {format(new Date(s.timeTo), "MM/dd/yyyy HH:mm")}
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>
+
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>}
                 <br/>
 
                 {/**BUTTONS*/}

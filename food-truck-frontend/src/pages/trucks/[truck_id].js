@@ -19,6 +19,10 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
 import Dialog from "@material-ui/core/Dialog";
+import Table from "@material-ui/core/Table";
+import TableCell from "@material-ui/core/TableCell";
+import TableRow from "@material-ui/core/TableRow";
+import TableBody from "@material-ui/core/TableBody";
 
 const useStyles = makeStyles((theme) => ({
     text: {
@@ -34,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
         paddingLeft: '30px'
     },
     currentLocation: {
-        fontSize: '16px'
+        fontSize: '20px'
     },
     ratingContainer: {
         display: "flex",
@@ -234,20 +238,34 @@ class TruckPage extends Component {
                 </div>}
                 <Divider variant="inset"/>
 
+                <br/>
                 {/**CURRENT LOCATION*/}
                 {this.state.truckFound && this.state.truck.currentLocation && <div className={useStyles.currentLocation}>
-                    <MyLocationIcon/>
-                    <strong>{this.state.truck.currentLocation?.location}</strong>
+                    <CardHeader title={"Current Location"}/>
+                    <MyLocationIcon/>  <strong>{this.state.truck.currentLocation?.location}</strong>
                 </div>}
 
+                <br/>
                 {/**SCHEDULE*/}
-                {this.state.truckFound && this.state.schedules.length > 0 && <div>
-                    {this.state.schedules.map((s, i) => (
-                        <Typography key={i} variant="body1">
-                            <ScheduleIconRounded/> {s.location}: {format(new Date(s.timeFrom), "MM-dd-yyyy, HH:mm")}-{format(new Date(s.timeTo), "MM-dd-yyyy, HH:mm")}
-                        </Typography>
-                    ))}
-                </div>}
+                {this.state.truckFound && this.state.schedules.length > 0 && <Card>
+                    <CardHeader title={"Schedule"}/>
+                    <CardContent>
+                        <Table size="small">
+                            <TableBody>
+                                {this.state.schedules.map((s, i) => (
+                                    <TableRow>
+                                        <TableCell>
+                                            <Typography key={i} variant="body1">
+                                                <ScheduleIconRounded/> {s.location}: {format(new Date(s.timeFrom), "MM/dd/yyyy HH:mm")} to {format(new Date(s.timeTo), "MM/dd/yyyy HH:mm")}
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>
+
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>}
                 <br/>
 
                 {/**REVIEWS*/}
@@ -261,9 +279,12 @@ class TruckPage extends Component {
                             <Typography variant="h8" component="h3" gutterBottom>
                                 {format(new Date(r.reviewTimestamp), "MM-dd-yyyy, HH:mm")}
                             </Typography>
-                            <Typography variant="subtitle 1" component="h5" className={useStyles.review} gutterBottom>
-                                By: {r.user.firstName} {r.user.lastName}
-                            </Typography>
+                            <Link href={`/users/${r.user.id}`}>
+                                <Typography variant="subtitle 1" component="h5" className={useStyles.review} gutterBottom>
+                                    By: {r.user.firstName} {r.user.lastName}
+                                </Typography>
+                            </Link>
+
                             <Rating precision={0.5} value={r.rating} size="small" readOnly/>
                             <Typography variant="subtitle 2" component="h6" >
                                 {r.comment}
