@@ -68,11 +68,14 @@ class TruckPage extends Component {
             reviews: [],
             truckFound: false,
             openReview: false,
+            subscribed: false,
+            userId: false,
 
             reviewComment: "",
             rating: -1
         };
 
+        this.toggleSubscribe = this.toggleSubscribe.bind(this);
         this.writeReview = this.writeReview.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleCancel = this.handleCancel.bind(this);
@@ -106,6 +109,34 @@ class TruckPage extends Component {
             this.setState({
                 truck: '',
                 tags: []
+            });
+        });
+
+        axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
+            auth: {
+                username: this.props.auth.email,
+                password: this.props.auth.password
+            }
+        })
+        .then(res => {
+            this.setState({
+                userId: res.data.id
+            });
+            axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/subscriptions/${this.props.router.query.truck_id}`)
+            .then(res => {
+                this.setState({
+                    subscribed: true
+                });
+            })
+            .catch(err => {
+                this.setState({
+                    subscribed: false
+                });
+            })
+        })
+        .catch(err => {
+            this.setState({
+                userId: undefined
             });
         });
     }
@@ -177,6 +208,40 @@ class TruckPage extends Component {
         }
     }
 
+    toggleSubscribe() {
+        if (!this.props.auth.isLoggedIn) {
+            alert("To subscribe to a food truck, you need to be logged in. Click the log-in button in the top right to log in or create an account.");
+        } else {
+            if (!this.state.subscribed) {
+                axios.post(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/subscriptions/${this.state.truck.id}`, {}, {
+                    auth: {
+                        username: this.props.auth.email,
+                        password: this.props.auth.password
+                    }
+                })
+                .then(res => {
+                    this.setState({
+                        subscribed: true
+                    });
+                })
+                .catch(err => console.log(err));
+            } else {
+                axios.delete(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/subscriptions/${this.state.truck.id}`, {
+                    auth: {
+                        username: this.props.auth.email,
+                        password: this.props.auth.password
+                    }
+                })
+                .then(res => {
+                    this.setState({
+                        subscribed: false
+                    });
+                })
+                .catch(err => console.log(err));
+            }
+        }
+    }
+
     render() {
         /**
          * display the information
@@ -200,6 +265,12 @@ class TruckPage extends Component {
                 {this.state.truckFound && this.state.truck.rating !== null &&
                 <div align="center">
                     <Rating name="rating" precision={0.5} value={this.state.truck.rating} size="medium" readOnly />
+                </div>}
+
+                {/**SUBSCRIBE BUTTON*/}
+                {this.state.userId &&
+                <div align="center">
+                    <Button color={this.state.subscribed ? "secondary" : "primary"} variant="contained" onClick={this.toggleSubscribe}>{this.state.subscribed ? "Unsubscribe" : "Subscribe"}</Button>
                 </div>}
 
                 {/**DESCRIPTION*/}
@@ -279,14 +350,14 @@ class TruckPage extends Component {
                             <Typography variant="h8" component="h3" gutterBottom>
                                 {format(new Date(r.reviewTimestamp), "MM-dd-yyyy, HH:mm")}
                             </Typography>
-                            <Link href={`/users/${r.user.id}`}>
+                            <Link href={`/user/${r.user.id}`}>
                                 <Typography variant="subtitle 1" component="h5" className={useStyles.review} gutterBottom>
                                     By: {r.user.firstName} {r.user.lastName}
                                 </Typography>
                             </Link>
 
                             <Rating precision={0.5} value={r.rating} size="small" readOnly/>
-                            <Typography variant="subtitle 2" component="h6" >
+                            <Typography variant="subtitle 2" component="h4" >
                                 {r.comment}
                             </Typography>
                             <Divider/>
