@@ -8,7 +8,7 @@ class CreateNewTruck extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {license_plate: '', payment_types: '', description:'', truck_name:''};
+        this.state = {license_plate: '', description:'', truck_name:''};
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleChangeStatus = this.handleChangeStatus.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -35,7 +35,7 @@ class CreateNewTruck extends Component {
     createNewTruck(){
         const truck = {
             licensePlate: this.state.license_plate,
-            payment_types: this.state.payment_types,
+            payment_types: 0,
             description: this.state.description,
             name: this.state.truck_name
         }
@@ -68,26 +68,6 @@ class CreateNewTruck extends Component {
                         <tbody>
                         <tr>
                             <td>
-                                <label htmlFor="license_plate">
-                                    Plate Number:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="license_plate" type="text" value={this.state.license_plate} onChange={this.handleInputChange} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label htmlFor="payment_types">
-                                    Payment Types:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="payment_types" type="text" value={this.state.payment_types} onChange={this.handleInputChange}/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
                                 <label htmlFor="description">
                                     Description:
                                 </label>
@@ -104,6 +84,16 @@ class CreateNewTruck extends Component {
                             </td>
                             <td>
                                 <input name="truck_name" type="text" value={this.state.truck_name} onChange={this.handleInputChange} />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label htmlFor="license_plate">
+                                    Plate Number:
+                                </label>
+                            </td>
+                            <td>
+                                <input name="license_plate" type="text" value={this.state.license_plate} onChange={this.handleInputChange} />
                             </td>
                         </tr>
                         </tbody>
