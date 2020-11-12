@@ -17,6 +17,8 @@ import food.truck.api.data.user.UserRepository;
 import food.truck.api.data.user.UserService;
 import food.truck.api.util.Location;
 import lombok.extern.log4j.Log4j2;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -73,6 +75,7 @@ class RecommendationServiceTest {
     private Tag tagB;
     private Tag tagC;
 
+    @BeforeEach
     private void setupRecommendationTest() {
         // Test user
         User testUser = new User();
@@ -123,6 +126,7 @@ class RecommendationServiceTest {
         this.tagC = tagCOpt.get();
     }
 
+    @AfterEach
     private void cleanUpRecommendationTest() {
         this.userRepository.deleteAll();
         this.tagRepository.deleteAll();
@@ -172,8 +176,6 @@ class RecommendationServiceTest {
 
     @Test
     public void testRecommendationsLocation() {
-        this.setupRecommendationTest();
-
         int numTrucks = 0;
 
         // Create close truck
@@ -218,16 +220,11 @@ class RecommendationServiceTest {
             closeTruck,
             farTruck
         }).map(Truck::getName).toArray(), recommendationsWithoutSubscriptions.stream().map(Truck::getName).toArray());
-
-
-        this.cleanUpRecommendationTest();
     }
 
 
     @Test
     public void testRecommendationsRating() {
-        this.setupRecommendationTest();
-
         int numTrucks = 0;
 
         // Create no rating truck
@@ -278,15 +275,10 @@ class RecommendationServiceTest {
             lowRatingTruck,
             noRatingTruck
         }).map(Truck::getName).toArray(), recommendationsWithoutSubscriptions.stream().map(Truck::getName).toArray());
-
-
-        this.cleanUpRecommendationTest();
     }
 
     @Test
     public void testRecommendationsTags() {
-        this.setupRecommendationTest();
-
         int numTrucks = 0;
 
         // Create subscribed truck
@@ -374,7 +366,5 @@ class RecommendationServiceTest {
             oneTagTruck,
             noTagTruck
         }).map(Truck::getName).toArray(), recommendationsWithoutSubscriptions.stream().map(Truck::getName).toArray());
-
-        this.cleanUpRecommendationTest();
     }
 }

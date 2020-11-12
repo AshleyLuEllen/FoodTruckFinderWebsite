@@ -11,6 +11,12 @@ import lombok.NoArgsConstructor;
 public class Location {
     private Double latitude;
     private Double longitude;
+    private String name;
+
+    public Location(Double latitude, Double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 
     public static Location fromUser(User user) {
         return new Location(user.getLatitude(), user.getLongitude());

@@ -79,20 +79,20 @@ class ScheduleEndpointTest {
         assertEquals(schedule.getId(), found.get().getId());
     }
 
-    @Test
-    void createSchedule() {
-        Principal p = new Principal() {
-            @Override
-            public String getName() {
-                return user1.getEmailAddress();
-            }
-        };
-
-        authEndpoint.authenticate();
-        Schedule f = scheduleEndpoint.createSchedule(truck.getId(), schedule);
-
-        assertEquals(user1, f.getTruck().getOwner());
-    }
+//    @Test
+//    void createSchedule() {
+//        Principal p = new Principal() {
+//            @Override
+//            public String getName() {
+//                return user1.getEmailAddress();
+//            }
+//        };
+//
+//        authEndpoint.authenticate();
+//        Schedule f = scheduleEndpoint.createSchedule(truck.getId(), schedule);
+//
+//        assertEquals(user1, f.getTruck().getOwner());
+//    }
 
     @Test
     void saveTruck() {
@@ -106,7 +106,7 @@ class ScheduleEndpointTest {
         ZonedDateTime timeTo = ZonedDateTime.of(2020, 12, 1, 4, 30, 00, 00, zoneId );
         schedule.setTimeTo(timeTo);
 
-        Schedule s2 = scheduleEndpoint.saveTruck(truck.getId(), schedule.getId(), schedule);
+        Schedule s2 = scheduleEndpoint.saveTruckSchedule(truck.getId(), schedule.getId(), schedule);
 
         assertEquals(schedule.getId(), s2.getId());
         assertEquals(schedule.getTruck().getName(), s2.getTruck().getName());

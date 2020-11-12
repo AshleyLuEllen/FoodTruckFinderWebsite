@@ -1,7 +1,6 @@
 package food.truck.api.recommendations;
 
 import food.truck.api.data.review.Review;
-import food.truck.api.data.review.ReviewRepository;
 import food.truck.api.data.review.ReviewService;
 import food.truck.api.data.schedule.Schedule;
 import food.truck.api.data.schedule.ScheduleRepository;
@@ -11,7 +10,6 @@ import food.truck.api.data.tag.Tag;
 import food.truck.api.data.tag.TagRepository;
 import food.truck.api.data.tag.TagService;
 import food.truck.api.data.truck.Truck;
-import food.truck.api.data.truck.TruckRepository;
 import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.truck_tag.TruckTagService;
 import food.truck.api.data.user.User;
@@ -20,6 +18,8 @@ import food.truck.api.data.user.UserService;
 import food.truck.api.util.Location;
 import food.truck.api.util.SearchQuery;
 import lombok.extern.log4j.Log4j2;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -42,9 +42,6 @@ class SearchServiceTest {
     private RecommendationService recommendationService;
 
     @Autowired
-    private SubscriptionService subscriptionService;
-
-    @Autowired
     private TruckTagService truckTagService;
 
     @Autowired
@@ -55,9 +52,6 @@ class SearchServiceTest {
 
     @Autowired
     private TruckService truckService;
-
-    @Autowired
-    private TruckRepository truckRepository;
 
     @Autowired
     private UserService userService;
@@ -74,10 +68,6 @@ class SearchServiceTest {
     @Autowired
     private ReviewService reviewService;
 
-    @Autowired
-    private ReviewRepository reviewRepository;
-
-    private User owner;
     private Tag tagA;
     private Tag tagB;
     private Tag tagC;
@@ -85,6 +75,7 @@ class SearchServiceTest {
     private Truck farTruck;
     private Truck furtherTruck;
 
+    @BeforeEach
     private void setupSearchTest() {
         // Test user
         User testUser = new User();
@@ -120,7 +111,7 @@ class SearchServiceTest {
         // Get DAO objects
         Optional<User> ownerOpt = this.userService.findUser(userId);
         assertTrue(ownerOpt.isPresent());
-        this.owner = ownerOpt.get();
+        User owner = ownerOpt.get();
 
         Optional<Tag> tagAOpt = this.tagService.findTag(tagAId);
         assertTrue(tagAOpt.isPresent());
@@ -141,7 +132,7 @@ class SearchServiceTest {
         Truck closeTruck = new Truck();
         closeTruck.setName("Close Truck");
         closeTruck.setDescription("This is the truck that is close ABC DEF");
-        final long closeTruckId = this.truckService.createTruck(closeTruck, this.owner).getId();
+        final long closeTruckId = this.truckService.createTruck(closeTruck, owner).getId();
         this.scheduleService.createSchedule(this.createTestSchedule(), closeTruck);
         this.truckTagService.addTruckTag(closeTruck, this.tagA);
         this.truckTagService.addTruckTag(closeTruck, this.tagB);
@@ -152,10 +143,10 @@ class SearchServiceTest {
         Truck farTruck = new Truck();
         farTruck.setName("Far Truck ABC DEF");
         farTruck.setDescription("This is the truck that is far");
-        final long farTruckId = this.truckService.createTruck(farTruck, this.owner).getId();
+        final long farTruckId = this.truckService.createTruck(farTruck, owner).getId();
         this.scheduleService.createSchedule(this.createFarSchedule(), farTruck);
         this.truckTagService.addTruckTag(closeTruck, this.tagA);
-        this.reviewService.createReview(this.createLowReview(), this.owner, farTruck);
+        this.reviewService.createReview(this.createLowReview(), owner, farTruck);
         ++numTrucks;
         log.info("Created far truck");
 
@@ -163,9 +154,9 @@ class SearchServiceTest {
         Truck furtherTruck = new Truck();
         furtherTruck.setName("Further Truck GHI");
         furtherTruck.setDescription("This is the truck that is further ABC DEF");
-        final long furtherTruckId = this.truckService.createTruck(furtherTruck, this.owner).getId();
+        final long furtherTruckId = this.truckService.createTruck(furtherTruck, owner).getId();
         this.scheduleService.createSchedule(this.createFurtherSchedule(), furtherTruck);
-        this.reviewService.createReview(this.createHighReview(), this.owner, furtherTruck);
+        this.reviewService.createReview(this.createHighReview(), owner, furtherTruck);
         ++numTrucks;
         log.info("Created further truck");
 
@@ -189,6 +180,7 @@ class SearchServiceTest {
         this.furtherTruck = furtherTruckOpt.get();
     }
 
+    @AfterEach
     private void cleanUpSearchTest() {
         this.userRepository.deleteAll();
         this.tagRepository.deleteAll();
@@ -238,8 +230,6 @@ class SearchServiceTest {
 
     @Test
     public void testSearchByLocation() {
-        this.setupSearchTest();
-
         // Get search results
         SearchQuery searchQuery = new SearchQuery();
         searchQuery.setPreferredRating(6L);
@@ -250,14 +240,10 @@ class SearchServiceTest {
             this.farTruck,
             this.furtherTruck,
         }).map(Truck::getName).toArray(), searchResults.stream().map(Truck::getName).toArray());
-
-        this.cleanUpSearchTest();
     }
 
     @Test
     public void testSearchByRating() {
-        this.setupSearchTest();
-
         // Get search results
         SearchQuery searchQuery = new SearchQuery();
         List<Truck> searchResults = this.recommendationService.getSearchResults(searchQuery);
@@ -266,14 +252,10 @@ class SearchServiceTest {
             this.farTruck,
             this.closeTruck,
         }).map(Truck::getName).toArray(), searchResults.stream().map(Truck::getName).toArray());
-
-        this.cleanUpSearchTest();
     }
 
     @Test
     public void testSearchByQuery() {
-        this.setupSearchTest();
-
         // Get search results
         SearchQuery searchQuery = new SearchQuery();
         searchQuery.setQuery("abc ghi def");
@@ -285,14 +267,10 @@ class SearchServiceTest {
             this.closeTruck,
             this.farTruck,
         }).map(Truck::getName).toArray(), searchResults.stream().map(Truck::getName).toArray());
-
-        this.cleanUpSearchTest();
     }
 
     @Test
     public void testSearchByTags() {
-        this.setupSearchTest();
-
         // Get search results
         SearchQuery searchQuery = new SearchQuery();
         searchQuery.setTags(List.of(this.tagA, this.tagB, this.tagC));
@@ -304,7 +282,5 @@ class SearchServiceTest {
             this.farTruck,
             this.furtherTruck,
         }).map(Truck::getName).toArray(), searchResults.stream().map(Truck::getName).toArray());
-
-        this.cleanUpSearchTest();
     }
 }

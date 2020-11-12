@@ -92,6 +92,11 @@ export default function LocationInput(props) {
     };
   }, [value, inputValue, fetch]);
 
+  React.useEffect(() => {
+      setInputValue(props.initialValue);
+      setValue(props.initialValue)
+  }, [props.initialValue]);
+
   return (
     <Autocomplete
       id="google-map-demo"
@@ -114,7 +119,7 @@ export default function LocationInput(props) {
         setInputValue(newInputValue);
       }}
       renderInput={(params) => (
-        <TextField {...params} label="Location" variant="outlined" fullWidth />
+        <TextField {...params} label="Location" variant="outlined" required={props.required ? true : false} fullWidth error={props.required && !value}/>
       )}
       renderOption={(option) => {
         const matches = option.structured_formatting.main_text_matched_substrings;

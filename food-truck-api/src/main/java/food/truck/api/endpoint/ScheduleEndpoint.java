@@ -1,5 +1,6 @@
 package food.truck.api.endpoint;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import food.truck.api.data.schedule.Schedule;
 import food.truck.api.data.schedule.ScheduleService;
 import food.truck.api.data.truck.Truck;
@@ -7,6 +8,8 @@ import food.truck.api.data.truck.TruckService;
 import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
+import food.truck.api.util.GoogleApiService;
+import food.truck.api.util.Location;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +29,9 @@ public class ScheduleEndpoint {
 
     @Autowired
     private TruckService truckService;
+
+    @Autowired
+    private GoogleApiService googleApiService;
 
     @Autowired
     private UserService userService;
@@ -61,6 +67,11 @@ public class ScheduleEndpoint {
             throw new ResourceNotFoundException();
         }
 
+        Location location = googleApiService.getLocationFromPlaceId(schedule.getPlaceId());
+//        schedule.setLocation(location.getName());
+        schedule.setLatitude(location.getLatitude());
+        schedule.setLongitude(location.getLongitude());
+
         return scheduleService.createSchedule(schedule, truck.get());
     }
 
@@ -69,10 +80,24 @@ public class ScheduleEndpoint {
         return scheduleService.findSchedule(scheduleId).orElseThrow(ResourceNotFoundException::new);
     }
 
-    @PutMapping("/trucks/{truckId}/schedules/{scheduleId}")
-    public Schedule saveTruck(@PathVariable Long truckId, @PathVariable Long scheduleId, @RequestBody Schedule schedule) {
-        if (!schedule.getId().equals(scheduleId)) {
+    @PatchMapping("/trucks/{truckId}/schedules/{scheduleId}")
+    public Schedule saveTruckSchedule(@PathVariable Long truckId, @PathVariable Long scheduleId, @RequestBody Schedule newSchedule) {
+        if (!newSchedule.getId().equals(scheduleId)) {
             throw new BadRequestException("IDs do not match");
+        }
+
+        Optional<Schedule> scheduleOpt = scheduleService.findSchedule(scheduleId);
+        if (scheduleOpt.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+        Schedule schedule = scheduleOpt.get();
+        schedule.setTimeTo(newSchedule.getTimeTo());
+        schedule.setTimeFrom(newSchedule.getTimeFrom());
+        if (newSchedule.getPlaceId() != null) {
+            Location location = googleApiService.getLocationFromPlaceId(newSchedule.getPlaceId());
+            schedule.setLocation(newSchedule.getLocation());
+            schedule.setLatitude(location.getLatitude());
+            schedule.setLongitude(location.getLongitude());
         }
 
         return scheduleService.saveSchedule(schedule);
