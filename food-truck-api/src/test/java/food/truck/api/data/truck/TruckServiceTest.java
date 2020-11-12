@@ -1,4 +1,7 @@
 package food.truck.api.data.truck;
+
+import food.truck.api.data.schedule.Schedule;
+import food.truck.api.data.schedule.ScheduleService;
 import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
 import org.hibernate.annotations.Cascade;
@@ -10,11 +13,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.OneToMany;
 import java.util.List;
 import java.util.Optional;
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+
+import static org.junit.Assert.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -25,53 +27,59 @@ class TruckServiceTest {
     private TruckService truckService;
 
     @Autowired
+    private ScheduleService scheduleService;
+
+    @Autowired
     private UserService userService;
 
+    long truckID = -1l;
+    User user1;
     Truck truck;
-    User u;
+    Schedule location;
 
     @BeforeEach
-    void setup() {
-        User user1 = new User();
-        user1.setFirstName("Bob");
-        user1.setLastName("Ross");
-        user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("B0bRo$$43vr");
-        u = userService.createUser(user1);
+    void setup(){
+        User user = new User();
+        user.setFirstName("Bob");
+        user.setLastName("Ross");
+        user.setEmailAddress("bob.ros@example.com");
+        user.setPassword("G00dPa$$word");
+        user.setLatitude((double) 12);
+        user.setLongitude((double) 50);
+        user1 = userService.createUser(user);
+
 
         Truck truck1 = new Truck();
         truck1.setName("Harry");
         truck1.setDescription("Best truck ever");
         truck1.setLicensePlate("LVN 6982");
         truck1.setOwner(user1);
-        truck = truckService.createTruck(truck1, u);
+
+        Schedule currLoc = new Schedule();
+        currLoc.setLatitude((double) 15);
+        currLoc.setLongitude((double) 50);
+        location = scheduleService.createSchedule(currLoc, truck1);
+
+        truck1.setCurrentLocation(currLoc);
+        truck = truckService.createTruck(truck1, user1);
+
+        assertEquals(truck.getName(), "Harry");
+        assertEquals(truck.getOwner().getFirstName(), ("Bob"));
+
+        truckID = truck.getId();
     }
 
     @Test
     void testFindTruck() {
-        Optional<Truck> found = truckService.findTruck(truck.getId());
-        assertThat(found.get().getId() == truck.getId());
-    }
-
-    @Test
-    void testCreateTruck() {
-        Truck truck = new Truck();
-        truck.setName("Harry");
-        truck.setDescription("Best truck ever");
-        truck.setLicensePlate("LVN 6982");
-
-        Truck found = truckService.createTruck(truck,u);
-        assert(found.getName().equals("Harry"));
-        assert(found.getOwner().getFirstName().equals("Bob"));
+        Optional<Truck> found = truckService.findTruck(truckID);
+        assertTrue(found.isPresent());
     }
 
     @Test
     void testSaveTruck() {
-        truck.setLicensePlate("BIG LICENSE");
-
         Truck found = truckService.saveTruck(truck);
-        assert(found != null);
-        assert(found.getLicensePlate().equals("BIG LICENSE"));
+        assertNotNull(found);
+        assertEquals("Harry", found.getName());
     }
 
     @Test
@@ -79,30 +87,35 @@ class TruckServiceTest {
         System.out.println("Truck being deleted");
         truckService.deleteTruck(truck.getId());
 
-        assertThat(truckService.findTruck(truck.getId()).isEmpty());
+        assertTrue(truckService.findTruck(truckID).isEmpty());
     }
 
     @Test
     @Cascade(CascadeType.ALL)
     void testGetTrucksOwnedByUser() {
-        Truck t1 = new Truck();
-        t1.setDescription("truck 1");
-        t1.setName("t1");
+        Truck truck1 = new Truck();
+        truck1.setName("Harry");
+        truck1.setDescription("Best truck ever");
+        truck1.setLicensePlate("LVN 6982");
 
-        Truck t2 = new Truck();
-        t2.setDescription("truck 2");
-        t2.setName("t2");
+        Truck found1 = truckService.createTruck(truck1,user1);
 
-        Truck t3 = new Truck();
-        t1.setDescription("truck 3");
-        t1.setName("t3");
+        Truck truck2 = new Truck();
+        truck2.setName("Ford");
+        truck2.setDescription("Meh Truck");
+        truck2.setLicensePlate("LVN 6983");
 
-        truckService.createTruck(t1, u);
-        truckService.createTruck(t2, u);
-        truckService.createTruck(t3, u);
+        Truck found2 = truckService.createTruck(truck2,user1);
 
-        List<Truck> trucks = truckService.getTrucksOwnedByUser(u);
-        assertThat(trucks != null);
-        assertArrayEquals(new Truck[]{truck, t1, t2, t3}, trucks.toArray());
+        Truck truck3 = new Truck();
+        truck3.setName("Charlie");
+        truck3.setDescription("No");
+        truck3.setLicensePlate("LVN 6984");
+
+        Truck found3 = truckService.createTruck(truck3,user1);
+
+        List<Truck> trucks = truckService.getTrucksOwnedByUser(user1);
+        assertNotNull(trucks);
+        assertEquals(4, trucks.size());
     }
 }
