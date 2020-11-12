@@ -46,7 +46,7 @@ class CreateNewTruck extends Component {
     }
 
     handleCancel = () => {
-        this.props.router.push(`/owner/trucks/${this.state.id}`);
+        this.props.router.push(`/owner/trucks`);
     }
 
     componentDidMount() {
