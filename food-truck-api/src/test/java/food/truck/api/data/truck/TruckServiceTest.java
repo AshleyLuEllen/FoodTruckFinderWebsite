@@ -53,15 +53,13 @@ class TruckServiceTest {
         truck1.setName("Harry");
         truck1.setDescription("Best truck ever");
         truck1.setLicensePlate("LVN 6982");
-        truck1.setOwner(user1);
+        truck = truckService.createTruck(truck1, user1);
 
         Schedule currLoc = new Schedule();
         currLoc.setLatitude((double) 15);
         currLoc.setLongitude((double) 50);
         location = scheduleService.createSchedule(currLoc, truck1);
 
-        truck1.setCurrentLocation(currLoc);
-        truck = truckService.createTruck(truck1, user1);
 
         assertEquals(truck.getName(), "Harry");
         assertEquals(truck.getOwner().getFirstName(), ("Bob"));

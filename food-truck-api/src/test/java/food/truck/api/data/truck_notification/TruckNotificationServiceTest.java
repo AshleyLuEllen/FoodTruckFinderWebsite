@@ -55,15 +55,13 @@ public class TruckNotificationServiceTest {
         truck1.setName("Harry");
         truck1.setDescription("Best truck ever");
         truck1.setLicensePlate("LVN 6982");
-        truck1.setOwner(user1);
+        truck = truckservice.createTruck(truck1, user1);
 
         Schedule currLoc = new Schedule();
         currLoc.setLatitude((double) 15);
         currLoc.setLongitude((double) 50);
         location = scheduleService.createSchedule(currLoc, truck1);
 
-        truck1.setCurrentLocation(currLoc);
-        truck = truckservice.createTruck(truck1, user1);
 
         not = new TruckNotification();
         not.setTruck(truck);
@@ -99,7 +97,6 @@ public class TruckNotificationServiceTest {
         not2.setSubject("This is a second test.");
         not2.setDescription("This is only a second test.");
         not2.setPublished(true);
-        long not2ID = truckNotificationService.saveTruckNotification(not2).getId();
 
         TruckNotification set = truckNotificationService.createTruckNotification(not2, truck);
         assertEquals(not2.getDescription(), set.getDescription());
