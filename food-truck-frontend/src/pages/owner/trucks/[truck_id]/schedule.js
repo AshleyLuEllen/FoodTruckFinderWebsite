@@ -1,12 +1,13 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import Link from "next/link";
 import axios from "axios";
 import { withRouter } from "next/router";
 import { connect } from "react-redux";
 import { format, parse, parseISO } from 'date-fns';
 
-import { Container, Grid, CircularProgress, Typography, Box } from '@material-ui/core';
+import { Container, Grid, CircularProgress, Typography, Box, TablePagination} from '@material-ui/core';
 import { DataGrid } from '@material-ui/data-grid';
+import { Add, Delete } from '@material-ui/icons';
 
 import TruckMap from '../../../../components/TruckMap';
 
@@ -19,9 +20,9 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Paper from '@material-ui/core/Paper';
 import Draggable from 'react-draggable';
 
-
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
+import EnhancedTable from '../../../../components/tables/EnhancedTable';
 
 function PaperComponent(props) {
   return (
@@ -44,9 +45,6 @@ function DraggableDialog(props) {
 
     return (
         <div>
-            <Button variant="outlined" color="primary" onClick={handleClickOpen}>
-                Open form dialog
-            </Button>
             <Dialog
                 open={open}
                 onClose={handleClose}
@@ -77,12 +75,13 @@ function DraggableDialog(props) {
 
 const scheduleStyles = theme => ({
     root: {
-        marginTop: '20px'
+        marginTop: '20px',
+        maxWidth: '95%'
     },
     mapWrapper: {
         position: 'relative',
         width: '100%',
-        height: '87vh'
+        height: '50vh'
     },
     progressContainer: {
         display: 'flex',
@@ -94,44 +93,18 @@ const scheduleStyles = theme => ({
     }
 });
 
-const columns = [
-    { field: "location", headerName: "Location", width: 200 },
-    { field: "fromTime", headerName: "Start Time", width: 200, type: "dateTime" },
-    { field: "toTime", headerName: "End Time", width: 200, type: "dateTime" },
-  ];
-
 class ScheduleManagementPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            location: '',
-            time_from: '',
-            time_to: '',
-            truckFound: false,
-            editing: false,
-            editingSchedule: undefined,
-            loading: false,
+            loading: true,
             upcoming: [],
-            past: [],
+            past: []
         };
 
-        this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.updateTruckSchedule = this.updateTruckSchedule.bind(this);
         this.fetchData = this.fetchData.bind(this);
-        this.clearForm = this.clearForm.bind(this);
-        this.editSchedule = this.editSchedule.bind(this);
-        this.deleteSchedule = this.deleteSchedule.bind(this);
-    }
-
-    handleInputChange(event) {
-        this.setState({
-            [event.target.name]: event.target.value
-        });
-    }
-
-    handleSubmit(event) {
-        event.preventDefault();
+        this.setSchedules = this.setSchedules.bind(this);
+        this.deleteScheduleById = this.deleteScheduleById.bind(this);
     }
 
     fetchData() {
@@ -142,28 +115,16 @@ class ScheduleManagementPage extends Component {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`).then(res => {
             const schedules = res.data.map(schedule => ({
                 id: schedule.id,
+                scheduleId: schedule.id,
                 latitude: schedule.latitude,
                 longitude: schedule.longitude,
                 location: schedule.location,
                 timeFrom: parseISO(schedule.timeFrom),
                 timeTo: parseISO(schedule.timeTo),
-            }))
-            this.setState({
-                upcoming: schedules.filter(s => s.timeFrom > Date.now()),
-                past: schedules.filter(s => s.timeFrom <= Date.now()),
-            });
+            }));
+            this.setSchedules(schedules);
         }).catch(err => {
             console.log(err);
-        });
-    }
-
-    clearForm() {
-        this.setState({
-            location: '',
-            time_from: '',
-            time_to: '',
-            editing: false,
-            editingSchedule: undefined
         });
     }
 
@@ -177,195 +138,82 @@ class ScheduleManagementPage extends Component {
         }
     }
 
-    editSchedule(i) {
+    setSchedules(schedules) {
+        const sl = [...schedules];
         this.setState({
-            editing: true,
-            editingSchedule: this.state.schedules[i],
-            location: this.state.schedules[i].location,
-            time_from: format(new Date(this.state.schedules[i].timeFrom), "yyyy-MM-dd'T'HH:mm"),
-            time_to: format(new Date(this.state.schedules[i].timeTo), "yyyy-MM-dd'T'HH:mm")
-        });
+            upcoming: sl.filter(s => s.timeFrom > Date.now()).map(s => Object.assign({}, s)),
+            past: sl.filter(s => s.timeFrom <= Date.now()).map(s => Object.assign({}, s)),
+            loading: false
+        }, () => console.log(this.state.past));
     }
 
-    deleteSchedule(i) {
-        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${this.state.schedules[i].id}`, {
-            auth: {
-                username: this.props.auth.email,
-                password: this.props.auth.password
-            }
-        })
-        .then((res) => {
-            this.clearForm();
-            this.fetchData();
-        })
-        .catch((err) => {
-            alert(err);
-            // alert("Invalid Schedule/Location")
-            console.log(err);
-        });
-    }
-
-    updateTruckSchedule() {
-        if (!(this.state.location && this.state.time_from && this.state.time_to && this.state.location !== '' && this.state.time_from !== '' && this.state.time_to !== '')) {
-            return;
-        }
-
-        const schedule = {
-            location: this.state.location,
-            timeFrom: parse(this.state.time_from, "yyyy-MM-dd'T'HH:mm", new Date()).toISOString(),
-            timeTo: parse(this.state.time_to, "yyyy-MM-dd'T'HH:mm", new Date()).toISOString(),
-        }
-
-        // Check if editing
-        if (this.state.editing) {
-            schedule.id = this.state.editingSchedule.id;
-            schedule.truck = this.state.editingSchedule.truck;
-
-            // Update
-            axios.patch(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${schedule.id}`, schedule, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password
-                }
-            })
-            .then((res) => {
-                this.clearForm();
-                this.fetchData();
-            })
-            .catch((err) => {
-                alert(err);
-                // alert("Invalid Schedule/Location")
-                console.log(err);
-            });
-        } else {
-            // Create new
-            axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`, schedule,{
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password
-                }
-            })
-            .then((res) => {
-                this.clearForm();
-                this.fetchData();
-            })
-            .catch((err) => {
-                alert(err);
-                // alert("Invalid Schedule/Location")
-                console.log(err);
-            });
-        }
+    deleteScheduleById(event, id) {
+        this.setSchedules([...this.state.upcoming, ...this.state.past].filter(s => s.id != id));
     }
 
     render() {
         const {classes} = this.props;
+
+        const columns = [
+            { id: 'location', align: 'left', width: '175px', disablePadding: false, label: 'Location' },
+            { id: 'timeFrom', align: 'left', width: '200px', disablePadding: false, label: 'Start Time', renderer: (val) => format(val, 'Pp') },
+            { id: 'timeTo', align: 'left', width: '200px', disablePadding: false, label: 'End Time', renderer: (val) => format(val, 'Pp') },
+        ];
+
+        const rowActions = [
+            { references: 'id', color: 'primary', label: 'Edit', action: (event, id) => alert(`Edit ${id}`) },
+            { references: 'id', color: 'secondary', label: 'Delete', action: this.deleteScheduleById }
+        ]
+
+        const selectedActions = [
+            { title: "Delete All", icon: <Delete/>, action: () => alert("delete all") },
+        ]
+
+        const unselectedActions = [
+            { title: "Add", icon: <Add/>, action: () => alert("new") },
+        ]
+
         return (
-            <Container className={classes.root}>
-                <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                        <Typography variant="h4" style={{ marginBottom: "10px", textAlign: "center" }}>Manage Truck Schedule</Typography>
-                        {!this.state.loading &&
-                            <Box style={{ textAlign: "left", maxHeight: "calc(87vh - 51px)", overflow: "auto" }}>
-                                <Typography variant="h5" style={{ marginBottom: "10px", textAlign: "center" }}>Upcoming Schedules</Typography>
-                                <div style={{ height: 400, width: '100%' }}>
-                                    <DataGrid rows={this.state.upcoming} columns={columns} pageSize={5} checkboxSelection />
-                                </div>
-
-                                <Typography variant="h5" style={{ marginTop: "10px", marginBottom: "10px", textAlign: "center" }}>Past Schedules</Typography>
-                                <div style={{ height: 400, width: '100%' }}>
-                                    <DataGrid rows={this.state.past} columns={columns} pageSize={5} checkboxSelection />
-                                </div>
+            <div>
+                <Container className={classes.root}>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} md={6}>
+                            <Box style={{ textAlign: "left", overflow: "auto" }}>
+                                <EnhancedTable
+                                    columns={columns}
+                                    rowActions={rowActions}
+                                    selectedActions={selectedActions}
+                                    unselectedActions={unselectedActions}
+                                    title="Upcoming Schedules"
+                                    rows={this.state.upcoming}
+                                    order="asc"
+                                    orderBy="timeFrom"
+                                />
                             </Box>
-                        }
-                        {this.state.loading &&
-                            <div className={classes.progressContainer}>
-                                <CircularProgress className={classes.progress} size="3.5rem" />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <Box style={{ textAlign: "left", overflow: "auto" }}>
+                            <EnhancedTable
+                                    columns={columns}
+                                    rowActions={rowActions}
+                                    selectedActions={selectedActions}
+                                    unselectedActions={unselectedActions}
+                                    title="Past Schedules"
+                                    rows={this.state.past}
+                                    order="desc"
+                                    orderBy="timeFrom"
+                                />
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12} md={12}>
+                            <div className={classes.mapWrapper}>
+                                <TruckMap trucks={[]} selected={0}/>
                             </div>
-                        }
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} md={6}>
-                        <div className={classes.mapWrapper}>
-                            <TruckMap trucks={[]} selected={0}/>
-                        </div>
-                    </Grid>
-                </Grid>
-            </Container>
-            // <div className="truck-schedule-form">
-            //     <h2>Schedule</h2>
-            //     <table>
-            //         <thead>
-            //             <tr>
-            //                 <th>Location</th>
-            //                 <th>Time From</th>
-            //                 <th>Time To</th>
-            //                 <th></th>
-            //                 <th></th>
-            //             </tr>
-            //         </thead>
-            //         <tbody>
-            //             {this.state.schedules.map((s, i) => (
-            //                 <tr key={i}>
-            //                     <td>{s.location}</td>
-            //                     <td>{s.timeFrom}</td>
-            //                     <td>{s.timeTo}</td>
-            //                     <td><button onClick={() => this.editSchedule(i)}>Edit</button></td>
-            //                     <td><button onClick={() => this.deleteSchedule(i)}>Delete</button></td>
-            //                 </tr>
-            //             ))}
-            //         </tbody>
-            //     </table>
-
-            //     <form onSubmit={this.handleSubmit} method="put">
-            //         <table className="schedule-details">
-            //             <tbody>
-            //             <tr>
-            //                 <td>
-            //                     <label for="locationSun">
-            //                         Location:
-            //                     </label>
-            //                 </td>
-            //                 <td>
-            //                     <input name="location" location="location" type="text"
-            //                            value={this.state.location} onChange={this.handleInputChange} />
-            //                 </td>
-            //             </tr>
-            //             <tr>
-            //                 <td>
-            //                     <label for="timeFromSun">
-            //                         From:
-            //                     </label>
-            //                 </td>
-            //                 <td>
-            //                     <input name="time_from" time_from="time_from" type="datetime-local"
-            //                            value={this.state.time_from} onChange={this.handleInputChange} />
-
-            //                 </td>
-            //             </tr>
-            //             <tr>
-            //                 <td>
-            //                     <label for="timeToSun">
-            //                         To:
-            //                     </label>
-            //                 </td>
-            //                 <td>
-            //                     <input name="time_to" time_to="time_to" type="datetime-local"
-            //                            value={this.state.time_to} onChange={this.handleInputChange} />
-            //                 </td>
-            //             </tr>
-            //             </tbody>
-            //         </table>
-            //         <button className="schedule-submit-button" onClick={this.updateTruckSchedule}>
-            //             {this.state.editing ? "Save changes" : "Create New"}
-            //         </button>
-            //     </form>
-            //     <br />
-            //     <label>{this.state.message}</label>
-            //     <li>
-            //         <Link href={`/owner/trucks/${this.props?.router?.query?.truck_id}`}>
-            //             <a>Cancel</a>
-            //         </Link>
-            //     </li>
-            // </div>
+                </Container>
+                <DraggableDialog/>
+            </div>
         );
     }
 }
