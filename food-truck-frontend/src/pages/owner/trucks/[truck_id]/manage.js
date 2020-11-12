@@ -225,7 +225,7 @@ class ManagePage extends Component {
                                 label=""
                                 value={this.state.licensePlate}
                                 fullWidth={true}
-                                onChange={e => this.handleInputChange(e, "licensPlate")}
+                                onChange={e => this.handleInputChange(e, "licensePlate")}
                             />
                         </Grid>
                         <Grid item xs={12}>
