@@ -107,7 +107,7 @@ class ManagePage extends Component {
                 name: res.data.name,
                 description: res.data.description,
                 licensePlate: res.data.licensePlate,
-                paymentTypes: res.data.paymentTypes,
+                paymentTypes: 0,
                 owner: res.data.owner.id,
 
                 truckFound: true,
@@ -225,19 +225,7 @@ class ManagePage extends Component {
                                 label=""
                                 value={this.state.licensePlate}
                                 fullWidth={true}
-                                onChange={e => this.handleInputChange(e, "licensPlate")}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <InputLabel>
-                                Payment Types
-                            </InputLabel>
-                            <TextField
-                                id="paymentTypes"
-                                label=""
-                                value={this.state.paymentTypes}
-                                fullWidth={true}
-                                onChange={e => this.handleInputChange(e,"paymentTypes")}
+                                onChange={e => this.handleInputChange(e, "licensePlate")}
                             />
                         </Grid>
                         <Grid item xs={12}>

@@ -23,34 +23,16 @@ public class UserNotificationService {
         return userNotificationRepository.findById(new UserNotificationId(user.getId(), notification.getId()));
     }
 
-    public UserNotification saveUserNotification(UserNotification userNotification) {
-        return userNotificationRepository.save(userNotification);
-    }
-
-    public UserNotification createUserNotification(UserNotification userNotification) {
-        return userNotificationRepository.save(userNotification);
-    }
-
     public List<TruckNotification> findAllSavedNotifications(User user) {
-        return userNotificationRepository.findAllByUser(user).stream().map(UserNotification::getNotification).collect(Collectors.toList());
-    }
-
-    public void addUserSavedNotification(User user, TruckNotification notification) {
-        UserNotification savedNotification = new UserNotification();
-        savedNotification.setNotification(notification);
-        savedNotification.setUser(user);
-
-        userNotificationRepository.save(savedNotification);
-    }
-
-    public void deleteUserSavedNotification(User user, TruckNotification notification) {
-        userNotificationRepository.deleteById(new UserNotificationId(user.getId(), notification.getId()));
+        return userNotificationRepository.findAllByUser(user).stream().map(UserNotification::getNotification)            .filter(truckNotification1 -> truckNotification1.getPublished() != null && truckNotification1.getPublished())
+            .collect(Collectors.toList());
     }
 
     public List<TruckNotification> findAllNotifications(User user) {
         List<TruckNotification> notificationList = truckNotificationRepository.findAllByUser(user.getId());
 
         return notificationList.parallelStream()
+            .filter(truckNotification1 -> truckNotification1.getPublished() != null && truckNotification1.getPublished())
             .peek(truckNotification -> {
                 Optional<UserNotification> userNotOpt = userNotificationRepository.findById(new UserNotificationId(user.getId(), truckNotification.getId()));
                 if (userNotOpt.isPresent()) {

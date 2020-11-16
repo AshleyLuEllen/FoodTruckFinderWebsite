@@ -117,7 +117,8 @@ class NotificationPage extends Component {
                 description: this.state.description,
                 type: null,
                 published: option,
-                postedTimestamp: this.state.postedTimestamp
+                postedTimestamp: this.state.postedTimestamp,
+                notificationType: null,
             }
             console.log(this.notification);
 

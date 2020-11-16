@@ -7,7 +7,7 @@ const jss = create({plugins: [...jssPreset().plugins, rtl()]});
 
 const themeOptions = {
     typography: {
-        fontFamily: 'Noto Sans, sans-serif',
+        // fontFamily: 'Noto Sans, sans-serif',
         fontStyle: 'normal',
         fontWeight: 600,
         fontSize: 14,
@@ -23,15 +23,15 @@ const themeOptions = {
     },
     overrides: {
         MuiButton: {
-            root: {
-                textTransform: 'none',
-                marginLeft: 8,
-                marginRight: 8,
-                marginTop: 8,
-                marginBottom: 8,
-                width: '181px',
-                height: '48px',
-            },
+            // root: {
+            //     textTransform: 'none',
+            //     marginLeft: 8,
+            //     marginRight: 8,
+            //     marginTop: 8,
+            //     marginBottom: 8,
+            //     // width: '181px',
+            //     // height: '48px',
+            // },
             outlinedPrimary: {
                 border: '2px solid'
             },

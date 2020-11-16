@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import clsx from 'clsx';
 
 import { Card, CardHeader, CardMedia, CardContent, IconButton, Chip } from '@material-ui/core';
+import { Rating } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import { Notifications, NotificationsOff } from '@material-ui/icons';
 
@@ -35,6 +36,11 @@ const useStyles = makeStyles((theme) => ({
     },
     noMedia: {
         paddingTop: '0px'
+    },
+    rating: {
+        textAlign: "left",
+        marginTop: "-10px",
+        marginLeft: "15px"
     }
 }));
 
@@ -51,6 +57,8 @@ function TruckCard(props) {
             setSubscribed(true);
         })
         .catch(err => {});
+
+        console.log(props.truck)
     }, []);
 
     const toggleSubscribe = () => {
@@ -98,6 +106,9 @@ function TruckCard(props) {
                     </IconButton> : undefined
                 }
             />
+            <div className={classes.rating}>
+                <Rating name="rating" precision={0.5} value={props.truck.rating} size="medium" readOnly />
+            </div>
             {props.image && <CardMedia
                 className={classes.media}
                 image={props.image}
@@ -105,7 +116,7 @@ function TruckCard(props) {
             />}
             <CardContent className={noMediaClass}>
                 {props.truck.currentLocation && <div className={classes.currentLocation}>
-                    Currently at <strong>{props.truck.currentLocation?.location}</strong>
+                    Currently at <strong>{props.truck.currentLocation?.location}</strong> {props.truck.currentDistance !== undefined && props.truck.currentDistance !== null ? `(${props.truck.currentDistance.toFixed(2)} mi)` : ""}
                 </div>}
                 {props.tags.length > 0 && <div className={classes.truckTags}>
                     {props.tags.map((t, i) => (

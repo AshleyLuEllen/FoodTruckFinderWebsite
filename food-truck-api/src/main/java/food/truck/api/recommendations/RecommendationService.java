@@ -1,5 +1,6 @@
 package food.truck.api.recommendations;
 
+import food.truck.api.data.review.ReviewService;
 import food.truck.api.data.schedule.ScheduleService;
 import food.truck.api.data.subscription.SubscriptionService;
 import food.truck.api.data.truck.Truck;
@@ -30,13 +31,16 @@ public class RecommendationService {
     TruckService truckService;
 
     @Autowired
+    ReviewService reviewService;
+
+    @Autowired
     GoogleApiService googlePlaceService;
 
     private IRecommendationAlgorithm recommendationComputer = null;
 
     private IRecommendationAlgorithm getRecommendationComputer() {
         if (recommendationComputer == null) {
-            this.recommendationComputer = TagBasedRecommendationAlgorithm.progressiveWeights(scheduleService, truckTagService, 5);
+            this.recommendationComputer = TagBasedRecommendationAlgorithm.progressiveWeights(scheduleService, truckTagService,reviewService, 5);
         }
 
         return this.recommendationComputer;

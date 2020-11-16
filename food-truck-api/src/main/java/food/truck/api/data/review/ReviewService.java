@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,15 +19,10 @@ public class ReviewService {
         return reviewRepository.findById(reviewId);
     }
 
-    public Review saveReview(Review review, Truck truck, User user) {
-        review.setUser(user);
-        review.setTruck(truck);
-        return reviewRepository.save(review);
-    }
-
     public Review createReview(Review review, User user, Truck truck) {
         review.setUser(user);
         review.setTruck(truck);
+        review.setReviewTimestamp(ZonedDateTime.now());
         return reviewRepository.save(review);
     }
 

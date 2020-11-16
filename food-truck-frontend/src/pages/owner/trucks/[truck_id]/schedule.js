@@ -1,54 +1,193 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import Link from "next/link";
 import axios from "axios";
 import { withRouter } from "next/router";
 import { connect } from "react-redux";
-import { format, parse } from 'date-fns';
+import { format, parse, parseISO } from 'date-fns';
 
-import { makeStyles } from '@material-ui/core/styles';
+import { Container, Grid, CircularProgress, Typography, Box, TablePagination} from '@material-ui/core';
+import { DataGrid } from '@material-ui/data-grid';
+import { Add, Delete } from '@material-ui/icons';
+
+import { DateTimePicker } from "@material-ui/pickers";
+
+
+import TruckMap from '../../../../components/TruckMap';
+import LocationInput from '../../../../components/LocationInput';
+
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Paper from '@material-ui/core/Paper';
+import Draggable from 'react-draggable';
+
+import { withStyles, makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
+import EnhancedTable from '../../../../components/tables/EnhancedTable';
 
-const useStyles = theme => ({
-    container: {
+function PaperComponent(props) {
+  return (
+    <Draggable handle="#draggable-dialog-title" cancel={'[class*="MuiDialogContent-root"]'}>
+      <Paper {...props} />
+    </Draggable>
+  );
+}
+
+const useStyles = makeStyles((theme) => ({
+    dateTimeInput : {
+        width: '100%',
+        "& > button": {
+            width: 'auto',
+            height: 'auto'
+        }
+    }
+}));
+
+function DraggableDialog(props) {
+    const classes = useStyles();
+
+    const [startDate, setStartDate] = useState(undefined);
+    const [endDate, setEndDate] = useState(undefined);
+    const [locationStr, setLocationStr] = useState('');
+    const [locationChanged, setLocationChanged] = useState(false);
+    const [placeId, setPlaceId] = useState(undefined);
+    const [resultLocationStr, setResultLocationStr] = useState('');
+
+    useEffect(() => {
+        if (props.open === true) {
+            setStartDate(props.initialData?.timeFrom || new Date());
+            setEndDate(props.initialData?.timeTo || new Date());
+            setLocationStr(props.initialData?.location || "");
+            setResultLocationStr(props.initialData?.location || "");
+            setLocationChanged(!props.editing);
+            setPlaceId(undefined)
+        }
+    }, [props.open]);
+
+    const handleClose = () => {
+        props.onClose && props.onClose();
+    };
+
+    const handleSave = () => {
+        if (locationChanged && !placeId) {
+            return;
+        }
+
+        console.log(resultLocationStr)
+
+        props.onSave && props.onSave({
+            placeId,
+            timeFrom: startDate,
+            timeTo: endDate,
+            id: props?.initialData?.id,
+            location: resultLocationStr
+        });
+    };
+
+    return (
+        <div>
+            <Dialog
+                open={props.open}
+                onClose={handleClose}
+                PaperComponent={PaperComponent}
+                aria-labelledby="draggable-dialog-title"
+            >
+                <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
+                    {props.editing ? "Edit" : "Create"} Schedule
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        {props.editing ? "Edit" : "Specify"} the start and end dates/times here, as well as the location where your truck will be during this interval of time. All of these individual "schedules" will consist your truck's hours.
+                    </DialogContentText>
+                    <LocationInput
+                        initialValue={locationStr}
+                        onChange={(event, newValue) => {
+                            setPlaceId(newValue?.place_id);
+                            setLocationChanged(true);
+                            console.log(newValue);
+                            setResultLocationStr(newValue?.structured_formatting?.main_text || newValue?.description);
+                        }}
+                        required
+                    />
+                    <br/>
+                    <DateTimePicker
+                        className={classes.dateTimeInput}
+                        value={startDate}
+                        inputVariant="outlined"
+                        onChange={setStartDate}
+                        label="Start Date/Time"
+                        showTodayButton
+                        required
+                    />
+                    <br/>
+                    <br/>
+                    <DateTimePicker
+                        className={classes.dateTimeInput}
+                        value={endDate}
+                        inputVariant="outlined"
+                        onChange={setEndDate}
+                        label="End Date/Time"
+                        showTodayButton
+                        required
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button autoFocus onClick={handleClose} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleSave} color="primary">
+                        {props.editing ? "Save Changes" : "Create New Schedule"}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </div>
+    );
+}
+
+const scheduleStyles = theme => ({
+    root: {
+        marginTop: '20px',
+        maxWidth: '95%'
+    },
+    mapWrapper: {
+        position: 'relative',
+        width: '100%',
+        height: '50vh'
+    },
+    progressContainer: {
         display: 'flex',
-        flexWrap: 'wrap',
+        alignItems: 'center',
+        height: 'calc(87vh - 51px)'
     },
-    textField: {
-        marginLeft: theme.spacing(1),
-        marginRight: theme.spacing(1),
-        width: 200,
-    },
+    progress: {
+        margin: '0 auto'
+    }
 });
 
-class Schedule extends Component {
+class ScheduleManagementPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            schedules: [],
-            location: '',
-            time_from: '',
-            time_to: '',
-            truckFound: false,
+            loading: true,
+            upcoming: [],
+            past: [],
+            editorOpen: false,
             editing: false,
-            editingSchedule: undefined
+            initialData: undefined,
+            upcomingSelected: [],
+            pastSelected: []
         };
-        this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.updateTruckSchedule = this.updateTruckSchedule.bind(this);
+
         this.fetchData = this.fetchData.bind(this);
-        this.clearForm = this.clearForm.bind(this);
-        this.editSchedule = this.editSchedule.bind(this);
-        this.deleteSchedule = this.deleteSchedule.bind(this);
-    }
-
-    handleInputChange(event) {
-        this.setState({
-            [event.target.name]: event.target.value
-        });
-    }
-
-    handleSubmit(event) {
-        event.preventDefault();
+        this.setSchedules = this.setSchedules.bind(this);
+        this.deleteScheduleById = this.deleteScheduleById.bind(this);
+        this.handleSave = this.handleSave.bind(this);
+        this.triggerEdit = this.triggerEdit.bind(this);
+        this.triggerCreation = this.triggerCreation.bind(this);
+        this.deleteAll = this.deleteAll.bind(this);
     }
 
     fetchData() {
@@ -57,22 +196,19 @@ class Schedule extends Component {
         }
 
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`).then(res => {
-            this.setState({
-                schedules: res.data
-            });
+            const schedules = res.data.map(schedule => ({
+                id: schedule.id,
+                scheduleId: schedule.id,
+                latitude: schedule.latitude,
+                longitude: schedule.longitude,
+                location: schedule.location,
+                timeFrom: parseISO(schedule.timeFrom),
+                timeTo: parseISO(schedule.timeTo),
+            }));
+            this.setSchedules(schedules);
         }).catch(err => {
             console.log(err);
         });
-    }
-
-    clearForm() {
-        this.setState({
-            location: '',
-            time_from: '',
-            time_to: '',
-            editing: false,
-            editingSchedule: undefined
-        }); 
     }
 
     componentDidMount() {
@@ -85,164 +221,188 @@ class Schedule extends Component {
         }
     }
 
-    editSchedule(i) {
+    setSchedules(schedules) {
+        const sl = [...schedules];
         this.setState({
-            editing: true,
-            editingSchedule: this.state.schedules[i],
-            location: this.state.schedules[i].location,
-            time_from: format(new Date(this.state.schedules[i].timeFrom), "yyyy-MM-dd'T'HH:mm"),
-            time_to: format(new Date(this.state.schedules[i].timeTo), "yyyy-MM-dd'T'HH:mm")
+            upcoming: sl.filter(s => s.timeFrom > Date.now()).map(s => Object.assign({}, s)),
+            past: sl.filter(s => s.timeFrom <= Date.now()).map(s => Object.assign({}, s)),
+            loading: false
         });
     }
 
-    deleteSchedule(i) {
-        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${this.state.schedules[i].id}`, {
+    deleteScheduleById(event, id) {
+        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${id}`, {
             auth: {
                 username: this.props.auth.email,
                 password: this.props.auth.password
             }
         })
-        .then((res) => {
-            this.clearForm();
-            this.fetchData();
+        .then(res => {
+            this.setSchedules([...this.state.upcoming, ...this.state.past].filter(s => s.id != id))
         })
-        .catch((err) => {
-            alert(err);
-            // alert("Invalid Schedule/Location")
-            console.log(err);
+        .catch(err => console.log(err));
+    }
+
+    triggerCreation() {
+        this.setState({
+            open: true,
+            editing: false,
+            initialData: undefined
         });
     }
 
-    updateTruckSchedule() {
-        if (!(this.state.location && this.state.time_from && this.state.time_to && this.state.location !== '' && this.state.time_from !== '' && this.state.time_to !== '')) {
-            return;
-        }
+    triggerEdit(event, id) {
+        this.setState({
+            open: true,
+            editing: true,
+            initialData: this.state.upcoming.find(s => s.id == id)
+        });
+    }
 
-        const schedule = {
-            location: this.state.location,
-            timeFrom: parse(this.state.time_from, "yyyy-MM-dd'T'HH:mm", new Date()).toISOString(),
-            timeTo: parse(this.state.time_to, "yyyy-MM-dd'T'HH:mm", new Date()).toISOString(),
-        }
+    deleteAll(table) {
+        const toDelete = table === 'upcoming' ? this.state.upcomingSelected : this.state.pastSelected;
+        console.log("todelete", toDelete);
 
-        // Check if editing
+        Promise.all(
+            toDelete.map(s => {
+                return axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${s}`, {
+                    auth: {
+                        username: this.props.auth.email,
+                        password: this.props.auth.password
+                    }
+                })
+            })
+        )
+        .then(res => {
+            this.setSchedules([...this.state.past, ...this.state.upcoming].filter(s => !toDelete.some(td => s.id == td)));
+        })
+        .catch(err => console.log(err))
+    }
+
+    handleSave(savedData) {
+        console.log(savedData)
         if (this.state.editing) {
-            schedule.id = this.state.editingSchedule.id;
-            schedule.truck = this.state.editingSchedule.truck;
-            
-            // Update
-            axios.put(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${schedule.id}`, schedule, {
+            let schedule = {
+                id: savedData.id,
+                timeFrom: savedData.timeFrom,
+                timeTo: savedData.timeTo
+            };
+
+            if (savedData.placeId) {
+                schedule.placeId = savedData.placeId;
+                schedule.location = savedData.location;
+            }
+
+            axios.patch(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${savedData.id}`, schedule, {
                 auth: {
                     username: this.props.auth.email,
                     password: this.props.auth.password
                 }
             })
-            .then((res) => {
-                this.clearForm();
+            .then(res => {
+                this.setState({
+                    open: false
+                });
                 this.fetchData();
             })
-            .catch((err) => {
-                alert(err);
-                // alert("Invalid Schedule/Location")
-                console.log(err);
-            });
+            .catch(err => console.log(err));
         } else {
-            // Create new
-            axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`, schedule,{
+            let schedule = {
+                timeFrom: savedData.timeFrom,
+                timeTo: savedData.timeTo,
+                placeId: savedData.placeId,
+                location: savedData.location,
+            };
+
+            axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`, schedule, {
                 auth: {
                     username: this.props.auth.email,
                     password: this.props.auth.password
                 }
             })
-            .then((res) => {
-                this.clearForm();
+            .then(res => {
+                this.setState({
+                    open: false
+                });
                 this.fetchData();
             })
-            .catch((err) => {
-                alert(err);
-                // alert("Invalid Schedule/Location")
-                console.log(err);
-            });
-        }        
+            .catch(err => console.log(err));
+        }
     }
 
     render() {
         const {classes} = this.props;
+
+        const columns = [
+            { id: 'location', align: 'left', width: '175px', disablePadding: false, label: 'Location' },
+            { id: 'timeFrom', align: 'left', width: '225px', disablePadding: false, label: 'Start Time', renderer: (val) => format(val, 'Pp') },
+            { id: 'timeTo', align: 'left', width: '225px', disablePadding: false, label: 'End Time', renderer: (val) => format(val, 'Pp') },
+        ];
+
+        const rowActions = [
+            { references: 'id', color: 'primary', label: 'Edit', action: this.triggerEdit },
+            { references: 'id', color: 'secondary', label: 'Delete', action: this.deleteScheduleById }
+        ]
+
+        const selectedActionsUpcoming = [
+            { title: "Delete All", icon: <Delete/>, action: () => this.deleteAll("upcoming") },
+        ]
+
+        const selectedActionsPast = [
+            { title: "Delete All", icon: <Delete/>, action: () => this.deleteAll("past") },
+        ]
+
+        const unselectedActions = [
+            { title: "Add", icon: <Add/>, action: this.triggerCreation },
+        ]
+
         return (
-            <div className="truck-schedule-form">
-                <h2>Schedule</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Location</th>
-                            <th>Time From</th>
-                            <th>Time To</th>
-                            <th></th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {this.state.schedules.map((s, i) => (
-                            <tr key={i}>
-                                <td>{s.location}</td>
-                                <td>{s.timeFrom}</td>
-                                <td>{s.timeTo}</td>
-                                <td><button onClick={() => this.editSchedule(i)}>Edit</button></td>
-                                <td><button onClick={() => this.deleteSchedule(i)}>Delete</button></td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-
-                <form onSubmit={this.handleSubmit} method="put">
-                    <table className="schedule-details">
-                        <tbody>
-                        <tr>
-                            <td>
-                                <label for="locationSun">
-                                    Location:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="location" location="location" type="text"
-                                       value={this.state.location} onChange={this.handleInputChange} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="timeFromSun">
-                                    From:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="time_from" time_from="time_from" type="datetime-local"
-                                       value={this.state.time_from} onChange={this.handleInputChange} />
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="timeToSun">
-                                    To:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="time_to" time_to="time_to" type="datetime-local"
-                                       value={this.state.time_to} onChange={this.handleInputChange} />
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <button className="schedule-submit-button" onClick={this.updateTruckSchedule}>
-                        {this.state.editing ? "Save changes" : "Create New"}
-                    </button>
-                </form>
-                <br />
-                <label>{this.state.message}</label>
-                <li>
-                    <Link href={`/owner/trucks/${this.props?.router?.query?.truck_id}`}>
-                        <a>Cancel</a>
-                    </Link>
-                </li>
+            <div>
+                <Container className={classes.root}>
+                    <Grid container spacing={0}>
+                        <Grid item xs={12} md={6}>
+                            <Box style={{ textAlign: "left", overflow: "auto" }}>
+                                <EnhancedTable
+                                    columns={columns}
+                                    rowActions={rowActions}
+                                    selectedActions={selectedActionsUpcoming}
+                                    unselectedActions={unselectedActions}
+                                    title="Upcoming Schedules"
+                                    rows={this.state.upcoming}
+                                    order="asc"
+                                    orderBy="timeFrom"
+                                    onSelectionChange={data => {console.log(data);this.setState({ upcomingSelected: data })}}
+                                />
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <Box style={{ textAlign: "left", overflow: "auto" }}>
+                            <EnhancedTable
+                                    columns={columns}
+                                    rowActions={rowActions.slice(1)}
+                                    selectedActions={selectedActionsPast}
+                                    title="Past Schedules"
+                                    rows={this.state.past}
+                                    order="desc"
+                                    orderBy="timeFrom"
+                                    onSelectionChange={data => this.setState({ pastSelected: data })}
+                                />
+                            </Box>
+                        </Grid>
+                        {/* <Grid item xs={12} md={12}>
+                            <div className={classes.mapWrapper}>
+                                <TruckMap trucks={[]} selected={0}/>
+                            </div>
+                        </Grid> */}
+                    </Grid>
+                </Container>
+                <DraggableDialog
+                    open={this.state.open}
+                    editing={this.state.editing}
+                    initialData={this.state.initialData}
+                    onClose={() => this.setState({ open: false })}
+                    onSave={this.handleSave}
+                />
             </div>
         );
     }
@@ -256,4 +416,4 @@ function mapStateToProps(state) {
 const mapDispatchToProps = {
 }
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Schedule));
+export default withStyles(scheduleStyles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(ScheduleManagementPage)));
