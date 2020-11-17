@@ -399,6 +399,7 @@ class TruckPage extends Component {
                         </InputLabel>
                         <div className={classes.ratingContainer}>
                             <Rating
+                                align="left"
                                 name="preferredRating" precision={0.5} value={this.state.rating}
                                 onChange={(event, newValue) => {
                                     this.handleInputChange(event, newValue);
