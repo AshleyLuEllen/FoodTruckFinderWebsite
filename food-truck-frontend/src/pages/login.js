@@ -6,7 +6,34 @@ import { connect, useDispatch } from 'react-redux';
 import { login as authLogin, logout as authLogout } from '../redux/actions/auth';
 import LocationInput from '../components/LocationInput';
 
-class Login extends Component {
+import { Paper, withStyles, Grid, TextField, Button, FormControlLabel, Checkbox } from '@material-ui/core';
+import { spacing } from '@material-ui/system';
+import { Face, Fingerprint } from '@material-ui/icons'
+
+const styles = theme => ({
+    margin: {
+        margin: theme.spacing.unit ,
+    },
+    root: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        '& > *': {
+            margin: theme.spacing(10),
+            width: theme.spacing(35),
+            height: theme.spacing(25),
+        },
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    buttons: {
+        "& > *": {
+            margin: theme.spacing(1)
+        }
+    }
+});
+
+
+class Login extends React.Component {
     constructor(props) {
         super(props);
         this.state = {email: '', password: '', loginFailed:false};
@@ -52,44 +79,35 @@ class Login extends Component {
     }
 
     render() {
+        const { classes } = this.props;
         return (
-            <div className="login-form">
-                <h2>Login</h2>
-                <form onSubmit={this.handleSubmit}>
-                    <table className="login-form-details">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <label for="email">
-                                        Email:
-                                    </label>
-                                </td>
-                                <td>
-                                    <input name="email" email="email" type="text" onChange={this.handleInputChange} />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label for="password">
-                                        Password:
-                                    </label>
-                                </td>
-                                <td>
-                                    <input name="password" password = "password" type="password" onChange={this.handleInputChange} />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <input className="login-submit-button" type="submit" value="Sign In" />
-                    <button className="login-submit-button" onClick={this.createAccount}>Create Account</button>
-                </form>
+            <div className={classes.root}>
+                <Paper elevation={3} alignItems="center">
+
+                <div className={classes.margin}>
+                    <form onSubmit={this.handleSubmit}>
+                    <Grid container  alignItems="flex-end" justify="center">
+                        <Grid item alignItems="center">
+                            <TextField id="email" label="Email" type="email" autoFocus required onChange={this.handleInputChange}/>
+                        </Grid>
+                    </Grid>
+                    <Grid container alignItems="flex-end" justify="center">
+                        <Grid item alignItems="center">
+                            <TextField justify="center" id="password" label="Password" type="password" required onChange={this.handleInputChange}/>
+                        </Grid>
+                    </Grid>
+                    <Grid container style={{ marginTop: '30px' }} justify="space-between">
+                        <Button  style={{ marginLeft:'10px', maxWidth: '85px', maxHeight: '40px', minWidth: '85px', minHeight: '40px'}} variant="contained" color="primary" type="submit">Sign In</Button>
+                        <Button style={{ maxWidth: '160px', maxHeight: '40px', minWidth: '160px', minHeight: '40px'}} variant="contained" color="primary" onClick={this.createAccount}>Create Account</Button>
+                    </Grid>
+                    </form>
+                </div>
+
+                </Paper>
                 <br />
                 {this.state.loginFailed && <span>Login failed. Re-enter your username and password.</span>}
-                <li>
-                    <Link href="/">
-                        <a>Home</a>
-                    </Link>
-                </li>
+
+
             </div>
         );
     }
@@ -104,5 +122,4 @@ const mapDispatchToProps = {
     authLogin,
     authLogout
 }
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Login));
+export default withStyles(styles,{ withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(Login)));
