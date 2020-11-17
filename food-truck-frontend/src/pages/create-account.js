@@ -3,6 +3,30 @@ import Link from "next/link";
 import axios from "axios";
 import withRouter from "next/dist/client/with-router";
 
+import { Paper, withStyles, Grid, TextField, Button } from '@material-ui/core';
+
+const styles = theme => ({
+    margin: {
+        margin: theme.spacing.unit ,
+    },
+    root: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        '& > *': {
+            margin: theme.spacing(10),
+            width: theme.spacing(35),
+            height: theme.spacing(43),
+        },
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    buttons: {
+        "& > *": {
+            margin: theme.spacing(1)
+        }
+    }
+});
+
 class CreateAccount extends Component {
 
     constructor(props) {
@@ -17,9 +41,9 @@ class CreateAccount extends Component {
     handleChangeStatus(event) {
     }
 
-    handleInputChange(event) {
+    handleInputChange(event, name_of_attribute) {
         this.setState({
-                [event.target.name]: event.target.value
+                [name_of_attribute]: event.target.value
         });
     }
 
@@ -56,75 +80,48 @@ class CreateAccount extends Component {
     }
 
     render() {
+        const { classes } = this.props;
         return (
-            <div className="create-account-form">
-                <h2>Create Account</h2>
-                <form onSubmit={this.handleSubmit} method="post">
-                    <table className="login-form-details">
-                        <tbody>
-                        <tr>
-                            <td>
-                                <label for="email">
-                                    Email:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="email" email="email" type="text" value={this.state.email} onChange={this.handleInputChange} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label htmlFor="firstName">
-                                    First Name:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="firstName" type="text" value={this.state.firstName} onChange={this.handleInputChange}/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label htmlFor="lastName">
-                                    Last Name:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="lastName" type="text" value={this.state.lastName} onChange={this.handleInputChange}/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="password">
-                                    Password:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="password" type="password" value={this.state.password} onChange={this.handleInputChange} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label htmlFor="passConf">
-                                    Re-enter Password:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="passConf" type="password" value={this.state.passConf} onChange={this.handleInputChange}/>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <button className="login-submit-button" onClick={this.createAccount}>Create Account</button>
-                </form>
-                <br />
-                <label>{this.state.message}</label>
-                <li>
-                    <Link href="/">
-                        <a>Cancel</a>
-                    </Link>
-                </li>
+            <div className={classes.root}>
+                <Paper elevation={3} alignItems="center">
+
+                    <div className={classes.margin}>
+                        <form onSubmit={this.handleSubmit} method="post">
+                            <Grid container  alignItems="flex-end" justify="center">
+                                <Grid item alignItems="center">
+                                    <TextField value={this.state.email} onChange={e => this.handleInputChange(e, "email")} id="email" label="Email" type="email" autoFocus required/>
+                                </Grid>
+                            </Grid>
+                            <Grid container  alignItems="flex-end" justify="center">
+                                <Grid item alignItems="center">
+                                    <TextField value={this.state.firstName} onChange={e => this.handleInputChange(e, "firstName")} id="firstName" label="First Name" required/>
+                                </Grid>
+                            </Grid>
+                            <Grid container  alignItems="flex-end" justify="center">
+                                <Grid item alignItems="center">
+                                    <TextField value={this.state.lastName} onChange={e => this.handleInputChange(e, "lastName")} id="lastName" label="Last Name" required/>
+                                </Grid>
+                            </Grid>
+                            <Grid container alignItems="flex-end" justify="center">
+                                <Grid item alignItems="center">
+                                    <TextField value={this.state.password} onChange={e => this.handleInputChange(e, "password")} justify="center" id="password" label="Password" type="password" required/>
+                                </Grid>
+                            </Grid>
+                            <Grid container alignItems="flex-end" justify="center">
+                                <Grid item alignItems="center">
+                                    <TextField value={this.state.passConf} onChange={e => this.handleInputChange(e, "passConf")} justify="center" id="password" label="Confirm Password" type="password" required/>
+                                </Grid>
+                            </Grid>
+                            <Grid container style={{ marginTop: '30px' }} justify="center">
+                                <Button style={{ maxWidth: '160px', maxHeight: '40px', minWidth: '160px', minHeight: '40px'}} justify="center" variant="contained" color="primary" onClick={this.createAccount}>Create Account</Button>
+                            </Grid>
+                        </form>
+                        <label>{this.state.message}</label>
+
+                    </div>
+                </Paper>
             </div>
         );
     }
 }
-export default withRouter(CreateAccount);
+export default withStyles(styles,{ withTheme: true })(withRouter(CreateAccount));

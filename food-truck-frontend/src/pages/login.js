@@ -6,9 +6,8 @@ import { connect, useDispatch } from 'react-redux';
 import { login as authLogin, logout as authLogout } from '../redux/actions/auth';
 import LocationInput from '../components/LocationInput';
 
-import { Paper, withStyles, Grid, TextField, Button, FormControlLabel, Checkbox } from '@material-ui/core';
-import { spacing } from '@material-ui/system';
-import { Face, Fingerprint } from '@material-ui/icons'
+import { Paper, withStyles, Grid, TextField, Button, Snackbar, CircularProgress } from '@material-ui/core';
+import Alert from '@material-ui/lab/Alert';
 
 const styles = theme => ({
     margin: {
@@ -20,7 +19,7 @@ const styles = theme => ({
         '& > *': {
             margin: theme.spacing(10),
             width: theme.spacing(35),
-            height: theme.spacing(25),
+            height: theme.spacing(30),
         },
         alignItems: 'center',
         justifyContent: 'center',
@@ -29,9 +28,8 @@ const styles = theme => ({
         "& > *": {
             margin: theme.spacing(1)
         }
-    }
+    },
 });
-
 
 class Login extends React.Component {
     constructor(props) {
@@ -43,9 +41,9 @@ class Login extends React.Component {
     }
     handleChangeStatus(event) {
     }
-    handleInputChange(event) {
+    handleInputChange(event, name_of_attribute) {
         this.setState({
-                [event.target.name]: event.target.value
+                [name_of_attribute]: event.target.value
         });
     }
     handleSubmit(event) {
@@ -78,6 +76,7 @@ class Login extends React.Component {
         this.props.router.push('/create-account');
     }
 
+
     render() {
         const { classes } = this.props;
         return (
@@ -88,26 +87,28 @@ class Login extends React.Component {
                     <form onSubmit={this.handleSubmit}>
                     <Grid container  alignItems="flex-end" justify="center">
                         <Grid item alignItems="center">
-                            <TextField id="email" label="Email" type="email" autoFocus required onChange={this.handleInputChange}/>
+                            <TextField onChange={e => this.handleInputChange(e, "email")} id="email" label="Email" type="email" autoFocus required/>
                         </Grid>
                     </Grid>
                     <Grid container alignItems="flex-end" justify="center">
                         <Grid item alignItems="center">
-                            <TextField justify="center" id="password" label="Password" type="password" required onChange={this.handleInputChange}/>
+                            <TextField onChange={e => this.handleInputChange(e, "password")} justify="center" id="password" label="Password" type="password" required/>
                         </Grid>
                     </Grid>
-                    <Grid container style={{ marginTop: '30px' }} justify="space-between">
-                        <Button  style={{ marginLeft:'10px', maxWidth: '85px', maxHeight: '40px', minWidth: '85px', minHeight: '40px'}} variant="contained" color="primary" type="submit">Sign In</Button>
-                        <Button style={{ maxWidth: '160px', maxHeight: '40px', minWidth: '160px', minHeight: '40px'}} variant="contained" color="primary" onClick={this.createAccount}>Create Account</Button>
+                    <Grid container style={{ marginTop: '30px' }} justify="center">
+                        <Button style={{maxWidth: '160px', maxHeight: '40px', minWidth: '160px', minHeight: '40px'}} variant="contained" color="primary" type="submit">Sign In</Button>
                     </Grid>
+                        <Grid container style={{ marginTop: '10px' }} justify="center">
+                            <Button style={{ maxWidth: '160px', maxHeight: '40px', minWidth: '160px', minHeight: '40px'}} variant="contained" color="primary" onClick={this.createAccount}>Create Account</Button>
+                        </Grid>
                     </form>
+                    {this.state.loginFailed && <Snackbar open={true} autoHideDuration={6000}>
+                        <Alert variant="filled" severity="error">
+                            Invaild email and/or password.
+                        </Alert>
+                    </Snackbar>}
                 </div>
-
                 </Paper>
-                <br />
-                {this.state.loginFailed && <span>Login failed. Re-enter your username and password.</span>}
-
-
             </div>
         );
     }
