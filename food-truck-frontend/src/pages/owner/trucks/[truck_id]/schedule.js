@@ -5,7 +5,7 @@ import { withRouter } from "next/router";
 import { connect } from "react-redux";
 import { format, parse, parseISO } from 'date-fns';
 
-import { Container, Grid, CircularProgress, Typography, Box, TablePagination} from '@material-ui/core';
+import { Container, Grid, CircularProgress, Typography, Box, TablePagination, Breadcrumbs, Link as MuiLink } from '@material-ui/core';
 import { DataGrid } from '@material-ui/data-grid';
 import { Add, Delete } from '@material-ui/icons';
 
@@ -164,6 +164,9 @@ const scheduleStyles = theme => ({
     },
     progress: {
         margin: '0 auto'
+    },
+    breadcrumb: {
+        textDecoration: 'none'
     }
 });
 
@@ -224,8 +227,8 @@ class ScheduleManagementPage extends Component {
     setSchedules(schedules) {
         const sl = [...schedules];
         this.setState({
-            upcoming: sl.filter(s => s.timeFrom > Date.now()).map(s => Object.assign({}, s)),
-            past: sl.filter(s => s.timeFrom <= Date.now()).map(s => Object.assign({}, s)),
+            upcoming: sl.filter(s => s.timeTo > Date.now()).map(s => Object.assign({}, s)),
+            past: sl.filter(s => s.timeTo <= Date.now()).map(s => Object.assign({}, s)),
             loading: false
         });
     }
@@ -359,6 +362,22 @@ class ScheduleManagementPage extends Component {
         return (
             <div>
                 <Container className={classes.root}>
+                    <Breadcrumbs aria-label="breadcrumb">
+                        <Link href="/owner" passHref>
+                            <MuiLink color="inherit">
+                                Owner Dashboard
+                            </MuiLink>
+                        </Link>
+                        {this.props.router?.query?.truck_id ?
+                            <Link href={`/owner/trucks/${this.props.router.query.truck_id}`} passHref>
+                                <MuiLink color="inherit">
+                                    Manage Truck
+                                </MuiLink>
+                            </Link> :
+                            <Typography color="textPrimary">Truck</Typography>
+                        }
+                        <Typography color="textPrimary">Schedule</Typography>
+                    </Breadcrumbs>
                     <Grid container spacing={0}>
                         <Grid item xs={12} md={6}>
                             <Box style={{ textAlign: "left", overflow: "auto" }}>
