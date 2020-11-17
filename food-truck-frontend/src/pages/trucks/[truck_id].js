@@ -23,6 +23,7 @@ import Table from "@material-ui/core/Table";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import TableBody from "@material-ui/core/TableBody";
+import Box from "@material-ui/core/Box";
 
 const truckPageStyles = (theme) => ({
     text: {
@@ -45,7 +46,7 @@ const truckPageStyles = (theme) => ({
     ratingContainer: {
         display: "flex",
         height: "50px",
-        alignItems: "center",
+        alignItems: "left",
         justifyContent: "center"
     },
     review: {
@@ -276,7 +277,9 @@ class TruckPage extends Component {
                 {/**SUBSCRIBE BUTTON*/}
                 {this.state.truckFound && this.state.userId &&
                 <div align="center">
-                    <Button color={this.state.subscribed ? "secondary" : "primary"} variant="contained" onClick={this.toggleSubscribe}>{this.state.subscribed ? "Unsubscribe" : "Subscribe"}</Button>
+                    <Box mt={1}>
+                        <Button color={this.state.subscribed ? "secondary" : "primary"} variant="contained" onClick={this.toggleSubscribe}>{this.state.subscribed ? "Unsubscribe" : "Subscribe"}</Button>
+                    </Box>
                 </div>}
 
                 {/**DESCRIPTION*/}
@@ -397,7 +400,7 @@ class TruckPage extends Component {
                         <InputLabel>
                             Rating
                         </InputLabel>
-                        <div className={classes.ratingContainer}>
+                        <Box align={"left"} mt={1} ml={1} >
                             <Rating
                                 align="left"
                                 name="preferredRating" precision={0.5} value={this.state.rating}
@@ -406,9 +409,9 @@ class TruckPage extends Component {
                                 }}
                                 size="medium"
                             />
-                        </div>
-                        <TextField id="reviewComment" label="Review Comment (optional)"
-                            multiline rows={4} fullWidth={true} defaultValue=""
+                        </Box>
+                        <TextField variant="outlined" id="reviewComment" label="Review Comment (optional)"
+                            multiline rows={4} fullWidth={true} value={this.state.reviewComment}
                             onChange={e => this.handleInputChange(e, null)}
                         />
                     </DialogContent>
