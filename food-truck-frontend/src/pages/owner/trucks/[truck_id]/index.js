@@ -91,7 +91,10 @@ class Information extends Component {
     }
 
     handleTagChange(event, tag) {
-        this.setState({ truckTags: tag});
+        if(tag.length < 6) {
+            console.log(tag.length);
+            this.setState({ truckTags: tag});
+        }
     }
 
     handleSubmit(event) {
@@ -195,17 +198,19 @@ class Information extends Component {
                     </Grid>
                     <Grid item xs={6} >
                         <ChipSelector
-                            label="Tags"
+                            label="Tags (select at most 5)"
                             options={this.state.allTags}
                             selectedOptions={this.state.truckTags}
-                            onChange={(event, value) => { this.handleTagChange(event, value) }}
-                            onSelectOption={t => axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`, {},
-                                { auth: {
-                                        username: this.props.auth.email,
-                                        password: this.props.auth.password
-                                    }}).then().catch(error => {
-                                console.log(error.message);
-                            })}
+                            onChange={(event, value) => {this.handleTagChange(event, value)}}
+                            onSelectOption={t => {
+                                if(this.state.truckTags.length < 5) {
+                                    axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`, {},
+                                    {auth: { username: this.props.auth.email, password: this.props.auth.password}
+                                    }).then().catch(error => {
+                                        console.log(error.message);
+                                    })
+                                }
+                            }}
                             onDeselectOption={t => axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
                                 { auth: {
                                         username: this.props.auth.email,

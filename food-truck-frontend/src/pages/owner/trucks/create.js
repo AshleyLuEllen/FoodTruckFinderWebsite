@@ -39,8 +39,9 @@ class CreateNewTruck extends Component {
     }
 
     handleTagChange(event, tag) {
-        console.log(tag);
-        this.setState({ truckTags: tag});
+        if(tag.length < 6) {
+            this.setState({ truckTags: tag});
+        }
     }
 
     handleSubmit(event) {
