@@ -249,8 +249,8 @@ class Information extends Component {
                                 </Typography>
                             </Button>
                         </Box>
-                        <Box>
-                            <Button mt={1} ml={1} mr={1} mb={1} variant="contained" pt={10} pl={10} href={`/trucks/${this.props.router.query.truck_id}`}>
+                        <Box mt={1} ml={1} mr={1} mb={1}>
+                            <Button variant="contained" pt={10} pl={10} href={`/trucks/${this.props.router.query.truck_id}`}>
                                 <Typography variant="button" gutterBottom display="block">
                                     View Live Page
                                 </Typography>

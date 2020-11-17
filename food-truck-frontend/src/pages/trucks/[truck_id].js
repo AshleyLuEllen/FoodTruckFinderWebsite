@@ -388,7 +388,7 @@ class TruckPage extends Component {
                 }
 
                 {this.state.truckFound &&
-                <Button variant={"outline"} onClick={this.writeReview}>
+                <Button variant="contained" onClick={this.writeReview}>
                     <Typography variant="button" gutterBottom display="block" color={"primary"}>
                         Write Review
                     </Typography>
@@ -416,10 +416,10 @@ class TruckPage extends Component {
                         />
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.handleCancel} color="primary" variant="outlined">
+                        <Button onClick={this.handleCancel} color="primary" variant="contained">
                             Cancel
                         </Button>
-                        <Button onClick={this.createReview} color="primary" variant="outlined">
+                        <Button onClick={this.createReview} color="primary" variant="contained">
                             Save
                         </Button>
                     </DialogActions>
@@ -427,7 +427,7 @@ class TruckPage extends Component {
 
                 {/**BACK*/}
                 <br/>
-                <Button variant="outlined" href="/">
+                <Button variant="contained" href="/">
                     <Typography variant="button" gutterBottom display="block">
                         Back
                     </Typography>
