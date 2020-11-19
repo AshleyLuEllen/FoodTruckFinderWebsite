@@ -24,6 +24,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import TableBody from "@material-ui/core/TableBody";
 import Box from "@material-ui/core/Box";
+import ReviewCard from "../../components/ReviewCard";
 
 const truckPageStyles = (theme) => ({
     text: {
@@ -355,26 +356,14 @@ class TruckPage extends Component {
                 <Divider/>
                 {this.state.truckFound && this.state.reviews.length > 0 &&
                 <Card>
-                    <CardHeader title="Reviews"/>
+                    <CardHeader title={"Reviews"}/>
                     <CardContent>
-                    {this.state.reviews.map((r, i) => (
-                        <div>
-                            <Typography variant="h8" component="h3" gutterBottom>
-                                {format(new Date(r.reviewTimestamp), "MM-dd-yyyy, HH:mm")}
-                            </Typography>
-                            <Link href={`/user/${r.user.id}`}>
-                                <Typography variant="subtitle 1" component="h5" className={classes.review} gutterBottom>
-                                    By: {r.user.firstName} {r.user.lastName}
-                                </Typography>
-                            </Link>
-
-                            <Rating precision={0.5} value={r.rating} size="small" readOnly/>
-                                {r.comment?.split('\n').map(line => <p>{line}</p>)}
-                            <Divider/>
-                        </div>
-                    ))}
+                        {this.state.reviews.map((r, i) => (
+                            <ReviewCard key={i} r={r}/>
+                        ))}
                     </CardContent>
-                </Card>}
+                </Card>
+                }
 
                 {this.state.truckFound && this.state.reviews.length === 0 &&
                 <Card>
