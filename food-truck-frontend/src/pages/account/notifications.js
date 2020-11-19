@@ -3,6 +3,7 @@ import Link from "next/link";
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { lighten, makeStyles, withStyles } from '@material-ui/core/styles';
+import { Dialog, DialogActions, DialogTitle, DialogContent, DialogContentText, Button } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -154,11 +155,11 @@ const EnhancedTableToolbar = (props) => {
         props.markAllAsUnread ? props.markAllAsUnread() : undefined;
     }
 
-  return (
+    return (
     <Toolbar
-      className={clsx(classes.root, {
-        [classes.highlight]: numSelected > 0,
-      })}
+        className={clsx(classes.root, {
+            [classes.highlight]: numSelected > 0,
+        })}
     >
       {numSelected > 0 ? (
         <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
@@ -257,6 +258,7 @@ class Notifications extends Component {
         this.markAllAsUnread = this.markAllAsUnread.bind(this);
         this.markAllAsRead = this.markAllAsRead.bind(this);
         this.fetchData = this.fetchData.bind(this);
+        this.handleClose = this.handleClose.bind(this);
     }
 
     markAllAsRead() {
@@ -370,8 +372,19 @@ class Notifications extends Component {
         });
     };
 
+    handleClose(event) {
+        this.setState({
+            open: false,
+            // selectedNotification: undefined
+        });
+    }
+
     handleClick = (event, id) => {
-        alert(this.state.rows.find(row => row.id === id)?.description);
+        this.setState({
+            open: true,
+            selectedNotification: this.state.rows.find(row => row.id === id),
+        });
+
         axios.patch(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${id}`, {
             unread: false
         }, {
@@ -497,23 +510,23 @@ class Notifications extends Component {
                                 key={row.id}
                                 selected={isItemSelected}
                                 >
-                                <TableCell padding="checkbox">
-                                    <Checkbox
-                                    checked={isItemSelected}
-                                    inputProps={{ 'aria-labelledby': labelId }}
-                                    onChange={event => this.handleSelectionChange(event, row.id)}
-                                    onClick={event => this.handleSelectClick(event, row.id)}
-                                    />
-                                </TableCell>
-                                <TableCell padding="none">
-                                    {row.unread ? <CheckBox/> : <CheckBoxOutlined/> }
-                                </TableCell>
-                                <TableCell padding="none">
-                                    {row.saved ? <Flag/> : <FlagOutlined/> }
-                                </TableCell>
-                                <TableCell>{row.truck_name}</TableCell>
-                                <TableCell>{row.subject}</TableCell>
-                                <TableCell align="right">{row.date}</TableCell>
+                                    <TableCell padding="checkbox">
+                                        <Checkbox
+                                        checked={isItemSelected}
+                                        inputProps={{ 'aria-labelledby': labelId }}
+                                        onChange={event => this.handleSelectionChange(event, row.id)}
+                                        onClick={event => this.handleSelectClick(event, row.id)}
+                                        />
+                                    </TableCell>
+                                    <TableCell padding="none">
+                                        {row.unread ? <CheckBox/> : <CheckBoxOutlined/> }
+                                    </TableCell>
+                                    <TableCell padding="none">
+                                        {row.saved ? <Flag/> : <FlagOutlined/> }
+                                    </TableCell>
+                                    <TableCell>{row.truck_name}</TableCell>
+                                    <TableCell>{row.subject}</TableCell>
+                                    <TableCell align="right">{row.date}</TableCell>
                                 </TableRow>
                             );
                             })}
@@ -526,16 +539,37 @@ class Notifications extends Component {
                     </Table>
                     </TableContainer>
                     <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    component="div"
-                    count={this.state.rows.length}
-                    rowsPerPage={this.state.rowsPerPage}
-                    page={this.state.page}
-                    onChangePage={this.handleChangePage}
-                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                        rowsPerPageOptions={[5, 10, 25]}
+                        component="div"
+                        count={this.state.rows.length}
+                        rowsPerPage={this.state.rowsPerPage}
+                        page={this.state.page}
+                        onChangePage={this.handleChangePage}
+                        onChangeRowsPerPage={this.handleChangeRowsPerPage}
                     />
                 </Paper>
-                </div>
+                <Dialog
+                    open={this.state.open}
+                    onClose={this.handleClose}
+                    scroll="paper"
+                    aria-labelledby="dialog-title"
+                    aria-describedby="dialog-description"
+                >
+                    <DialogTitle id="dialog-title">{this.state.selectedNotification?.subject} - {this.state.selectedNotification?.truck_name}</DialogTitle>
+                    <DialogContent dividers>
+                        <DialogContentText
+                          id="dialog-description"
+                        >
+                            {this.state.selectedNotification?.description?.split('\n').map(par => <p>{par}</p>)}
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleClose} color="primary">
+                            Close
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </div>
         );
     }
 }
@@ -543,7 +577,7 @@ class Notifications extends Component {
 function mapStateToProps(state) {
     const { auth } = state
     return { auth }
-  }
+}
   
 const mapDispatchToProps = {
     authLogout
