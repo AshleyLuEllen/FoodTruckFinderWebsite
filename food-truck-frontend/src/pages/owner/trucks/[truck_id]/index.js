@@ -236,6 +236,13 @@ class Information extends Component {
                             </Button>
                         </Box>
                         <Box mt={1} ml={1} mr={1} mb={1}>
+                            <Button variant="contained" pt={10} pl={10} href={`/trucks/${this.props.router.query.truck_id}`}>
+                                <Typography variant="button" gutterBottom display="block">
+                                    View Live Page
+                                </Typography>
+                            </Button>
+                        </Box>
+                        <Box mt={1} ml={1} mr={1} mb={1}>
                             <Button variant="contained" pt={10} pl={10} href="/owner/trucks">
                                 <Typography variant="button" gutterBottom display="block">
                                     Back
@@ -246,13 +253,6 @@ class Information extends Component {
                             <Button variant="contained" pt={10} pl={10} href="/">
                                 <Typography variant="button" gutterBottom display="block">
                                     Home
-                                </Typography>
-                            </Button>
-                        </Box>
-                        <Box mt={1} ml={1} mr={1} mb={1}>
-                            <Button variant="contained" pt={10} pl={10} href={`/trucks/${this.props.router.query.truck_id}`}>
-                                <Typography variant="button" gutterBottom display="block">
-                                    View Live Page
                                 </Typography>
                             </Button>
                         </Box>

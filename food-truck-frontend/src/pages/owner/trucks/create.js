@@ -3,7 +3,7 @@ import Link from "next/link";
 import axios from "axios";
 import { withRouter } from "next/router";
 import { connect } from "react-redux";
-import {Button, Grid, InputLabel, TextField} from "@material-ui/core";
+import {Button, Grid, InputLabel, TextField, Box} from "@material-ui/core";
 import ChipSelector from "../../../components/ChipSelector";
 import Container from "@material-ui/core/Container";
 
@@ -106,40 +106,34 @@ class CreateNewTruck extends Component {
                 <Grid container spacing={4} >
                     <Grid item xs={12}>
                         <br/>
-                        <InputLabel>
-                            Food Truck Name
-                        </InputLabel>
                         <TextField
                             id="name"
-                            label=""
+                            variant="outlined"
+                            label="Food Truck Name"
                             value={this.state.name}
                             fullWidth={true}
                             onChange={e => this.handleInputChange(e, "name")}
                         />
                     </Grid>
                     <Grid item xs={12}>
-                        <InputLabel>
-                            License Plate Number
-                        </InputLabel>
                         <TextField
+                            variant="outlined"
                             id="licensePlate"
-                            label=""
+                            label="License Plate Number"
                             value={this.state.licensePlate}
                             fullWidth={true}
                             onChange={e => this.handleInputChange(e, "licensePlate")}
                         />
                     </Grid>
                     <Grid item xs={12}>
-                        <InputLabel>
-                            Description
-                        </InputLabel>
                         <TextField
                             id="description"
-                            label=""
+                            label="Description"
+                            variant="outlined"
                             multiline
                             rows={4}
                             fullWidth={true}
-                            defaultValue={this.state.description}
+                            value={this.state.description}
                             onChange={e => this.handleInputChange(e, "description")}
                         />
                     </Grid>
@@ -151,24 +145,27 @@ class CreateNewTruck extends Component {
                             onChange={(event, value) => { this.handleTagChange(event, value) }}
                         />
                     </Grid>
-                    <Grid item xs={6} sm={3}>
+                    <Grid item xs={3}>
                         <Button
-                            variant="outlined"
+                            variant="contained"
                             color="primary"
                             onClick={this.createNewTruck}
                             width={1/3}>
                             Create
                         </Button>
+                        <Box mr={1} mt={1} mb={1}>
+                            <Button
+                                variant="contained"
+                                onClick={this.handleCancel}
+                                href={`/owner/trucks`}
+                                width={1/3}>
+                                Cancel
+                            </Button>
+                        </Box>
+
                     </Grid>
-                    <Grid item xs={6} sm={3}>
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            onClick={this.handleCancel}
-                            href={`/owner/trucks`}
-                            width={1/3}>
-                            Cancel
-                        </Button>
+                    <Grid item xs={3}>
+
                     </Grid>
                 </Grid>
             </Container>
