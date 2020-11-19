@@ -177,7 +177,7 @@ class EnhancedTable extends Component {
                     >
                         <colgroup>
                             <col style={{width:'50px'}}/>
-                            {this.props.columns.map(column => <col style={{ width: column.width }}/>)}
+                            {this.props.columns.map((column, i) => <col key={i} style={{ width: column.width }}/>)}
                         </colgroup>
                         <EnhancedTableHead
                             classes={classes}
@@ -215,16 +215,17 @@ class EnhancedTable extends Component {
                                             onClick={event => this.handleSelectClick(event, row.id)}
                                         />
                                     </TableCell>
-                                    {this.props.columns.map(column =>
-                                        <TableCell align={column.align}>
+                                    {this.props.columns.map((column, i) =>
+                                        <TableCell key={i} align={column.align}>
                                             {column.renderer ? column.renderer(row[column.id]) : row[column.id]}
                                         </TableCell>
                                     )}
                                     {this.props.rowActions &&
                                         <TableCell>
                                             <div style={{ display: 'flex' }}>
-                                                {this.props.rowActions.map(action =>
+                                                {this.props.rowActions.map((action, i) =>
                                                     <Button
+                                                        key={i}
                                                         variant="contained"
                                                         size="small"
                                                         color={action.color}

@@ -5,15 +5,15 @@ import clsx from 'clsx';
 import { geolocated } from "react-geolocated";
 import { useRouter } from "next/router";
 
+import { Container, Grid, Typography, TextField, Button, Paper, Box, CircularProgress } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'
-import { TextField, Divider, Grid, Container, Typography, Button, Box, CircularProgress, Paper } from '@material-ui/core';
 import { Rating } from '@material-ui/lab';
 import { green } from '@material-ui/core/colors';
 import ChipSelector from '../components/ChipSelector';
-import TruckMap from '../components/TruckMap';
 import TruckCard from '../components/TruckCard';
 import LocationInput from '../components/LocationInput';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
+import GoogleMap, { Marker } from '../components/GoogleMap';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -181,6 +181,8 @@ function SearchPage(props) {
         }
     };
 
+    let markerCount = 0;
+
     return (
         <ul>
             <Container className={classes.root}>
@@ -203,9 +205,8 @@ function SearchPage(props) {
                             />
                         </div>
                         <LocationInput onChange={(event, value) => {
-                            setLocation(value?.place_id);
                             console.log(value);
-                            // TODO: get coordinates on server-side
+                            setLocation(value?.place_id);
                         }}/>
                         <div className={classes.ratingContainer}>
                             <Typography variant="h6" style={{ marginRight: "20px" }}>Minimum Rating</Typography>
@@ -241,15 +242,30 @@ function SearchPage(props) {
                             </Button>
                             <Typography variant="h4" style={{ marginTop: "10px", marginBottom: "10px", textAlign: "center" }}>Search Results</Typography>
                             <Box style={{ textAlign: "left", maxHeight: "calc(75vh)", overflow: "auto" }}>
-                            {truckResults.map((tr, i) => (
-                                <TruckCard key={i} className={classes.truckCard} userId={userId} tags={tr.tags.map(t => t.tag.name) || []} truck={tr} onClick={evt => setCurrentlySelected(i)}/>
-                            ))}
+                                {truckResults.map((tr, i) => (
+                                    <TruckCard key={i} className={classes.truckCard} userId={userId} tags={tr.tags.map(t => t.tag.name) || []} truck={tr} onClick={evt => setCurrentlySelected(i)}/>
+                                ))}
                             </Box>
                         </Paper>
                     </Grid>
                     <Grid item xs={12} md={7}>
                         <div className={classes.mapWrapper}>
-                            <TruckMap trucks={truckResults} selected={currentlySelected}/>
+                                <GoogleMap
+                                    center={{ lat: props?.coords?.latitude || 31.5489, lng: props?.coords?.longitude || -97.1131 }}
+                                >
+                                    {showingResults && truckResults.map((tr, i) => (
+                                        tr.currentLocation && <Marker
+                                            key={i}
+                                            position={{ lat: tr.currentLocation.latitude, lng: tr.currentLocation.longitude }}
+                                            label={markerCount < 5 ? `${++markerCount}` : undefined}
+                                            title={tr.name}
+                                            animation="drop"
+                                        />
+                                    ))}
+                                    <Marker
+                                        variant="circle"
+                                    ></Marker>
+                                </GoogleMap>
                         </div>
                     </Grid>
                 </Grid>

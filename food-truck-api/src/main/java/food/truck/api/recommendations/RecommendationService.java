@@ -86,11 +86,13 @@ public class RecommendationService {
     }
 
     public List<Truck> getSearchResults(SearchQuery query) {
+        Location loc = query.getPlaceId() != null ? googlePlaceService.getLocationFromPlaceId(query.getPlaceId()) : query.getLocation();
+
         return this.getRecommendationComputer().getSearchResults(
-            truckService.findAll(),
+            scheduleService.getAllTrucksWithinDistanceFromLocation(loc, this.recommendationComputer.getMaxDistance()),
             query.getQuery(),
             query.getTags(),
-            query.getPlaceId() != null ? googlePlaceService.getLocationFromPlaceId(query.getPlaceId()) : query.getLocation(),
+            loc,
             query.getPreferredRating() != null ? query.getPreferredRating() : 0,
             20
         );

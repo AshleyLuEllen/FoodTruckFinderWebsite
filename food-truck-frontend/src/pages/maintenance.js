@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/router'
-import { makeStyles } from '@material-ui/core/styles';
+import { useDispatch } from 'react-redux';
+import { logout } from '../redux/actions/auth';
 import axios from 'axios';
+import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
     wrapper: {
@@ -16,6 +18,7 @@ const useStyles = makeStyles((theme) => ({
 export default function MaintenancePage() {
     const classes = useStyles();
     const router = useRouter();
+    const dispatch = useDispatch();
 
     useEffect(() => {
         if (router.query.next) {
@@ -23,7 +26,10 @@ export default function MaintenancePage() {
             .then(res => {
                 router.push(router.query.next);
             })
-            .catch(err => console.log(err));
+            .catch(err => {
+                console.log(err);
+                dispatch(logout());
+            });
         }
     }, [router.query.next]);
 

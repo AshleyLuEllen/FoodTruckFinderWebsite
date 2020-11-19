@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function LocationInput(props) {
   const classes = useStyles();
-  const [value, setValue] = React.useState(null);
+  const [value, setValue] = React.useState('');
   const [inputValue, setInputValue] = React.useState('');
   const [options, setOptions] = React.useState([]);
   const loaded = React.useRef(false);
@@ -51,7 +51,11 @@ export default function LocationInput(props) {
   const fetch = React.useMemo(
     () =>
       throttle((request, callback) => {
+        try {
         autocompleteService.current.getPlacePredictions(request, callback);
+        } catch(e) {
+
+        }
       }, 200),
     [],
   );
@@ -93,8 +97,10 @@ export default function LocationInput(props) {
   }, [value, inputValue, fetch]);
 
   React.useEffect(() => {
-      setInputValue(props.initialValue);
-      setValue(props.initialValue)
+      if (props.initialValue) {
+        setInputValue(props.initialValue);
+        setValue(props.initialValue)
+      }
   }, [props.initialValue]);
 
   return (

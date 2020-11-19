@@ -12,7 +12,7 @@ import { Add, Delete } from '@material-ui/icons';
 import { DateTimePicker } from "@material-ui/pickers";
 
 
-import TruckMap from '../../../../components/TruckMap';
+// import TruckMap from '../../../../components/TruckMap';
 import LocationInput from '../../../../components/LocationInput';
 
 import Button from '@material-ui/core/Button';
@@ -90,7 +90,7 @@ function DraggableDialog(props) {
     return (
         <div>
             <Dialog
-                open={props.open}
+                open={props.open || false}
                 onClose={handleClose}
                 PaperComponent={PaperComponent}
                 aria-labelledby="draggable-dialog-title"
@@ -177,7 +177,7 @@ class ScheduleManagementPage extends Component {
             loading: true,
             upcoming: [],
             past: [],
-            editorOpen: false,
+            open: false,
             editing: false,
             initialData: undefined,
             upcomingSelected: [],

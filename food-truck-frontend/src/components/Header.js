@@ -1,5 +1,6 @@
 import React from "react";
 import Link from 'next/link';
+import { Link as MuiLink } from '@material-ui/core';
 import { useRouter } from 'next/router'
 import { connect } from 'react-redux';
 import { logout as authLogout } from '../redux/actions/auth';
@@ -91,6 +92,11 @@ const useStyles = makeStyles((theme) => ({
         marginLeft: theme.spacing(2),
         height: "auto",
         width: "100px"
+    },
+    link: {
+        '&:hover': {
+            textDecoration: 'none'
+        }
     }
 }));
 
@@ -165,15 +171,15 @@ function PrimarySearchAppBar(props) {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <Link href="/owner">
+            <MuiLink className={classes.link} href="/owner" color="inherit">
                 <MenuItem onClick={handleMenuClose}>Owner Dashboard</MenuItem>
-            </Link>
-            <Link href="/account">
+            </MuiLink>
+            <MuiLink className={classes.link} href="/account" color="inherit">
                 <MenuItem onClick={handleMenuClose}>My Profile</MenuItem>
-            </Link>
-            <Link href="/logout">
+            </MuiLink>
+            <MuiLink className={classes.link} href="/logout" color="inherit">
                 <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
-            </Link>
+            </MuiLink>
         </Menu>
     );
 

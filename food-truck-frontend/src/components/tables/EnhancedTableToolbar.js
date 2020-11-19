@@ -47,8 +47,8 @@ export default function EnhancedTableToolbar(props) {
 
             {numSelected > 0 ? (
                 <Fragment>
-                    {props.selectedActions && props.selectedActions.map(action =>
-                        <Tooltip title={action.title}>
+                    {props.selectedActions && props.selectedActions.map((action, i) =>
+                        <Tooltip key={i} title={action.title}>
                             <IconButton aria-label={action.title} onClick={action.action}>
                                 {action.icon}
                             </IconButton>
@@ -57,8 +57,8 @@ export default function EnhancedTableToolbar(props) {
                 </Fragment>
             ) : (
                 <Fragment>
-                    {props.unselectedActions && props.unselectedActions.map(action =>
-                        <Tooltip title={action.title}>
+                    {props.unselectedActions && props.unselectedActions.map((action, i) =>
+                        <Tooltip key={i} title={action.title}>
                             <IconButton aria-label={action.title} onClick={action.action}>
                                 {action.icon}
                             </IconButton>

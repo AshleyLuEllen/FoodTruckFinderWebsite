@@ -17,7 +17,7 @@ function loadScript(src, position, id) {
 
 const mapStyles = (theme) => ({
     mapWrapper: {
-        height: '500px',
+        height: '100%',
         width: '100%',
         '& > #map': {
             height: '100%'
@@ -122,6 +122,15 @@ export default geolocated({
     userDecisionTimeout: null,
 })(withStyles(mapStyles, { withTheme: true })(GoogleMap));
 
+var circleIcon = {
+    path: "M-20,0a20,20 0 1,0 40,0a20,20 0 1,0 -40,0",
+    fillColor: '#0000FF',
+    fillOpacity: .6,
+    // anchor: new google.maps.Point(0,0),
+    strokeWeight: 0,
+    scale: 0.3
+}
+
 export class Marker extends Component {
     constructor(props) {
         super(props);
@@ -134,9 +143,13 @@ export class Marker extends Component {
     }
 
     addToMap() {
-        console.log("added to map", this.props.mapRef);
-
         const animationType = this.props.animation === 'drop' ? google.maps.Animation.DROP : undefined;
+
+        let icon = undefined;
+
+        if (this.props.variant === 'circle') {
+            icon = circleIcon;
+        }
 
         this.marker = new google.maps.Marker({
             draggable: this.props.draggable || false,
@@ -144,6 +157,7 @@ export class Marker extends Component {
             position: this.props.position || this.props.mapRef.getCenter(),
             label: this.props.label,
             title: this.props.title,
+            icon,
         });
 
         this.marker.setMap(this.props.mapRef);
@@ -177,7 +191,6 @@ export class Marker extends Component {
         if (!this.state.attached || !this.marker) {
             return;
         }
-        console.log("remove from map")
 
         this.marker.setMap(null);
         this.marker = null;

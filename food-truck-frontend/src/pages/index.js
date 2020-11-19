@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import Link from "next/link";
+import { geolocated } from 'react-geolocated';
 import { withRouter } from 'next/router'
 import axios from "axios";
 import { connect } from 'react-redux';
@@ -8,9 +9,8 @@ import { login as authLogin, logout as authLogout } from '../redux/actions/auth'
 import { withStyles } from '@material-ui/core/styles';
 import { Container, Grid, Typography, Box, CircularProgress, Divider } from "@material-ui/core";
 
-import TruckMap from '../components/TruckMap';
+import GoogleMap, { Marker } from '../components/GoogleMap';
 import TruckCard from '../components/TruckCard';
-import { Search } from '@material-ui/icons';
 import SearchPage from './search';
 
 const dashboardStyles = theme => ({
@@ -38,12 +38,71 @@ const dashboardStyles = theme => ({
 class DashboardPage extends Component {
     constructor(props) {
         super(props);
-        this.state = { userId: undefined, loading: true, user: undefined, subscriptions: [], recommendations: [], currentlySelected: undefined };
+        this.state = {
+            userId: undefined,
+            loading: true,
+            user: undefined,
+            subscriptions: [],
+            recommendations: [],
+            currentlySelected: undefined,
+            positionUpdated: false
+        };
+    }
+
+    loadTrucks(userId) {
+        Promise.all([
+            axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userId}/recommendations`),
+            axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userId}/subscriptions`)
+        ])
+        .then(results => {
+            this.setState({
+                recommendations: results[0].data,
+                subscriptions: results[1].data,
+                loading: false,
+                currentlySelected: undefined
+            });
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    }
+
+    componentDidUpdate(prevProps) {
+        if (!this.state.positionUpdated && this.props.isGeolocationEnabled) {
+            if (prevProps?.coords?.latitude !== this.props?.coords?.latitude || prevProps?.coords?.longitude !== this.props?.coords?.longitude) {
+                if (this.props.coords?.latitude && this.props.coords?.longitude) {
+                    const position = {
+                        latitude: this.props?.coords?.latitude,
+                        longitude: this.props?.coords?.longitude
+                    };
+                    console.log(position);
+
+                    this.setState({
+                        positionUpdated: true
+                    });
+
+                    axios.put(`${process.env.FOOD_TRUCK_API_URL}/users/me/location`, position, {
+                        auth: {
+                            username: this.props.auth.email,
+                            password: this.props.auth.password
+                        }
+                    })
+                    .then(res => {
+                        console.log("position updated");
+                        this.loadTrucks(this.state.userId);
+                    })
+                    .catch(res => {
+                        this.setState({
+                            positionUpdated: false
+                        });
+                    })
+                }
+            }
+        }
     }
 
     componentDidMount() {
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`,
-            {
+        axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
                 auth: {
                     username: this.props.auth.email,
                     password: this.props.auth.password
@@ -52,22 +111,7 @@ class DashboardPage extends Component {
             .then(userres => {
                 this.setState({
                     userId: userres.data.id
-                });
-                Promise.all([
-                    axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userres.data.id}/recommendations`),
-                    axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userres.data.id}/subscriptions`)
-                ])
-                .then(results => {
-                    this.setState({
-                        recommendations: results[0].data,
-                        subscriptions: results[1].data,
-                        loading: false,
-                        currentlySelected: undefined
-                    });
-                })
-                .catch(err => {
-                    console.log(err);
-                });
+                }, () => this.loadTrucks(this.state.userId));
             })
             .catch(err => {
                 console.log(err);
@@ -77,12 +121,39 @@ class DashboardPage extends Component {
     render() {
         const { classes } = this.props;
 
+        let markerCount = 0;
+        const LETTERS = "12345ABCDE";
+
         return this.props.auth.isLoggedIn ? (
             <Container className={classes.root}>
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={8}>
                         <div className={classes.mapWrapper}>
-                            <TruckMap trucks={this.state.recommendations.concat(this.state.subscriptions)} selected={this.state.currentlySelected}/>
+                                <GoogleMap
+                                    center={{ lat: this.props?.coords?.latitude || 31.5489, lng: this.props?.coords?.longitude || -97.1131 }}
+                                >
+                                    {this.state.recommendations.map((tr, i) => (
+                                        tr.currentLocation && <Marker
+                                            key={i}
+                                            position={{ lat: tr.currentLocation.latitude, lng: tr.currentLocation.longitude }}
+                                            label={markerCount < 5 ? `${LETTERS[++markerCount]}` : undefined}
+                                            title={tr.name}
+                                            animation="drop"
+                                        />
+                                    ))}
+                                    {this.state.subscriptions.map((tr, i) => (
+                                        tr.currentLocation && <Marker
+                                            key={i}
+                                            position={{ lat: tr.currentLocation.latitude, lng: tr.currentLocation.longitude }}
+                                            label={markerCount < 10 ? `${LETTERS[++markerCount]}` : undefined}
+                                            title={tr.name}
+                                            animation="drop"
+                                        />
+                                    ))}
+                                    <Marker
+                                        variant="circle"
+                                    ></Marker>
+                                </GoogleMap>
                         </div>
                     </Grid>
                     {!this.state.loading &&
@@ -124,4 +195,9 @@ const mapDispatchToProps = {
     authLogout
 }
 
-export default withStyles(dashboardStyles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(DashboardPage)));
+export default geolocated({
+    positionOptions: {
+        enableHighAccuracy: false,
+    },
+    userDecisionTimeout: null,
+})(withStyles(dashboardStyles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(DashboardPage))));
