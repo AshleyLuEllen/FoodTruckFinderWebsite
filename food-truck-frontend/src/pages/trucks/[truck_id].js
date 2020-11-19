@@ -55,6 +55,10 @@ const truckPageStyles = (theme) => ({
         marginBottom: 10,
         margin: theme.spacing(1)
     },
+    reviewCard: {
+        marginBottom: "20px",
+        marginRight: "20px"
+    },
     reviewDialog: {
         maxWidth: '500px'
     }
@@ -359,7 +363,7 @@ class TruckPage extends Component {
                     <CardHeader title={"Reviews"}/>
                     <CardContent>
                         {this.state.reviews.map((r, i) => (
-                            <ReviewCard key={i} r={r}/>
+                            <ReviewCard className={truckPageStyles.reviewCard} key={i} r={r} user={false}/>
                         ))}
                     </CardContent>
                 </Card>
