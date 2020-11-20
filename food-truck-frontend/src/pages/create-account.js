@@ -3,7 +3,8 @@ import Link from "next/link";
 import axios from "axios";
 import withRouter from "next/dist/client/with-router";
 
-import { Paper, withStyles, Grid, TextField, Button } from '@material-ui/core';
+import {Paper, withStyles, Grid, TextField, Button, Snackbar} from '@material-ui/core';
+import Alert from "@material-ui/lab/Alert";
 
 const styles = theme => ({
     margin: {
@@ -62,18 +63,31 @@ class CreateAccount extends Component {
             password: this.state.password
         }
 
+        var pattern = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*\(\)_])(?=.{8,})");
+        const test = pattern.test(this.state.password);
         if (this.state.password === this.state.passConf) {
-            axios.post(process.env.FOOD_TRUCK_API_URL + "/users", user)
-                .then((res) => {
-                    this.props.router.push('/login')
-                })
-                .catch((err) => {
-                    alert("Email already exists.")
-                    console.log(err);
+            if (test) {
+                axios.post(process.env.FOOD_TRUCK_API_URL + "/users", user)
+                    .then((res) => {
+                        this.props.router.push('/login')
+                    })
+                    .catch((err) => {
+                        alert("Email already exists.")
+                        this.setState({
+                            emailTaken: true
+                        });
+                        console.log(err);
+                    });
+            } else {
+                this.setState({
+                    badPass: true
                 });
+            }
         }
         else {
-            alert("Passwords do no match.")
+            this.setState({
+                notMatchPass: true
+            });
         }
 
         console.log("create account!");
@@ -117,7 +131,23 @@ class CreateAccount extends Component {
                             </Grid>
                         </form>
                         <label>{this.state.message}</label>
-
+                        {this.state.badPass && <Snackbar open={true} autoHideDuration={6000}>
+                            <Alert variant="filled" severity="error">
+                                Password must contain: <br />- at least 8 characters<br />
+                                - at least 1 uppercase <br />- at least 1 lowercase<br />
+                                - at least 1 number <br />- at least 1 special character (!@#$%^&*()_
+                            </Alert>
+                        </Snackbar>}
+                        {this.state.emailTaken && <Snackbar open={true} autoHideDuration={6000}>
+                            <Alert variant="filled" severity="error">
+                                Email already taken.
+                            </Alert>
+                        </Snackbar>}
+                        {this.state.notMatchPass && <Snackbar open={true} autoHideDuration={6000}>
+                            <Alert variant="filled" severity="error">
+                                Passwords do not match.
+                            </Alert>
+                        </Snackbar>}
                     </div>
                 </Paper>
             </div>
