@@ -4,6 +4,7 @@ import axios from 'axios';
 import clsx from 'clsx';
 import { geolocated } from "react-geolocated";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 import { Container, Grid, Typography, TextField, Button, Paper, Box, CircularProgress } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'
@@ -262,8 +263,9 @@ function SearchPage(props) {
                                             title={tr.name}
                                             animation="drop"
                                         >
-                                            <h1>{tr.name}</h1>
-                                            <h2>{tr.description}</h2>
+                                            <div className="title full-width">{tr.name}</div>
+                                            <div className="address-line full-width">{tr.description}</div>
+                                            <Link href={`/trucks/${tr.id}`}>View Truck Info Page</Link>
                                         </Marker>
                                     ))}
                                     <Marker

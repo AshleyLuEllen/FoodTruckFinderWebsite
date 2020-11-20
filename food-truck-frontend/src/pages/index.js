@@ -131,6 +131,7 @@ class DashboardPage extends Component {
                         <div className={classes.mapWrapper}>
                                 <GoogleMap
                                     center={{ lat: this.props?.coords?.latitude || 31.5489, lng: this.props?.coords?.longitude || -97.1131 }}
+                                    withInfoWindow
                                 >
                                     {this.state.recommendations.map((tr, i) => (
                                         tr.currentLocation && <Marker
@@ -139,7 +140,11 @@ class DashboardPage extends Component {
                                             label={markerCount < 5 ? `${LETTERS[++markerCount]}` : undefined}
                                             title={tr.name}
                                             animation="drop"
-                                        />
+                                        >
+                                            <div className="title full-width">{tr.name}</div>
+                                            <div className="address-line full-width">{tr.description}</div>
+                                            <Link href={`/trucks/${tr.id}`}>View Truck Info Page</Link>
+                                        </Marker>
                                     ))}
                                     {this.state.subscriptions.map((tr, i) => (
                                         tr.currentLocation && <Marker
@@ -148,7 +153,11 @@ class DashboardPage extends Component {
                                             label={markerCount < 10 ? `${LETTERS[++markerCount]}` : undefined}
                                             title={tr.name}
                                             animation="drop"
-                                        />
+                                        >
+                                            <div className="title full-width">{tr.name}</div>
+                                            <div className="address-line full-width">{tr.description}</div>
+                                            <Link href={`/trucks/${tr.id}`}>View Truck Info Page</Link>
+                                        </Marker>
                                     ))}
                                     <Marker
                                         variant="circle"

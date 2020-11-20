@@ -43,9 +43,10 @@ class GoogleMap extends Component {
     markerClickHook(marker) {
         if (this.map) {
             this.map.panTo(marker.marker.getPosition());
+            this.map.setZoom(16);
 
             if (this.state.infoWindowLoaded && !this.props.hideInfoWindow) {
-                this.infoWindow.setContent(ReactDOMServer.renderToString(<div>{marker.props.children}</div>));
+                this.infoWindow.setContent(ReactDOMServer.renderToString(<div className="poi-info-window gm-style">{marker.props.children}</div>));
                 this.infoWindow.open(this.map, marker.marker);
             }
         }
