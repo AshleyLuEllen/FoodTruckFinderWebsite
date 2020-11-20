@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactDOMServer from 'react-dom/server';
 import { geolocated } from 'react-geolocated';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -30,10 +31,24 @@ class GoogleMap extends Component {
         super(props);
         this.state = {
             loaded: false,
-            centeredOnCurrentPosition: false
+            centeredOnCurrentPosition: false,
+            infoWindowLoaded: false,
         };
 
         this.mapRef = React.createRef();
+
+        this.markerClickHook = this.markerClickHook.bind(this);
+    }
+
+    markerClickHook(marker) {
+        if (this.map) {
+            this.map.panTo(marker.marker.getPosition());
+
+            if (this.state.infoWindowLoaded && !this.props.hideInfoWindow) {
+                this.infoWindow.setContent(ReactDOMServer.renderToString(<div>{marker.props.children}</div>));
+                this.infoWindow.open(this.map, marker.marker);
+            }
+        }
     }
 
     attemptMapLoad() {
@@ -61,6 +76,13 @@ class GoogleMap extends Component {
             this.setState({
                 loaded: true
             });
+
+            if (this.props.withInfoWindow) {
+                this.infoWindow = new google.maps.InfoWindow({});
+                this.setState({
+                    infoWindowLoaded: true,
+                });
+            }
         }
     }
 
@@ -71,7 +93,7 @@ class GoogleMap extends Component {
     componentDidUpdate(prevProps) {
         this.attemptMapLoad();
 
-        if (prevProps.center !== this.props.center && this.props.center) {
+        if (prevProps.center !== this.props.center && this.props.center && this.map) {
             this.map.setCenter(this.props.center);
 
             this.setState({
@@ -80,7 +102,7 @@ class GoogleMap extends Component {
             });
         }
 
-        if (!this.props.center && !this.state.centeredOnCurrentPosition && this.props.isGeolocationEnabled) {
+        if (!this.props.center && !this.state.centeredOnCurrentPosition && this.props.isGeolocationEnabled && this.map) {
             if (prevProps?.coords?.latitude !== this.props?.coords?.latitude || prevProps?.coords?.longitude !== this.props?.coords?.longitude) {
                 this.map.setCenter({
                     lat: this.props?.coords?.latitude,
@@ -102,7 +124,7 @@ class GoogleMap extends Component {
         const { classes } = this.props;
 
         const childrenWithProps = React.Children.map(this.props.children, child => {
-            const props = { mapRef: this.map, mapLoaded: this.state.loaded, mapCenter: this.state.mapCenter };
+            const props = { mapRef: this.map, mapLoaded: this.state.loaded, mapCenter: this.state.mapCenter, markerClickHook: this.markerClickHook };
             if (React.isValidElement(child)) {
                 return React.cloneElement(child, props);
             }
@@ -140,6 +162,14 @@ export class Marker extends Component {
         };
 
         this.marker = null;
+        this.clickHandler = this.clickHandler.bind(this);
+    }
+
+    clickHandler(event) {
+        this.props.onClick && this.props.onClick(event, this);
+        if (!this.props.preventDefaultOnClick && !this.props.disableInfoWindow) {
+            this.props.markerClickHook(this);
+        }
     }
 
     addToMap() {
@@ -162,6 +192,8 @@ export class Marker extends Component {
 
         this.marker.setMap(this.props.mapRef);
 
+        google.maps.event.addListener(this.marker, 'click', this.clickHandler);
+
         this.setState({
             attached: true
         });
@@ -178,7 +210,7 @@ export class Marker extends Component {
             this.addToMap();
         }
 
-        if (prevProps.position !== this.props.position || prevProps.mapCenter !== this.props.mapCenter) {
+        if (this.marker && (prevProps.position !== this.props.position || prevProps.mapCenter !== this.props.mapCenter)) {
             if (this.props.position) {
                 this.marker.setPosition(this.props.position);
             } else {

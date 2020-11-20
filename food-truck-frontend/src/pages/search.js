@@ -252,6 +252,7 @@ function SearchPage(props) {
                         <div className={classes.mapWrapper}>
                                 <GoogleMap
                                     center={{ lat: props?.coords?.latitude || 31.5489, lng: props?.coords?.longitude || -97.1131 }}
+                                    withInfoWindow
                                 >
                                     {showingResults && truckResults.map((tr, i) => (
                                         tr.currentLocation && <Marker
@@ -260,10 +261,14 @@ function SearchPage(props) {
                                             label={markerCount < 5 ? `${++markerCount}` : undefined}
                                             title={tr.name}
                                             animation="drop"
-                                        />
+                                        >
+                                            <h1>{tr.name}</h1>
+                                            <h2>{tr.description}</h2>
+                                        </Marker>
                                     ))}
                                     <Marker
                                         variant="circle"
+                                        disableInfoWindow
                                     ></Marker>
                                 </GoogleMap>
                         </div>
