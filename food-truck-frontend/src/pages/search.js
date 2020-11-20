@@ -131,6 +131,28 @@ function SearchPage(props) {
         }
     }, [router.query.tag, tagOptions]);
 
+    useEffect(() => {
+        if (props.coords?.latitude && props.coords?.longitude && userId) {
+            const position = {
+                latitude: props?.coords?.latitude,
+                longitude: props?.coords?.longitude
+            };
+
+            axios.put(`${process.env.FOOD_TRUCK_API_URL}/users/me/location`, position, {
+                auth: {
+                    username: props.auth.email,
+                    password: props.auth.password
+                }
+            })
+            .then(res => {
+                console.log("position updated");
+            })
+            .catch(res => {
+                console.log("could not update location");
+            })
+        }
+    }, [props.coords?.latitude, props.coords?.longitude])
+
     const resultsPageClass = clsx({
         [classes.resultsVisible]: showingResults,
     });
@@ -293,5 +315,5 @@ export default geolocated({
     positionOptions: {
         enableHighAccuracy: false,
     },
-    userDecisionTimeout: 5000,
+    userDecisionTimeout: 0,
 })(connect(mapStateToProps, mapDispatchToProps)(SearchPage));
