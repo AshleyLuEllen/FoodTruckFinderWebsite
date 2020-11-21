@@ -109,7 +109,7 @@ public class UserNotificationServiceTest {
         testTruck2.setDescription("Best comfort food ever!");
         testTruck2.setLicensePlate("COZY <3");
         final long truckID2 = truckService.createTruck(testTruck2, user).getId();
-        log.info("Created truck1");
+        log.info("Created truck2");
 
         Optional<Truck> truck2Opt = this.truckService.findTruck(truckID2);
         assertTrue(truck2Opt.isPresent());
