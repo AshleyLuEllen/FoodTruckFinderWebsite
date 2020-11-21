@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { geolocated } from 'react-geolocated';
 import { withRouter } from 'next/router';
@@ -239,6 +240,13 @@ class DashboardPage extends Component {
         );
     }
 }
+
+DashboardPage.propTypes = {
+    coords: PropTypes.any,
+    isGeolocationEnabled: PropTypes.any,
+    classes: PropTypes.any,
+    auth: PropTypes.any,
+};
 
 function mapStateToProps(state) {
     const { auth } = state;

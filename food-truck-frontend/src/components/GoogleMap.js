@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOMServer from 'react-dom/server';
+import PropTypes from 'prop-types';
 import { geolocated } from 'react-geolocated';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -16,6 +17,7 @@ function loadScript(src, position, id) {
     position.appendChild(script);
 }
 
+// eslint-disable-next-line no-unused-vars
 const mapStyles = theme => ({
     mapWrapper: {
         height: '100%',
@@ -83,7 +85,7 @@ class GoogleMap extends Component {
             });
 
             if (this.props.withInfoWindow) {
-                this.infoWindow = new google.maps.InfoWindow({});
+                this.infoWindow = new window.google.maps.InfoWindow({});
                 this.setState({
                     infoWindowLoaded: true,
                 });
@@ -172,6 +174,19 @@ var circleIcon = {
     scale: 0.3,
 };
 
+GoogleMap.propTypes = {
+    hideInfoWindow: PropTypes.bool,
+    withInfoWindow: PropTypes.bool,
+    center: PropTypes.exact({
+        lat: PropTypes.any.isRequired,
+        lng: PropTypes.any.isRequired,
+    }),
+    children: PropTypes.any,
+    coords: PropTypes.any,
+    isGeolocationEnabled: PropTypes.any,
+    classes: PropTypes.any,
+};
+
 export class Marker extends Component {
     constructor(props) {
         super(props);
@@ -192,7 +207,7 @@ export class Marker extends Component {
     }
 
     addToMap() {
-        const animationType = this.props.animation === 'drop' ? google.maps.Animation.DROP : undefined;
+        const animationType = this.props.animation === 'drop' ? window.google.maps.Animation.DROP : undefined;
 
         let icon = undefined;
 
@@ -200,7 +215,7 @@ export class Marker extends Component {
             icon = circleIcon;
         }
 
-        this.marker = new google.maps.Marker({
+        this.marker = new window.google.maps.Marker({
             draggable: this.props.draggable || false,
             animation: animationType,
             position: this.props.position || this.props.mapRef.getCenter(),
@@ -211,7 +226,7 @@ export class Marker extends Component {
 
         this.marker.setMap(this.props.mapRef);
 
-        google.maps.event.addListener(this.marker, 'click', this.clickHandler);
+        window.google.maps.event.addListener(this.marker, 'click', this.clickHandler);
 
         this.setState({
             attached: true,
@@ -254,3 +269,24 @@ export class Marker extends Component {
         return <div className="marker">{this.props.mapRef ? 'Map found' : 'Map not found'}</div>;
     }
 }
+
+Marker.propTypes = {
+    onClick: PropTypes.func,
+    preventDefaultOnClick: PropTypes.bool,
+    disableInfoWindow: PropTypes.bool,
+    markerClickHook: PropTypes.func,
+    animation: PropTypes.oneOf(['drop', 'none']),
+    variant: PropTypes.oneOf(['circle', 'default']),
+    draggable: PropTypes.bool,
+    position: PropTypes.exact({
+        lat: PropTypes.any,
+        lng: PropTypes.any,
+    }),
+    label: PropTypes.string,
+    title: PropTypes.string,
+    mapRef: PropTypes.any,
+    mapCenter: PropTypes.exact({
+        lat: PropTypes.any,
+        lng: PropTypes.any,
+    }),
+};

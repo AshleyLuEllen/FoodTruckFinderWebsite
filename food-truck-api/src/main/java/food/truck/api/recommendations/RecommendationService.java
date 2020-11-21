@@ -58,14 +58,6 @@ public class RecommendationService {
         return this.getRecommendationComputer().getRecommendations(trucksWithinDistanceFromLocation, subscriptions, location, includeSubscriptions, maxNum);
     }
 
-    public List<Truck> getRecommendations(List<Truck> subscriptions, Location location, boolean includeSubscriptions) {
-        return this.getRecommendations(subscriptions, location, includeSubscriptions, 10);
-    }
-
-    public List<Truck> getRecommendationsForLocation(Location location) {
-        return this.getRecommendations(List.of(), location, true);
-    }
-
     public List<Truck> getRecommendationsForUser(User user, long maxCount, boolean includeSubscriptions) {
         List<Truck> subscribedTrucks = subscriptionService.findUserSubscriptions(user);
 
