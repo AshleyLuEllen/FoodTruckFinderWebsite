@@ -16,13 +16,13 @@ function loadScript(src, position, id) {
     position.appendChild(script);
 }
 
-const mapStyles = (theme) => ({
+const mapStyles = theme => ({
     mapWrapper: {
         height: '100%',
         width: '100%',
         '& > #map': {
-            height: '100%'
-        }
+            height: '100%',
+        },
     },
 });
 
@@ -46,7 +46,11 @@ class GoogleMap extends Component {
             this.map.setZoom(16);
 
             if (this.state.infoWindowLoaded && !this.props.hideInfoWindow) {
-                this.infoWindow.setContent(ReactDOMServer.renderToString(<div className="poi-info-window gm-style">{marker.props.children}</div>));
+                this.infoWindow.setContent(
+                    ReactDOMServer.renderToString(
+                        <div className="poi-info-window gm-style">{marker.props.children}</div>
+                    )
+                );
                 this.infoWindow.open(this.map, marker.marker);
             }
         }
@@ -58,7 +62,7 @@ class GoogleMap extends Component {
                 loadScript(
                     'https://maps.googleapis.com/maps/api/js?key=AIzaSyDSDFlqV9UDWh6V0D6STb7JU0-niCSb91U&libraries=places',
                     document.querySelector('head'),
-                    'google-maps',
+                    'google-maps'
                 );
             }
         }
@@ -66,16 +70,16 @@ class GoogleMap extends Component {
         if (!this.map && window.google && this.mapRef.current) {
             const defaultCenter = {
                 lat: 31.5489,
-                lng: -97.1131
+                lng: -97.1131,
             };
 
             this.map = new window.google.maps.Map(this.mapRef.current, {
                 center: defaultCenter,
-                zoom: 14
+                zoom: 14,
             });
 
             this.setState({
-                loaded: true
+                loaded: true,
             });
 
             if (this.props.withInfoWindow) {
@@ -99,43 +103,57 @@ class GoogleMap extends Component {
 
             this.setState({
                 centeredOnCurrentPosition: false,
-                mapCenter: this.map.getCenter()
+                mapCenter: this.map.getCenter(),
             });
         }
 
-        if (!this.props.center && !this.state.centeredOnCurrentPosition && this.props.isGeolocationEnabled && this.map) {
-            if (prevProps?.coords?.latitude !== this.props?.coords?.latitude || prevProps?.coords?.longitude !== this.props?.coords?.longitude) {
+        if (
+            !this.props.center &&
+            !this.state.centeredOnCurrentPosition &&
+            this.props.isGeolocationEnabled &&
+            this.map
+        ) {
+            if (
+                prevProps?.coords?.latitude !== this.props?.coords?.latitude ||
+                prevProps?.coords?.longitude !== this.props?.coords?.longitude
+            ) {
                 this.map.setCenter({
                     lat: this.props?.coords?.latitude,
-                    lng: this.props?.coords?.longitude
+                    lng: this.props?.coords?.longitude,
                 });
 
                 this.setState({
                     centeredOnCurrentPosition: true,
-                    mapCenter: this.map.getCenter()
+                    mapCenter: this.map.getCenter(),
                 });
             }
         }
     }
 
-    componentWillUnmount() {
-    }
+    componentWillUnmount() {}
 
     render() {
         const { classes } = this.props;
 
         const childrenWithProps = React.Children.map(this.props.children, child => {
-            const props = { mapRef: this.map, mapLoaded: this.state.loaded, mapCenter: this.state.mapCenter, markerClickHook: this.markerClickHook };
+            const props = {
+                mapRef: this.map,
+                mapLoaded: this.state.loaded,
+                mapCenter: this.state.mapCenter,
+                markerClickHook: this.markerClickHook,
+            };
             if (React.isValidElement(child)) {
                 return React.cloneElement(child, props);
             }
             return child;
         });
 
-        return <div className={classes.mapWrapper}>
-            <div id="map" ref={this.mapRef}></div>
-            <div style={{ display: 'none' }}>{childrenWithProps}</div>
-        </div>
+        return (
+            <div className={classes.mapWrapper}>
+                <div id="map" ref={this.mapRef}></div>
+                <div style={{ display: 'none' }}>{childrenWithProps}</div>
+            </div>
+        );
     }
 }
 export default geolocated({
@@ -146,20 +164,20 @@ export default geolocated({
 })(withStyles(mapStyles, { withTheme: true })(GoogleMap));
 
 var circleIcon = {
-    path: "M-20,0a20,20 0 1,0 40,0a20,20 0 1,0 -40,0",
+    path: 'M-20,0a20,20 0 1,0 40,0a20,20 0 1,0 -40,0',
     fillColor: '#0000FF',
-    fillOpacity: .6,
+    fillOpacity: 0.6,
     // anchor: new google.maps.Point(0,0),
     strokeWeight: 0,
-    scale: 0.3
-}
+    scale: 0.3,
+};
 
 export class Marker extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            attached: false
+            attached: false,
         };
 
         this.marker = null;
@@ -196,7 +214,7 @@ export class Marker extends Component {
         google.maps.event.addListener(this.marker, 'click', this.clickHandler);
 
         this.setState({
-            attached: true
+            attached: true,
         });
     }
 
@@ -211,7 +229,10 @@ export class Marker extends Component {
             this.addToMap();
         }
 
-        if (this.marker && (prevProps.position !== this.props.position || prevProps.mapCenter !== this.props.mapCenter)) {
+        if (
+            this.marker &&
+            (prevProps.position !== this.props.position || prevProps.mapCenter !== this.props.mapCenter)
+        ) {
             if (this.props.position) {
                 this.marker.setPosition(this.props.position);
             } else {
@@ -230,8 +251,6 @@ export class Marker extends Component {
     }
 
     render() {
-        return <div className="marker">
-            {this.props.mapRef ? "Map found" : "Map not found"}
-        </div>
+        return <div className="marker">{this.props.mapRef ? 'Map found' : 'Map not found'}</div>;
     }
 }
