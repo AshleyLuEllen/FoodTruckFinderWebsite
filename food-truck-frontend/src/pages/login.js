@@ -4,9 +4,9 @@ import { withRouter } from 'next/router'
 import axios from "axios";
 import { connect, useDispatch } from 'react-redux';
 import { login as authLogin, logout as authLogout } from '../redux/actions/auth';
+import LocationInput from '../components/LocationInput';
 
 class Login extends Component {
-
     constructor(props) {
         super(props);
         this.state = {email: '', password: '', loginFailed:false};

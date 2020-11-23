@@ -1,20 +1,22 @@
 package food.truck.api.data.user;
 
-import java.time.ZonedDateTime;
-import java.util.Objects;
-import java.util.Optional;
-
 import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.endpoint.error.ResourceConflictException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
 import food.truck.api.security.WebSecurityConfig;
+import food.truck.api.util.Location;
 import food.truck.api.validation.UserValidator;
-import org.hibernate.criterion.Example;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+@Log4j2
 @Service
 public class UserService {
     @Autowired
@@ -115,5 +117,42 @@ public class UserService {
 
     public Optional<User> findUserByEmailAddress(String email) {
         return userRepository.findByEmailAddress(email);
+    }
+
+    public Location updateUserLocation(String email, Location location) {
+        Optional<User> userOpt = userRepository.findByEmailAddress(email);
+
+        if (userOpt.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+
+        User user = userOpt.get();
+
+        user.setLatitude(location.getLatitude());
+        user.setLongitude(location.getLongitude());
+
+        userRepository.save(user);
+
+        return location;
+    }
+
+    public Location findUserLocationByEmail(String email) {
+        Optional<User> userOpt = userRepository.findByEmailAddress(email);
+
+        if (userOpt.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+
+        User user = userOpt.get();
+
+        Location loc = new Location();
+        loc.setLatitude(user.getLatitude());
+        loc.setLongitude(user.getLongitude());
+
+        return loc;
+    }
+
+    public List<User> findUsersNearLocation(Location location) {
+        return userRepository.findAllUsersNearLocation(location.getLatitude(), location.getLongitude(), 20.0);
     }
 }

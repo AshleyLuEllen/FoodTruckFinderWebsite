@@ -1,8 +1,13 @@
 package food.truck.api.data.review;
 
+import food.truck.api.data.truck.Truck;
+import food.truck.api.data.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -10,16 +15,31 @@ public class ReviewService {
     @Autowired
     private ReviewRepository reviewRepository;
 
-    public Optional<Review> findReview(Long reviewId) {
+    public Optional<Review> findReviewById(Long reviewId) {
         return reviewRepository.findById(reviewId);
     }
 
-    public Review saveReview(Review review) {
+    public Review createReview(Review review, User user, Truck truck) {
+        review.setUser(user);
+        review.setTruck(truck);
+        review.setReviewTimestamp(ZonedDateTime.now());
         return reviewRepository.save(review);
     }
 
-    public Review createReview(Review review) {
-        return reviewRepository.save(review);
+    public List<Review> getReviewsByTruck(Truck truck) {
+        return reviewRepository.findAllByTruck(truck);
+    }
+
+    public List<Review> getReviewsByUser(User user) {
+        return reviewRepository.findAllByUser(user);
+    }
+
+    public void deleteReview(long reviewID) {
+        reviewRepository.deleteById(reviewID);
+    }
+
+    public double getAverageReviewByTruckID(long truckID) {
+        return reviewRepository.getAverageReviewByTruckID(truckID);
     }
 }
 

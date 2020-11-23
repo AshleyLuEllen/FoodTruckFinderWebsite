@@ -25,5 +25,8 @@ public class UserNotification {
 
     @Column(name = "saved")
     Boolean saved;
+
+    @Column(name = "unread")
+    Boolean unread;
 }
 
