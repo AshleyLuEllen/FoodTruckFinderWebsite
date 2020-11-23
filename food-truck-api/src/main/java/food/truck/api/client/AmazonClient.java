@@ -7,6 +7,9 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import food.truck.api.data.truck.Truck;
+import food.truck.api.data.user.User;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 
+@Log4j2
 @Service
 public class AmazonClient {
 
@@ -94,7 +98,30 @@ public class AmazonClient {
         return fileUrl;
     }
 
-    public void deleteProfilePicture(String fileName) {
-        s3client.deleteObject(new DeleteObjectRequest(bucketName + "/", "profiles/" + fileName));
+    public void deleteProfilePicture(User user) {
+        String fileName = user.getAvatar().getUrl().substring(user.getAvatar().getUrl().lastIndexOf('/') + 1);
+        s3client.deleteObject(new DeleteObjectRequest(bucketName, "profiles/" + fileName));
+    }
+
+    public String uploadMenu(MultipartFile multipartFile, Truck truck) {
+        String fileUrl = "";
+
+        try {
+            File file = convertMultiPartToFile(multipartFile);
+            String fileName = "menus/" + truck.getId() + getFileExtension(multipartFile);
+            fileUrl = endpointUrl + "/" + bucketName + "/" + fileName;
+            uploadFileTos3bucket(fileName, file);
+            file.delete();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return fileUrl;
+    }
+
+    public void deleteMenu(Truck truck) {
+        String fileName = truck.getMenu().getUrl().substring(truck.getMenu().getUrl().lastIndexOf('/') + 1);
+        log.info(fileName);
+        s3client.deleteObject(new DeleteObjectRequest(bucketName, "menus/" + fileName));
     }
 }
