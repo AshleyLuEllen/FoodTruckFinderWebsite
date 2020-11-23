@@ -56,7 +56,7 @@ function OwnerTruckCard(props) {
     return (
         <Card className={props.className}>
             <CardHeader
-                title={<Link href={`owner/trucks/${props.truck.id}`}>{props.truck.name}</Link>}
+                title={<Link href={`/owner/trucks/${props.truck.id}`}>{props.truck.name}</Link>}
                 subheader={props.truck.description}
             />
             <div className={classes.rating}>
