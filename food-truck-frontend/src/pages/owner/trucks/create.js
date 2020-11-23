@@ -139,6 +139,7 @@ class CreateNewTruck extends Component {
                     </Grid>
                     <Grid item xs={12} >
                         <ChipSelector
+                            owner={true}
                             label="Tags"
                             options={this.state.allTags}
                             selectedOptions={this.state.truckTags}

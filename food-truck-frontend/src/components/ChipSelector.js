@@ -17,6 +17,7 @@ const useStyles = makeStyles((theme) => ({
         listStyle: 'none',
         padding: theme.spacing(0.5),
         margin: 0,
+        owner: false
       },
       chip: {
         margin: theme.spacing(0.5),
@@ -72,13 +73,20 @@ function ChipSelector(props) {
 
                     // Select
                     if (newSelectedOptions.length > selectedOptions.length) {
-                        if (newSelectedOptions.length < 6){
-                            if (props.onSelectOption) {
-                                props.onSelectOption(newSelectedOptions.filter(x => !selectedOptions.includes(x))[0], newSelectedOptions);
+                        if(props.owner) {
+                            if (newSelectedOptions.length < 6){
+                                if (props.onSelectOption) {
+                                    props.onSelectOption(newSelectedOptions.filter(x => !selectedOptions.includes(x))[0], newSelectedOptions);
+                                }
+                            }
+                            else {
+                                newSelectedOptions = selectedOptions;
                             }
                         }
                         else {
-                            newSelectedOptions = selectedOptions;
+                            if (props.onSelectOption) {
+                                props.onSelectOption(newSelectedOptions.filter(x => !selectedOptions.includes(x))[0], newSelectedOptions);
+                            }
                         }
                     }
 
