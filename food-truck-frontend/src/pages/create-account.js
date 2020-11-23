@@ -32,7 +32,9 @@ class CreateAccount extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {email: '', password: '', passConf:'', firstName:'', lastName:''};
+        this.state = {email: '', password: '', passConf:'', firstName:'', lastName:'', open: false,
+            vertical: 'top',
+            horizontal: 'center',};
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleChangeStatus = this.handleChangeStatus.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -72,7 +74,7 @@ class CreateAccount extends Component {
                         this.props.router.push('/login')
                     })
                     .catch((err) => {
-                        alert("Email already exists.")
+                       // alert("Email already exists.")
                         this.setState({
                             emailTaken: true
                         });
@@ -95,6 +97,7 @@ class CreateAccount extends Component {
 
     render() {
         const { classes } = this.props;
+        const { vertical, horizontal, open } = this.state;
         return (
             <div className={classes.root}>
                 <Paper elevation={3} alignItems="center">
@@ -131,19 +134,19 @@ class CreateAccount extends Component {
                             </Grid>
                         </form>
                         <label>{this.state.message}</label>
-                        {this.state.badPass && <Snackbar open={true} autoHideDuration={6000}>
+                        {this.state.badPass && <Snackbar open={true} autoHideDuration={6000} anchorOrigin={{ vertical:'bottom', horizontal:'center' }}>
                             <Alert variant="filled" severity="error">
                                 Password must contain: <br />- at least 8 characters<br />
                                 - at least 1 uppercase <br />- at least 1 lowercase<br />
                                 - at least 1 number <br />- at least 1 special character (!@#$%^&*()_
                             </Alert>
                         </Snackbar>}
-                        {this.state.emailTaken && <Snackbar open={true} autoHideDuration={6000}>
+                        {this.state.emailTaken && <Snackbar open={true} autoHideDuration={6000} anchorOrigin={{ vertical:'bottom', horizontal:'left' }}>
                             <Alert variant="filled" severity="error">
                                 Email already taken.
                             </Alert>
                         </Snackbar>}
-                        {this.state.notMatchPass && <Snackbar open={true} autoHideDuration={6000}>
+                        {this.state.notMatchPass && <Snackbar open={true} autoHideDuration={6000} anchorOrigin={{ vertical:'bottom', horizontal:'right' }}>
                             <Alert variant="filled" severity="error">
                                 Passwords do not match.
                             </Alert>

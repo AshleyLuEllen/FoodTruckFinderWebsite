@@ -102,7 +102,7 @@ class Login extends React.Component {
                             <Button style={{ maxWidth: '160px', maxHeight: '40px', minWidth: '160px', minHeight: '40px'}} variant="contained" color="primary" onClick={this.createAccount}>Create Account</Button>
                         </Grid>
                     </form>
-                    {this.state.loginFailed && <Snackbar open={true} autoHideDuration={6000}>
+                    {this.state.loginFailed && <Snackbar open={true} autoHideDuration={6000} anchorOrigin={{ vertical:'bottom', horizontal:'center' }}>
                         <Alert variant="filled" severity="error">
                             Invaild email and/or password.
                         </Alert>
