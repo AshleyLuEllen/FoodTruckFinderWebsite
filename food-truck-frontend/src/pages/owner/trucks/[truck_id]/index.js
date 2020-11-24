@@ -115,6 +115,15 @@ class Information extends Component {
      * Saves the edited information from the form
      */
     saveInfo = () => {
+        if(this.state.licensePlate.length < 1) {
+            alert("Missing Information: License Plate Number");
+            return;
+        }
+        if(this.state.name.length < 1) {
+            alert("Missing Information: Food Truck Name");
+            return;
+        }
+
         const truck = {
             id: this.props.router.query.truck_id,
             name: this.state.name,
@@ -235,7 +244,7 @@ class Information extends Component {
                         {/**Payment Tags**/}
                         <ChipSelector
                             maxCount={2}
-                            label="Payment Tags (select at most 2)"
+                            label="Payment Types (select at most 2)"
                             options={this.state.paymentTags}
                             selectedOptions={this.state.paymentTruckTags}
                             onChange={(event, value) => {this.handlePaymentTagChange(event, value)}}
