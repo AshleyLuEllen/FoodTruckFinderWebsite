@@ -348,7 +348,6 @@ class TruckPage extends Component {
                                             </Typography>
                                         </TableCell>
                                     </TableRow>
-
                                 ))}
                             </TableBody>
                         </Table>
@@ -380,7 +379,7 @@ class TruckPage extends Component {
                 </Card>
                 }
 
-                {this.state.truckFound &&
+                {this.state.truckFound && this.props.auth.isLoggedIn &&
                 <Button variant="contained" onClick={this.writeReview}>
                     <Typography variant="button" gutterBottom display="block" color={"primary"}>
                         Write Review
