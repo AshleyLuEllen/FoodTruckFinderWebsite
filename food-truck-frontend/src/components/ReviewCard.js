@@ -41,7 +41,7 @@ function ReviewCard(props) {
                 {props.user === true &&
                 <MuiLink href={`/trucks/${props.r.truck.id}`}>
                     <Typography className={useStyles.root} variant="subtitle 1" component="h5" className={useStyles.root} gutterBottom>
-                        For: {props.r.truck.name}
+                        {props.r.truck.name}
                     </Typography>
                 </MuiLink>}
 
