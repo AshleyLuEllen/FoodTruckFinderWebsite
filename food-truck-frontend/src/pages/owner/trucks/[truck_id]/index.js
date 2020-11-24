@@ -198,7 +198,7 @@ class Information extends Component {
                     </Grid>
                     <Grid item xs={6} >
                         <ChipSelector
-                            owner={true}
+                            maxCount={5}
                             label="Tags (select at most 5)"
                             options={this.state.allTags}
                             selectedOptions={this.state.truckTags}

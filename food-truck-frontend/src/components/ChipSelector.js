@@ -73,8 +73,8 @@ function ChipSelector(props) {
 
                     // Select
                     if (newSelectedOptions.length > selectedOptions.length) {
-                        if(props.owner) {
-                            if (newSelectedOptions.length < 6){
+                        if(props.maxCount !== undefined) {
+                            if (newSelectedOptions.length <= props.maxCount){
                                 if (props.onSelectOption) {
                                     props.onSelectOption(newSelectedOptions.filter(x => !selectedOptions.includes(x))[0], newSelectedOptions);
                                 }
