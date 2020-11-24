@@ -1,5 +1,5 @@
 import React from "react";
-import Link from 'next/link';
+import MuiLink from '@material-ui/core/Link';
 
 import { Card } from '@material-ui/core';
 import Typography from "@material-ui/core/Typography";
@@ -32,18 +32,18 @@ function ReviewCard(props) {
                     {format(new Date(props.r.reviewTimestamp), "MM-dd-yyyy, HH:mm")}
                 </Typography>
                 {props.user === false &&
-                <Link href={`/user/${props.r.user.id}`}>
+                <MuiLink href={`/user/${props.r.user.id}`} className={useStyles.root}>
                     <Typography className={useStyles.root} variant="subtitle 1" component="h5" className={useStyles.root} gutterBottom>
                         By: {props.r.user.firstName} {props.r.user.lastName}
                     </Typography>
-                </Link>}
+                </MuiLink>}
 
                 {props.user === true &&
-                <Link href={`/trucks/${props.r.truck.id}`}>
+                <MuiLink href={`/trucks/${props.r.truck.id}`}>
                     <Typography className={useStyles.root} variant="subtitle 1" component="h5" className={useStyles.root} gutterBottom>
                         For: {props.r.truck.name}
                     </Typography>
-                </Link>}
+                </MuiLink>}
 
                 <Rating className={useStyles.rating} precision={0.5} value={props.r.rating} size="small" readOnly/>
                 {props.r.comment?.split('\n').map(line => <p>{line}</p>)}
