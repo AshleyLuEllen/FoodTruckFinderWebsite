@@ -1,10 +1,11 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import { TableHead, TableCell, TableRow, TableSortLabel, Checkbox } from '@material-ui/core';
 
 export default function EnhancedTableHead(props) {
     const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
-    const createSortHandler = (property) => (event) => {
+    const createSortHandler = property => event => {
         onRequestSort(event, property);
     };
 
@@ -13,13 +14,13 @@ export default function EnhancedTableHead(props) {
             <TableRow>
                 <TableCell padding="checkbox">
                     <Checkbox
-                    indeterminate={numSelected > 0 && numSelected < rowCount}
-                    checked={rowCount > 0 && numSelected === rowCount}
-                    onChange={onSelectAllClick}
-                    inputProps={{ 'aria-label': 'select all desserts' }}
+                        indeterminate={numSelected > 0 && numSelected < rowCount}
+                        checked={rowCount > 0 && numSelected === rowCount}
+                        onChange={onSelectAllClick}
+                        inputProps={{ 'aria-label': 'select all desserts' }}
                     />
                 </TableCell>
-                {props.columns.map((headCell) => (
+                {props.columns.map(headCell => (
                     <TableCell
                         key={headCell.id}
                         align={headCell.align}
@@ -33,18 +34,14 @@ export default function EnhancedTableHead(props) {
                         >
                             {headCell.label}
                             {orderBy === headCell.id ? (
-                            <span className={classes.visuallyHidden}>
-                                {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                            </span>
+                                <span className={classes.visuallyHidden}>
+                                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                                </span>
                             ) : null}
                         </TableSortLabel>
                     </TableCell>
                 ))}
-                {props.rowActions &&
-                    <TableCell>
-                        Actions
-                    </TableCell>
-                }
+                {props.rowActions && <TableCell>Actions</TableCell>}
             </TableRow>
         </TableHead>
     );
@@ -58,4 +55,6 @@ EnhancedTableHead.propTypes = {
     order: PropTypes.oneOf(['asc', 'desc']).isRequired,
     orderBy: PropTypes.string.isRequired,
     rowCount: PropTypes.number.isRequired,
+    columns: PropTypes.array.isRequired,
+    rowActions: PropTypes.array,
 };
