@@ -18,6 +18,8 @@ class CreateNewTruck extends Component {
             licensePlate: '',
             allTags: [],
             truckTags: [],
+            paymentTags: [],
+            paymentTruckTags: [],
 
             truckFound: false,
             menuOpen: false,
@@ -44,6 +46,12 @@ class CreateNewTruck extends Component {
         }
     }
 
+    handlePaymentTagChange(event, tag) {
+        if(tag.length < 3) {
+            this.setState({ paymentTruckTags: tag});
+        }
+    }
+
     handleSubmit(event) {
         event.preventDefault();
     }
@@ -55,7 +63,8 @@ class CreateNewTruck extends Component {
     componentDidMount() {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/tags`).then(r => {
             this.setState({
-                allTags: r.data,
+                allTags: r.data.filter(t => t.description !== 'payment'),
+                paymentTags: r.data.filter(t => t.description === 'payment'),
             });
         }).catch(error => {
             console.log(error.message);
@@ -63,12 +72,23 @@ class CreateNewTruck extends Component {
     }
 
     createNewTruck(){
+        if(this.state.licensePlate.length < 1) {
+            alert("Missing Information: License Plate Number");
+            return;
+        }
+        if(this.state.name.length < 1) {
+            alert("Missing Information: Food Truck Name");
+            return;
+        }
+
         const truck = {
             licensePlate: this.state.licensePlate,
             payment_types: 0,
             description: this.state.description,
             name: this.state.name
         }
+
+
 
         axios.post(process.env.FOOD_TRUCK_API_URL + "/trucks", truck, {
             auth: {
@@ -78,6 +98,15 @@ class CreateNewTruck extends Component {
         })
             .then((res) => {
                 this.state.truckTags.forEach(t => {
+                    axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${res.data.id}/tags/${t.id}`, {},
+                        { auth: {
+                                username: this.props.auth.email,
+                                password: this.props.auth.password
+                            }}).then().catch(error => {
+                        console.log(error.message);
+                    })
+                })
+                this.state.paymentTruckTags.forEach(t => {
                     axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${res.data.id}/tags/${t.id}`, {},
                         { auth: {
                                 username: this.props.auth.email,
@@ -139,10 +168,19 @@ class CreateNewTruck extends Component {
                     </Grid>
                     <Grid item xs={12} >
                         <ChipSelector
-                            label="Tags"
+                            maxCount={5}
+                            label="Tags (select at most 5)"
                             options={this.state.allTags}
                             selectedOptions={this.state.truckTags}
                             onChange={(event, value) => { this.handleTagChange(event, value) }}
+                        />
+                        <br/>
+                        <ChipSelector
+                            maxCount={2}
+                            label="Payment Types (select at most 2)"
+                            options={this.state.paymentTags}
+                            selectedOptions={this.state.paymentTruckTags}
+                            onChange={(event, value) => { this.handlePaymentTagChange(event, value) }}
                         />
                     </Grid>
                     <Grid item xs={3}>

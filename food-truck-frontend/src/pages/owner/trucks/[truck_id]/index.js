@@ -36,6 +36,8 @@ class Information extends Component {
             reviews: [],
             allTags: [],
             truckTags: [],
+            paymentTruckTags: [],
+            paymentTags: [],
 
             truckFound: false
         };
@@ -64,12 +66,15 @@ class Information extends Component {
             return axios.get(`${process.env.FOOD_TRUCK_API_URL}/tags`);
         }).then(res5 => {
             this.setState({
-                allTags: res5.data,
+                allTags: res5.data.filter(t => t.description !== 'payment'),
+                paymentTags: res5.data.filter(t => t.description === 'payment'),
             });
             return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`);
         }).then(res6 => {
             this.setState({
                 truckTags: this.state.allTags.filter(t => res6.data.findIndex(tt =>
+                    tt.id === t.id) !== -1),
+                paymentTruckTags: this.state.paymentTags.filter(t => res6.data.findIndex(tt =>
                     tt.id === t.id) !== -1),
                 truckFound: true
             });
@@ -91,9 +96,14 @@ class Information extends Component {
     }
 
     handleTagChange(event, tag) {
-        if(tag.length < 6) {
-            console.log(tag.length);
+        if (this.state.truckTags.length < 6){
             this.setState({ truckTags: tag});
+        }
+    }
+
+    handlePaymentTagChange(event, tag) {
+        if (this.state.truckTags.length < 3) {
+            this.setState({paymentTruckTags: tag});
         }
     }
 
@@ -105,6 +115,15 @@ class Information extends Component {
      * Saves the edited information from the form
      */
     saveInfo = () => {
+        if(this.state.licensePlate.length < 1) {
+            alert("Missing Information: License Plate Number");
+            return;
+        }
+        if(this.state.name.length < 1) {
+            alert("Missing Information: Food Truck Name");
+            return;
+        }
+
         const truck = {
             id: this.props.router.query.truck_id,
             name: this.state.name,
@@ -197,7 +216,9 @@ class Information extends Component {
                         />
                     </Grid>
                     <Grid item xs={6} >
+                        {/**Regular Tags**/}
                         <ChipSelector
+                            maxCount={5}
                             label="Tags (select at most 5)"
                             options={this.state.allTags}
                             selectedOptions={this.state.truckTags}
@@ -207,6 +228,31 @@ class Information extends Component {
                                     axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`, {},
                                     {auth: { username: this.props.auth.email, password: this.props.auth.password}
                                     }).then().catch(error => {
+                                        console.log(error.message);
+                                    })
+                                }
+                            }}
+                            onDeselectOption={t => axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
+                                { auth: {
+                                        username: this.props.auth.email,
+                                        password: this.props.auth.password
+                                    }}).then().catch(error => {
+                                console.log(error.message);
+                            })}
+                        />
+                        <br/>
+                        {/**Payment Tags**/}
+                        <ChipSelector
+                            maxCount={2}
+                            label="Payment Types (select at most 2)"
+                            options={this.state.paymentTags}
+                            selectedOptions={this.state.paymentTruckTags}
+                            onChange={(event, value) => {this.handlePaymentTagChange(event, value)}}
+                            onSelectOption={t => {
+                                if(this.state.paymentTags.length < 2) {
+                                    axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`, {},
+                                        {auth: { username: this.props.auth.email, password: this.props.auth.password}
+                                        }).then().catch(error => {
                                         console.log(error.message);
                                     })
                                 }
