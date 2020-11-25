@@ -1,49 +1,49 @@
 import React, { Component, useEffect, useState } from 'react';
-import Link from "next/link";
-import axios from "axios";
-import { withRouter } from "next/router";
-import { connect } from "react-redux";
-import { format, parse, parseISO } from 'date-fns';
+import PropTypes from 'prop-types';
+import Link from 'next/link';
+import axios from 'axios';
+import { withRouter } from 'next/router';
+import { connect } from 'react-redux';
+import { format, parseISO } from 'date-fns';
 
-import { Container, Grid, CircularProgress, Typography, Box, TablePagination} from '@material-ui/core';
-import { DataGrid } from '@material-ui/data-grid';
+import {
+    Container,
+    Grid,
+    Typography,
+    Box,
+    Breadcrumbs,
+    Link as MuiLink,
+    Button,
+    Dialog,
+    DialogContent,
+    DialogActions,
+    DialogContentText,
+    DialogTitle,
+    Paper,
+} from '@material-ui/core';
 import { Add, Delete } from '@material-ui/icons';
-
-import { DateTimePicker } from "@material-ui/pickers";
-
-
-import TruckMap from '../../../../components/TruckMap';
+import { DateTimePicker } from '@material-ui/pickers';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
+import Draggable from 'react-draggable';
+import EnhancedTable from '../../../../components/tables/EnhancedTable';
 import LocationInput from '../../../../components/LocationInput';
 
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Paper from '@material-ui/core/Paper';
-import Draggable from 'react-draggable';
-
-import { withStyles, makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import EnhancedTable from '../../../../components/tables/EnhancedTable';
-
 function PaperComponent(props) {
-  return (
-    <Draggable handle="#draggable-dialog-title" cancel={'[class*="MuiDialogContent-root"]'}>
-      <Paper {...props} />
-    </Draggable>
-  );
+    return (
+        <Draggable handle="#draggable-dialog-title" cancel={'[class*="MuiDialogContent-root"]'}>
+            <Paper {...props} />
+        </Draggable>
+    );
 }
 
-const useStyles = makeStyles((theme) => ({
-    dateTimeInput : {
+const useStyles = makeStyles(() => ({
+    dateTimeInput: {
         width: '100%',
-        "& > button": {
+        '& > button': {
             width: 'auto',
-            height: 'auto'
-        }
-    }
+            height: 'auto',
+        },
+    },
 }));
 
 function DraggableDialog(props) {
@@ -60,10 +60,10 @@ function DraggableDialog(props) {
         if (props.open === true) {
             setStartDate(props.initialData?.timeFrom || new Date());
             setEndDate(props.initialData?.timeTo || new Date());
-            setLocationStr(props.initialData?.location || "");
-            setResultLocationStr(props.initialData?.location || "");
+            setLocationStr(props.initialData?.location || '');
+            setResultLocationStr(props.initialData?.location || '');
             setLocationChanged(!props.editing);
-            setPlaceId(undefined)
+            setPlaceId(undefined);
         }
     }, [props.open]);
 
@@ -76,31 +76,34 @@ function DraggableDialog(props) {
             return;
         }
 
-        console.log(resultLocationStr)
+        console.log(resultLocationStr);
 
-        props.onSave && props.onSave({
-            placeId,
-            timeFrom: startDate,
-            timeTo: endDate,
-            id: props?.initialData?.id,
-            location: resultLocationStr
-        });
+        props.onSave &&
+            props.onSave({
+                placeId,
+                timeFrom: startDate,
+                timeTo: endDate,
+                id: props?.initialData?.id,
+                location: resultLocationStr,
+            });
     };
 
     return (
         <div>
             <Dialog
-                open={props.open}
+                open={props.open || false}
                 onClose={handleClose}
                 PaperComponent={PaperComponent}
                 aria-labelledby="draggable-dialog-title"
             >
                 <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title">
-                    {props.editing ? "Edit" : "Create"} Schedule
+                    {props.editing ? 'Edit' : 'Create'} Schedule
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        {props.editing ? "Edit" : "Specify"} the start and end dates/times here, as well as the location where your truck will be during this interval of time. All of these individual "schedules" will consist your truck's hours.
+                        {props.editing ? 'Edit' : 'Specify'} the start and end dates/times here, as well as the location
+                        where your truck will be during this interval of time. All of these individual
+                        &quot;schedules&quot; will consist your truck&apos;s hours.
                     </DialogContentText>
                     <LocationInput
                         initialValue={locationStr}
@@ -112,7 +115,7 @@ function DraggableDialog(props) {
                         }}
                         required
                     />
-                    <br/>
+                    <br />
                     <DateTimePicker
                         className={classes.dateTimeInput}
                         value={startDate}
@@ -122,8 +125,8 @@ function DraggableDialog(props) {
                         showTodayButton
                         required
                     />
-                    <br/>
-                    <br/>
+                    <br />
+                    <br />
                     <DateTimePicker
                         className={classes.dateTimeInput}
                         value={endDate}
@@ -139,7 +142,7 @@ function DraggableDialog(props) {
                         Cancel
                     </Button>
                     <Button onClick={handleSave} color="primary">
-                        {props.editing ? "Save Changes" : "Create New Schedule"}
+                        {props.editing ? 'Save Changes' : 'Create New Schedule'}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -147,24 +150,40 @@ function DraggableDialog(props) {
     );
 }
 
-const scheduleStyles = theme => ({
+DraggableDialog.propTypes = {
+    open: PropTypes.bool,
+    initialData: PropTypes.shape({
+        timeFrom: PropTypes.instanceOf(Date),
+        timeTo: PropTypes.instanceOf(Date),
+        location: PropTypes.string,
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    }),
+    editing: PropTypes.bool,
+    onClose: PropTypes.func,
+    onSave: PropTypes.onSave,
+};
+
+const scheduleStyles = () => ({
     root: {
         marginTop: '20px',
-        maxWidth: '95%'
+        maxWidth: '95%',
     },
     mapWrapper: {
         position: 'relative',
         width: '100%',
-        height: '50vh'
+        height: '50vh',
     },
     progressContainer: {
         display: 'flex',
         alignItems: 'center',
-        height: 'calc(87vh - 51px)'
+        height: 'calc(87vh - 51px)',
     },
     progress: {
-        margin: '0 auto'
-    }
+        margin: '0 auto',
+    },
+    breadcrumb: {
+        textDecoration: 'none',
+    },
 });
 
 class ScheduleManagementPage extends Component {
@@ -174,11 +193,11 @@ class ScheduleManagementPage extends Component {
             loading: true,
             upcoming: [],
             past: [],
-            editorOpen: false,
+            open: false,
             editing: false,
             initialData: undefined,
             upcomingSelected: [],
-            pastSelected: []
+            pastSelected: [],
         };
 
         this.fetchData = this.fetchData.bind(this);
@@ -195,20 +214,23 @@ class ScheduleManagementPage extends Component {
             return;
         }
 
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`).then(res => {
-            const schedules = res.data.map(schedule => ({
-                id: schedule.id,
-                scheduleId: schedule.id,
-                latitude: schedule.latitude,
-                longitude: schedule.longitude,
-                location: schedule.location,
-                timeFrom: parseISO(schedule.timeFrom),
-                timeTo: parseISO(schedule.timeTo),
-            }));
-            this.setSchedules(schedules);
-        }).catch(err => {
-            console.log(err);
-        });
+        axios
+            .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`)
+            .then(res => {
+                const schedules = res.data.map(schedule => ({
+                    id: schedule.id,
+                    scheduleId: schedule.id,
+                    latitude: schedule.latitude,
+                    longitude: schedule.longitude,
+                    location: schedule.location,
+                    timeFrom: parseISO(schedule.timeFrom),
+                    timeTo: parseISO(schedule.timeTo),
+                }));
+                this.setSchedules(schedules);
+            })
+            .catch(err => {
+                console.log(err);
+            });
     }
 
     componentDidMount() {
@@ -224,68 +246,74 @@ class ScheduleManagementPage extends Component {
     setSchedules(schedules) {
         const sl = [...schedules];
         this.setState({
-            upcoming: sl.filter(s => s.timeFrom > Date.now()).map(s => Object.assign({}, s)),
-            past: sl.filter(s => s.timeFrom <= Date.now()).map(s => Object.assign({}, s)),
-            loading: false
+            upcoming: sl.filter(s => s.timeTo > Date.now()).map(s => Object.assign({}, s)),
+            past: sl.filter(s => s.timeTo <= Date.now()).map(s => Object.assign({}, s)),
+            loading: false,
         });
     }
 
-    deleteScheduleById(event, id) {
-        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${id}`, {
-            auth: {
-                username: this.props.auth.email,
-                password: this.props.auth.password
-            }
-        })
-        .then(res => {
-            this.setSchedules([...this.state.upcoming, ...this.state.past].filter(s => s.id != id))
-        })
-        .catch(err => console.log(err));
+    deleteScheduleById(id) {
+        axios
+            .delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${id}`, {
+                auth: {
+                    username: this.props.auth.email,
+                    password: this.props.auth.password,
+                },
+            })
+            .then(() => {
+                this.setSchedules([...this.state.upcoming, ...this.state.past].filter(s => s.id != id));
+            })
+            .catch(err => console.log(err));
     }
 
     triggerCreation() {
         this.setState({
             open: true,
             editing: false,
-            initialData: undefined
+            initialData: undefined,
         });
     }
 
-    triggerEdit(event, id) {
+    triggerEdit(id) {
         this.setState({
             open: true,
             editing: true,
-            initialData: this.state.upcoming.find(s => s.id == id)
+            initialData: this.state.upcoming.find(s => s.id == id),
         });
     }
 
     deleteAll(table) {
         const toDelete = table === 'upcoming' ? this.state.upcomingSelected : this.state.pastSelected;
-        console.log("todelete", toDelete);
+        console.log('todelete', toDelete);
 
         Promise.all(
             toDelete.map(s => {
-                return axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${s}`, {
-                    auth: {
-                        username: this.props.auth.email,
-                        password: this.props.auth.password
+                return axios.delete(
+                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${s}`,
+                    {
+                        auth: {
+                            username: this.props.auth.email,
+                            password: this.props.auth.password,
+                        },
                     }
-                })
+                );
             })
         )
-        .then(res => {
-            this.setSchedules([...this.state.past, ...this.state.upcoming].filter(s => !toDelete.some(td => s.id == td)));
-        })
-        .catch(err => console.log(err))
+            .then(() => {
+                this.setSchedules(
+                    [...this.state.past, ...this.state.upcoming].filter(s => !toDelete.some(td => s.id == td))
+                );
+            })
+            .catch(err => console.log(err));
     }
 
     handleSave(savedData) {
-        console.log(savedData)
+        console.log(savedData);
         if (this.state.editing) {
             let schedule = {
                 id: savedData.id,
                 timeFrom: savedData.timeFrom,
-                timeTo: savedData.timeTo
+                timeTo: savedData.timeTo,
             };
 
             if (savedData.placeId) {
@@ -293,19 +321,24 @@ class ScheduleManagementPage extends Component {
                 schedule.location = savedData.location;
             }
 
-            axios.patch(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${savedData.id}`, schedule, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password
-                }
-            })
-            .then(res => {
-                this.setState({
-                    open: false
-                });
-                this.fetchData();
-            })
-            .catch(err => console.log(err));
+            axios
+                .patch(
+                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${savedData.id}`,
+                    schedule,
+                    {
+                        auth: {
+                            username: this.props.auth.email,
+                            password: this.props.auth.password,
+                        },
+                    }
+                )
+                .then(() => {
+                    this.setState({
+                        open: false,
+                    });
+                    this.fetchData();
+                })
+                .catch(err => console.log(err));
         } else {
             let schedule = {
                 timeFrom: savedData.timeFrom,
@@ -314,54 +347,82 @@ class ScheduleManagementPage extends Component {
                 location: savedData.location,
             };
 
-            axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`, schedule, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password
-                }
-            })
-            .then(res => {
-                this.setState({
-                    open: false
-                });
-                this.fetchData();
-            })
-            .catch(err => console.log(err));
+            axios
+                .post(
+                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`,
+                    schedule,
+                    {
+                        auth: {
+                            username: this.props.auth.email,
+                            password: this.props.auth.password,
+                        },
+                    }
+                )
+                .then(() => {
+                    this.setState({
+                        open: false,
+                    });
+                    this.fetchData();
+                })
+                .catch(err => console.log(err));
         }
     }
 
     render() {
-        const {classes} = this.props;
+        const { classes } = this.props;
 
         const columns = [
             { id: 'location', align: 'left', width: '175px', disablePadding: false, label: 'Location' },
-            { id: 'timeFrom', align: 'left', width: '225px', disablePadding: false, label: 'Start Time', renderer: (val) => format(val, 'Pp') },
-            { id: 'timeTo', align: 'left', width: '225px', disablePadding: false, label: 'End Time', renderer: (val) => format(val, 'Pp') },
+            {
+                id: 'timeFrom',
+                align: 'left',
+                width: '225px',
+                disablePadding: false,
+                label: 'Start Time',
+                renderer: val => format(val, 'Pp'),
+            },
+            {
+                id: 'timeTo',
+                align: 'left',
+                width: '225px',
+                disablePadding: false,
+                label: 'End Time',
+                renderer: val => format(val, 'Pp'),
+            },
         ];
 
         const rowActions = [
             { references: 'id', color: 'primary', label: 'Edit', action: this.triggerEdit },
-            { references: 'id', color: 'secondary', label: 'Delete', action: this.deleteScheduleById }
-        ]
+            { references: 'id', color: 'secondary', label: 'Delete', action: this.deleteScheduleById },
+        ];
 
         const selectedActionsUpcoming = [
-            { title: "Delete All", icon: <Delete/>, action: () => this.deleteAll("upcoming") },
-        ]
+            { title: 'Delete All', icon: <Delete />, action: () => this.deleteAll('upcoming') },
+        ];
 
-        const selectedActionsPast = [
-            { title: "Delete All", icon: <Delete/>, action: () => this.deleteAll("past") },
-        ]
+        const selectedActionsPast = [{ title: 'Delete All', icon: <Delete />, action: () => this.deleteAll('past') }];
 
-        const unselectedActions = [
-            { title: "Add", icon: <Add/>, action: this.triggerCreation },
-        ]
+        const unselectedActions = [{ title: 'Add', icon: <Add />, action: this.triggerCreation }];
 
         return (
             <div>
                 <Container className={classes.root}>
+                    <Breadcrumbs aria-label="breadcrumb">
+                        <Link href="/owner" passHref>
+                            <MuiLink color="inherit">Owner Dashboard</MuiLink>
+                        </Link>
+                        {this.props.router?.query?.truck_id ? (
+                            <Link href={`/owner/trucks/${this.props.router.query.truck_id}`} passHref>
+                                <MuiLink color="inherit">Manage Truck</MuiLink>
+                            </Link>
+                        ) : (
+                            <Typography color="textPrimary">Truck</Typography>
+                        )}
+                        <Typography color="textPrimary">Schedule</Typography>
+                    </Breadcrumbs>
                     <Grid container spacing={0}>
                         <Grid item xs={12} md={6}>
-                            <Box style={{ textAlign: "left", overflow: "auto" }}>
+                            <Box style={{ textAlign: 'left', overflow: 'auto' }}>
                                 <EnhancedTable
                                     columns={columns}
                                     rowActions={rowActions}
@@ -371,13 +432,16 @@ class ScheduleManagementPage extends Component {
                                     rows={this.state.upcoming}
                                     order="asc"
                                     orderBy="timeFrom"
-                                    onSelectionChange={data => {console.log(data);this.setState({ upcomingSelected: data })}}
+                                    onSelectionChange={data => {
+                                        console.log(data);
+                                        this.setState({ upcomingSelected: data });
+                                    }}
                                 />
                             </Box>
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <Box style={{ textAlign: "left", overflow: "auto" }}>
-                            <EnhancedTable
+                            <Box style={{ textAlign: 'left', overflow: 'auto' }}>
+                                <EnhancedTable
                                     columns={columns}
                                     rowActions={rowActions.slice(1)}
                                     selectedActions={selectedActionsPast}
@@ -407,13 +471,19 @@ class ScheduleManagementPage extends Component {
         );
     }
 }
+ScheduleManagementPage.propTypes = {
+    router: PropTypes.any,
+    auth: PropTypes.object,
+    classes: PropTypes.object,
+};
 
 function mapStateToProps(state) {
-    const { auth } = state
-    return { auth }
+    const { auth } = state;
+    return { auth };
 }
 
-const mapDispatchToProps = {
-}
+const mapDispatchToProps = {};
 
-export default withStyles(scheduleStyles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(ScheduleManagementPage)));
+export default withStyles(scheduleStyles, { withTheme: true })(
+    withRouter(connect(mapStateToProps, mapDispatchToProps)(ScheduleManagementPage))
+);

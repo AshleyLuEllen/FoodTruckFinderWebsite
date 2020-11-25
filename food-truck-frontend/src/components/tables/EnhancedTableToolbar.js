@@ -1,3 +1,4 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 
@@ -5,23 +6,23 @@ import { Fragment } from 'react';
 import { Toolbar, Typography, Tooltip, IconButton } from '@material-ui/core';
 import { lighten, makeStyles } from '@material-ui/core/styles';
 
-const useToolbarStyles = makeStyles((theme) => ({
+const useToolbarStyles = makeStyles(theme => ({
     root: {
-      paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(1),
+        paddingLeft: theme.spacing(2),
+        paddingRight: theme.spacing(1),
     },
     highlight:
-      theme.palette.type === 'light'
-        ? {
-            color: theme.palette.secondary.main,
-            backgroundColor: lighten(theme.palette.secondary.light, 0.85),
-          }
-        : {
-            color: theme.palette.text.primary,
-            backgroundColor: theme.palette.secondary.dark,
-          },
+        theme.palette.type === 'light'
+            ? {
+                color: theme.palette.secondary.main,
+                backgroundColor: lighten(theme.palette.secondary.light, 0.85),
+            }
+            : {
+                color: theme.palette.text.primary,
+                backgroundColor: theme.palette.secondary.dark,
+            },
     title: {
-      flex: '1 1 100%',
+        flex: '1 1 100%',
     },
 }));
 
@@ -36,41 +37,45 @@ export default function EnhancedTableToolbar(props) {
             })}
         >
             {numSelected > 0 ? (
-            <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
-                {numSelected} selected
-            </Typography>
+                <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
+                    {numSelected} selected
+                </Typography>
             ) : (
-            <Typography className={classes.title} variant="h5" id="tableTitle" component="div">
-                {props.title}
-            </Typography>
+                <Typography className={classes.title} variant="h5" id="tableTitle" component="div">
+                    {props.title}
+                </Typography>
             )}
 
             {numSelected > 0 ? (
                 <Fragment>
-                    {props.selectedActions && props.selectedActions.map(action =>
-                        <Tooltip title={action.title}>
-                            <IconButton aria-label={action.title} onClick={action.action}>
-                                {action.icon}
-                            </IconButton>
-                        </Tooltip>
-                    )}
+                    {props.selectedActions &&
+                        props.selectedActions.map((action, i) => (
+                            <Tooltip key={i} title={action.title}>
+                                <IconButton aria-label={action.title} onClick={action.action}>
+                                    {action.icon}
+                                </IconButton>
+                            </Tooltip>
+                        ))}
                 </Fragment>
             ) : (
                 <Fragment>
-                    {props.unselectedActions && props.unselectedActions.map(action =>
-                        <Tooltip title={action.title}>
-                            <IconButton aria-label={action.title} onClick={action.action}>
-                                {action.icon}
-                            </IconButton>
-                        </Tooltip>
-                    )}
+                    {props.unselectedActions &&
+                        props.unselectedActions.map((action, i) => (
+                            <Tooltip key={i} title={action.title}>
+                                <IconButton aria-label={action.title} onClick={action.action}>
+                                    {action.icon}
+                                </IconButton>
+                            </Tooltip>
+                        ))}
                 </Fragment>
             )}
         </Toolbar>
     );
-};
+}
 
 EnhancedTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
-    title: PropTypes.string.isRequired
+    title: PropTypes.string.isRequired,
+    selectedActions: PropTypes.array,
+    unselectedActions: PropTypes.array,
 };
