@@ -1,126 +1,136 @@
-import React, { Component } from 'react';
-import Link from "next/link";
-import { withRouter } from 'next/router'
-import axios from "axios";
-import { connect, useDispatch } from 'react-redux';
+import React from 'react';
+import { withRouter } from 'next/router';
+import axios from 'axios';
+import { connect } from 'react-redux';
 import { login as authLogin, logout as authLogout } from '../redux/actions/auth';
-import LocationInput from '../components/LocationInput';
 
-import { Paper, withStyles, Grid, TextField, Button, Snackbar, CircularProgress } from '@material-ui/core';
+import { Paper, withStyles, TextField, Button, Snackbar, Typography } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 
 const styles = theme => ({
-    margin: {
-        margin: theme.spacing.unit ,
-    },
     root: {
+        width: '360px',
+        margin: '20px auto',
+        padding: theme.spacing(2),
+    },
+    form: {
         display: 'flex',
-        flexWrap: 'wrap',
+        flexDirection: 'column',
         '& > *': {
-            margin: theme.spacing(10),
-            width: theme.spacing(35),
-            height: theme.spacing(30),
+            margin: '5px',
         },
         alignItems: 'center',
         justifyContent: 'center',
     },
-    buttons: {
-        "& > *": {
-            margin: theme.spacing(1)
-        }
+    text: {
+        width: '300px',
+    },
+    button: {
+        width: '180px',
     },
 });
 
 class Login extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {email: '', password: '', loginFailed:false};
+        this.state = { email: '', password: '', loginFailed: false };
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleChangeStatus = this.handleChangeStatus.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
-    handleChangeStatus(event) {
-    }
+    handleChangeStatus() {}
     handleInputChange(event, name_of_attribute) {
         this.setState({
-                [name_of_attribute]: event.target.value
+            [name_of_attribute]: event.target.value,
         });
     }
     handleSubmit(event) {
-        event.preventDefault()
+        event.preventDefault();
 
-        console.log(this.state)
+        console.log(this.state);
         axios
             .get(`${process.env.FOOD_TRUCK_API_URL}/basicauth`, {
                 auth: {
                     username: this.state.email,
-                    password: this.state.password
-                }
+                    password: this.state.password,
+                },
             })
-            .then(res => {
+            .then(() => {
                 this.props.authLogin(this.state.email, this.state.password);
-                this.props.router.push('/')
+                this.props.router.push('/');
             })
             .catch(err => {
                 this.setState({
-                    loginFailed: true
+                    loginFailed: true,
                 });
                 this.props.authLogout();
-                console.log(err)
+                console.log(err);
             });
     }
-    componentDidMount() {
-    }
+    componentDidMount() {}
 
-    createAccount = (e) => {
+    createAccount = () => {
         this.props.router.push('/create-account');
-    }
-
+    };
 
     render() {
         const { classes } = this.props;
         return (
-            <div className={classes.root}>
-                <Paper elevation={3} alignItems="center">
-
-                <div className={classes.margin}>
-                    <form onSubmit={this.handleSubmit}>
-                    <Grid container  alignItems="flex-end" justify="center">
-                        <Grid item alignItems="center">
-                            <TextField onChange={e => this.handleInputChange(e, "email")} id="email" label="Email" type="email" autoFocus required/>
-                        </Grid>
-                    </Grid>
-                    <Grid container alignItems="flex-end" justify="center">
-                        <Grid item alignItems="center">
-                            <TextField onChange={e => this.handleInputChange(e, "password")} justify="center" id="password" label="Password" type="password" required/>
-                        </Grid>
-                    </Grid>
-                    <Grid container style={{ marginTop: '30px' }} justify="center">
-                        <Button style={{maxWidth: '160px', maxHeight: '40px', minWidth: '160px', minHeight: '40px'}} variant="contained" color="primary" type="submit">Sign In</Button>
-                    </Grid>
-                        <Grid container style={{ marginTop: '10px' }} justify="center">
-                            <Button style={{ maxWidth: '160px', maxHeight: '40px', minWidth: '160px', minHeight: '40px'}} variant="contained" color="primary" onClick={this.createAccount}>Create Account</Button>
-                        </Grid>
-                    </form>
-                    {this.state.loginFailed && <Snackbar open={true} autoHideDuration={6000} anchorOrigin={{ vertical:'bottom', horizontal:'center' }}>
+            <Paper className={classes.root} elevation={3} alignItems="center">
+                <Typography variant="h4" style={{ textAlign: 'center' }}>
+                    Login
+                </Typography>
+                <form className={classes.form} onSubmit={this.handleSubmit}>
+                    <TextField
+                        className={classes.text}
+                        variant="outlined"
+                        onChange={e => this.handleInputChange(e, 'email')}
+                        id="email"
+                        label="Email"
+                        type="email"
+                        autoFocus
+                        required
+                    />
+                    <TextField
+                        className={classes.text}
+                        variant="outlined"
+                        onChange={e => this.handleInputChange(e, 'password')}
+                        justify="center"
+                        id="password"
+                        label="Password"
+                        type="password"
+                        required
+                    />
+                    <Button className={classes.button} variant="contained" color="primary" type="submit">
+                        Sign In
+                    </Button>
+                    <Button className={classes.button} variant="contained" color="primary" onClick={this.createAccount}>
+                        Create Account
+                    </Button>
+                </form>
+                {this.state.loginFailed && (
+                    <Snackbar
+                        open={true}
+                        autoHideDuration={6000}
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                    >
                         <Alert variant="filled" severity="error">
                             Invaild email and/or password.
                         </Alert>
-                    </Snackbar>}
-                </div>
-                </Paper>
-            </div>
+                    </Snackbar>
+                )}
+            </Paper>
         );
     }
 }
 
 function mapStateToProps(state) {
-    const { auth } = state
-    return { auth }
-  }
-  
+    const { auth } = state;
+    return { auth };
+}
+
 const mapDispatchToProps = {
     authLogin,
-    authLogout
-}
-export default withStyles(styles,{ withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(Login)));
+    authLogout,
+};
+export default withStyles(styles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(Login)));
