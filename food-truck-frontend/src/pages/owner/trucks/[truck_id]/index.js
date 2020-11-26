@@ -16,6 +16,7 @@ import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import ChipSelector from "../../../../components/ChipSelector";
 import Box from "@material-ui/core/Box";
+import ScheduleCard from "../../../../components/ScheduleCard";
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -321,20 +322,21 @@ class Information extends Component {
                         {this.state.schedules.length > 0 && <Card>
                             <CardHeader title={"Schedule"}/>
                             <CardContent>
-                                <Table size="small">
-                                    <TableBody>
-                                        {this.state.schedules.map((s, i) => (
-                                            <TableRow>
-                                                <TableCell>
-                                                    <Typography key={i} variant="body1">
-                                                        <ScheduleIconRounded/> {s.location}: {format(new Date(s.timeFrom), "MM/dd/yyyy HH:mm")} to {format(new Date(s.timeTo), "MM/dd/yyyy HH:mm")}
-                                                    </Typography>
-                                                </TableCell>
-                                            </TableRow>
+                                <ScheduleCard schedules={this.state.schedules} />
+                                {/*<Table size="small">*/}
+                                {/*    <TableBody>*/}
+                                {/*        {this.state.schedules.map((s, i) => (*/}
+                                {/*            <TableRow>*/}
+                                {/*                <TableCell>*/}
+                                {/*                    <Typography key={i} variant="body1">*/}
+                                {/*                        <ScheduleIconRounded/> {s.location}: {format(new Date(s.timeFrom), "MM/dd/yyyy HH:mm")} to {format(new Date(s.timeTo), "MM/dd/yyyy HH:mm")}*/}
+                                {/*                    </Typography>*/}
+                                {/*                </TableCell>*/}
+                                {/*            </TableRow>*/}
 
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                                {/*        ))}*/}
+                                {/*    </TableBody>*/}
+                                {/*</Table>*/}
                                 <br/>
                                 <Box mt={1} ml={1} mr={1} mb={1}>
                                     <Button variant="contained" href={`/owner/trucks/${this.props.router.query.truck_id}/schedule`}>
