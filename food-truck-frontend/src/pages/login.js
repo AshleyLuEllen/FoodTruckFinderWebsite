@@ -47,7 +47,6 @@ class Login extends React.Component {
     handleSubmit(event) {
         event.preventDefault();
 
-        console.log(this.state);
         axios
             .get(`${process.env.FOOD_TRUCK_API_URL}/basicauth`, {
                 auth: {
@@ -55,7 +54,7 @@ class Login extends React.Component {
                     password: this.state.password,
                 },
             })
-            .then(() => {
+            .then(res => {
                 this.props.authLogin(this.state.email, this.state.password);
                 this.props.router.push('/');
             })
