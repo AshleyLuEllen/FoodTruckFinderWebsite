@@ -222,12 +222,6 @@ class NotificationPage extends Component {
     }
 
     /**
-     * Displays all the information about the truck who's id is being
-     * used in the URL
-     */
-    componentDidMount() {}
-
-    /**
      * Continuously updates the truck information on the page
      */
     componentDidUpdate() {
