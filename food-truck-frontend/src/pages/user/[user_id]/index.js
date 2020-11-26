@@ -145,7 +145,7 @@ class UserPage extends Component {
                         <Avatar
                             className={classes.bigAvatar}
                             alt={`${this.state.user?.firstName} ${this.state.user?.lastName}`}
-                            src={this.state.user?.avatarURL}
+                            src={this.state.user?.avatar?.url}
                         />
                         <Typography variant="h3" style={{ marginTop: '10px' }}>
                             {this.state.user?.firstName} {this.state.user?.lastName}

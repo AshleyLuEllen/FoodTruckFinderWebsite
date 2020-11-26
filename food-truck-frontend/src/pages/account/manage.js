@@ -38,7 +38,6 @@ function ManageAccountPage(props) {
                 setEmail(res.data.emailAddress);
                 setFirstName(res.data.firstName);
                 setLastName(res.data.lastName);
-                setAvatar(res.data.avatarURL);
                 setBio(res.data.description);
             })
             .catch(() => {
@@ -156,6 +155,7 @@ function ManageAccountPage(props) {
                         id="email"
                         label="Email Address"
                         type="email"
+                        variant="outlined"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
                     />
@@ -164,6 +164,7 @@ function ManageAccountPage(props) {
                         id="confEmail"
                         label="Confirm Email Address"
                         type="email"
+                        variant="outlined"
                         value={confEmail}
                         onChange={e => setConfEmail(e.target.value)}
                     />
@@ -184,6 +185,7 @@ function ManageAccountPage(props) {
                         id="oldPassword"
                         label="Old Password"
                         type="password"
+                        variant="outlined"
                         value={oldPassword}
                         onChange={e => setOldPassword(e.target.value)}
                     />
@@ -192,6 +194,7 @@ function ManageAccountPage(props) {
                         id="password"
                         label="New Password"
                         type="password"
+                        variant="outlined"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                     />
@@ -200,6 +203,7 @@ function ManageAccountPage(props) {
                         id="confPassword"
                         label="Confirm Password"
                         type="password"
+                        variant="outlined"
                         value={confPassword}
                         onChange={e => setConfPassword(e.target.value)}
                     />
@@ -220,6 +224,7 @@ function ManageAccountPage(props) {
                         id="firstName"
                         label="First Name"
                         type="text"
+                        variant="outlined"
                         value={firstName}
                         onChange={e => setFirstName(e.target.value)}
                     />
@@ -227,6 +232,7 @@ function ManageAccountPage(props) {
                         id="lastName"
                         label="Last Name"
                         type="text"
+                        variant="outlined"
                         value={lastName}
                         onChange={e => setLastName(e.target.value)}
                     />
@@ -235,6 +241,7 @@ function ManageAccountPage(props) {
                         id="bio"
                         label="Bio"
                         type="text"
+                        variant="outlined"
                         style={{ width: '90%' }}
                         value={bio}
                         onChange={e => setBio(e.target.value)}
