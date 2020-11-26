@@ -1,24 +1,20 @@
 package food.truck.api.endpoint;
 
-import food.truck.api.data.schedule.Schedule;
-import food.truck.api.data.schedule.ScheduleService;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.truck_notification.TruckNotification;
 import food.truck.api.data.truck_notification.TruckNotificationService;
-import food.truck.api.data.user_notification.UserNotificationService;
+import food.truck.api.data.user.User;
+import food.truck.api.data.user.UserService;
 import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import food.truck.api.data.user.User;
-import food.truck.api.data.user.UserService;
-import lombok.extern.log4j.Log4j2;
 
-import javax.swing.text.html.Option;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
@@ -31,9 +27,6 @@ public class TruckNotificationEndpoint {
 
     @Autowired
     private TruckNotificationService truckNotificationService;
-
-    @Autowired
-    private UserNotificationService userNotificationService;
 
     @Autowired
     private TruckService truckService;
@@ -85,6 +78,15 @@ public class TruckNotificationEndpoint {
             throw new UnauthorizedException();
         }
 
+        Optional<TruckNotification> thisNot = truckNotificationService.findTruckNotification(notificationId);
+        if (thisNot.isEmpty()) {
+            throw new UnauthorizedException();
+        }
+
+        if (!meUser.get().getId().equals(thisNot.get().getTruck().getOwner().getId())) {
+            throw new UnauthorizedException();
+        }
+
         truckNotificationService.findTruckNotification(notificationId).orElseThrow(ResourceNotFoundException::new);
 
         try {
@@ -95,7 +97,6 @@ public class TruckNotificationEndpoint {
 
         return new ResponseEntity<>("Truck Notification has been deleted!", HttpStatus.OK);
     }
-
 
     @GetMapping("/trucks/{truckId}/notifications")
     public List<TruckNotification> findTruckOwnedNotifications(@PathVariable Long truckId) {
