@@ -36,7 +36,10 @@ class Information extends Component {
             paymentTags: [],
             truckFound: false,
             loadingInfo: false,
+            menu: undefined,
         };
+
+        this.saveInfo = this.saveInfo.bind(this);
     }
 
     fetchData() {
@@ -122,6 +125,8 @@ class Information extends Component {
      * Saves the edited information from the form
      */
     saveInfo() {
+        this.handleMenuUpload();
+
         if (this.state.licensePlate.length < 1) {
             alert('Missing Information: License Plate Number');
             return;
@@ -184,6 +189,32 @@ class Information extends Component {
             this.setState({ loadingInfo: true });
             this.fetchData();
         }
+    }
+
+    handleMenuUpload() {
+        if (!this.state.menu) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', this.state.menu);
+
+        axios
+            .put(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/menu`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                auth: {
+                    username: this.props.auth.email,
+                    password: this.props.auth.password,
+                },
+            })
+            .then(() => {
+                console.log('Success');
+            })
+            .catch(err => {
+                console.log(err);
+            });
     }
 
     render() {
@@ -317,6 +348,19 @@ class Information extends Component {
                                         })
                                 }
                             />
+                            <div>
+                                <Button variant="contained" component="label" style={{ width: 'auto', height: 'auto' }}>
+                                    Upload Menu
+                                    <input
+                                        type="file"
+                                        style={{ display: 'none' }}
+                                        ref={this.menuInputRef}
+                                        accept="image/jpeg,image/png,image/gif,application/pdf"
+                                        onChange={e => this.setState({ menu: e.target.files[0] })}
+                                    />
+                                </Button>
+                                {this.state.menu && `Selected file: ${this.state.menu.name}`}
+                            </div>
                             <Box mt={1} ml={1} mr={1} mb={1}>
                                 <Button variant="contained" pt={10} pl={10} onClick={this.saveInfo}>
                                     Save
