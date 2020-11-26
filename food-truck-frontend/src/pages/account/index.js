@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import axios from "axios";
+import PropTypes from 'prop-types';
+import axios from 'axios';
 
 import { useRouter } from 'next/router';
 import { connect } from 'react-redux';
@@ -12,31 +13,29 @@ function ProfilePage(props) {
             .get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
                 auth: {
                     username: props.auth.email,
-                    password: props.auth.password
-                }
+                    password: props.auth.password,
+                },
             })
             .then(res => {
                 router.push(`/user/${res.data.id}`);
             })
-            .catch(err => {
-                router.push('/login')
+            .catch(() => {
+                router.push('/login');
             });
     }, []);
 
-    return (
-        <div>
-            Redirecting...
-        </div>
-    )
+    return <div>Redirecting...</div>;
 }
 
+ProfilePage.propTypes = {
+    auth: PropTypes.any,
+};
+
 function mapStateToProps(state) {
-    const { auth } = state
-    return { auth }
+    const { auth } = state;
+    return { auth };
 }
-  
-const mapDispatchToProps = {
-    
-}
-  
+
+const mapDispatchToProps = {};
+
 export default connect(mapStateToProps, mapDispatchToProps)(ProfilePage);
