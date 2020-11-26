@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { withRouter } from 'next/router';
 import axios from 'axios';
 import { connect } from 'react-redux';
@@ -35,15 +36,15 @@ class Login extends React.Component {
         super(props);
         this.state = { email: '', password: '', loginFailed: false };
         this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleChangeStatus = this.handleChangeStatus.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
-    handleChangeStatus() {}
+
     handleInputChange(event, name_of_attribute) {
         this.setState({
             [name_of_attribute]: event.target.value,
         });
     }
+
     handleSubmit(event) {
         event.preventDefault();
 
@@ -54,7 +55,7 @@ class Login extends React.Component {
                     password: this.state.password,
                 },
             })
-            .then(res => {
+            .then(() => {
                 this.props.authLogin(this.state.email, this.state.password);
                 this.props.router.push('/');
             })
@@ -66,11 +67,10 @@ class Login extends React.Component {
                 console.log(err);
             });
     }
-    componentDidMount() {}
 
-    createAccount = () => {
+    createAccount() {
         this.props.router.push('/create-account');
-    };
+    }
 
     render() {
         const { classes } = this.props;
@@ -122,6 +122,13 @@ class Login extends React.Component {
         );
     }
 }
+
+Login.propTypes = {
+    authLogin: PropTypes.func,
+    authLogout: PropTypes.func,
+    classes: PropTypes.any,
+    router: PropTypes.any,
+};
 
 function mapStateToProps(state) {
     const { auth } = state;

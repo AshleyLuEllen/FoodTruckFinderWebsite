@@ -1,20 +1,25 @@
 import React, { Component } from 'react';
-import axios from "axios";
-import Link from "next/link";
-import {withRouter} from 'next/router';
-import {connect} from "react-redux";
-import {Card, CardHeader, IconButton, TextField, InputLabel} from "@material-ui/core";
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Dialog from "@material-ui/core/Dialog";
-import Button from "@material-ui/core/Button";
-import CardContent from "@material-ui/core/CardContent";
-import CardActions from "@material-ui/core/CardActions";
-import Typography from "@material-ui/core/Typography";
-import Grid from "@material-ui/core/Grid";
-import {format} from "date-fns";
+import PropTypes from 'prop-types';
+import axios from 'axios';
+import { withRouter } from 'next/router';
+import { connect } from 'react-redux';
+import { format } from 'date-fns';
+
+import {
+    Card,
+    CardHeader,
+    TextField,
+    InputLabel,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Dialog,
+    Button,
+    CardContent,
+    CardActions,
+    Typography,
+} from '@material-ui/core';
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -24,8 +29,8 @@ class NotificationPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            truck: "",
-            truckName: "",
+            truck: '',
+            truckName: '',
             truckID: 1,
             notifications: [],
             truckFound: false,
@@ -33,10 +38,10 @@ class NotificationPage extends Component {
             openNotification: 1,
             open: false,
             openCreate: false,
-            subject: "",
-            description: "",
+            subject: '',
+            description: '',
             published: false,
-            postedTimestamp: null
+            postedTimestamp: null,
         };
 
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -48,8 +53,9 @@ class NotificationPage extends Component {
     }
 
     handleClick(notification) {
-        if(notification !== null) {
-            axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.truckID}/notifications/${notification.id}`)
+        if (notification !== null) {
+            axios
+                .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.truckID}/notifications/${notification.id}`)
                 .then(res => {
                     this.setState({
                         openNotification: notification.id,
@@ -57,26 +63,26 @@ class NotificationPage extends Component {
                         subject: res.data.subject,
                         description: res.data.description,
                         published: res.data.published,
-                        postedTimestamp: res.data.postedTimestamp
+                        postedTimestamp: res.data.postedTimestamp,
                     });
                     console.log(this.state);
                     this.fetchData();
-            }).catch(err => console.log(err.message));
-        }
-        else {
+                })
+                .catch(err => console.log(err.message));
+        } else {
             this.setState({
                 openNotification: undefined,
                 openCreate: true,
-                subject: "",
-                description: "",
-                published: false
+                subject: '',
+                description: '',
+                published: false,
             });
         }
     }
 
     handleClose(option) {
-        if(this.state.open) {
-            console.log("Saving notification");
+        if (this.state.open) {
+            console.log('Saving notification');
 
             const notification = {
                 id: this.state.openNotification,
@@ -86,13 +92,16 @@ class NotificationPage extends Component {
                 description: this.state.description,
                 type: null,
                 published: option,
-                postedTimestamp: this.state.postedTimestamp
-            }
+                postedTimestamp: this.state.postedTimestamp,
+            };
 
-            axios.put(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
-                notification)
-                .then(res => {
-                    console.log("Notification saved!");
+            axios
+                .put(
+                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
+                    notification
+                )
+                .then(() => {
+                    console.log('Notification saved!');
                     this.fetchData();
                 })
                 .catch(err => console.log(err.message));
@@ -101,12 +110,11 @@ class NotificationPage extends Component {
                 openNotification: undefined,
                 open: false,
                 openCreate: false,
-                subject: "",
-                description: ""
+                subject: '',
+                description: '',
             });
-        }
-        else if(this.state.openCreate) {
-            console.log("Creating notification");
+        } else if (this.state.openCreate) {
+            console.log('Creating notification');
 
             console.log(this.state);
             const notification = {
@@ -119,13 +127,16 @@ class NotificationPage extends Component {
                 published: option,
                 postedTimestamp: this.state.postedTimestamp,
                 notificationType: null,
-            }
+            };
             console.log(this.notification);
 
-            axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`,
-                notification)
-                .then(res => {
-                    console.log("Notification saved!");
+            axios
+                .post(
+                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`,
+                    notification
+                )
+                .then(() => {
+                    console.log('Notification saved!');
                     this.fetchData();
                 })
                 .catch(err => console.log(err.message));
@@ -134,14 +145,14 @@ class NotificationPage extends Component {
                 openNotification: undefined,
                 open: false,
                 openCreate: false,
-                subject: "",
-                description: ""
+                subject: '',
+                description: '',
             });
         }
     }
 
     handleCancel() {
-        this.setState({ open: false, openCreate:false });
+        this.setState({ open: false, openCreate: false });
     }
 
     handleInputChange(event, opt) {
@@ -149,7 +160,7 @@ class NotificationPage extends Component {
         console.log(event.target.value);
         console.log(opt);
         this.setState({
-            [opt]: event.target.value
+            [opt]: event.target.value,
         });
         console.log(this.state);
     }
@@ -157,13 +168,18 @@ class NotificationPage extends Component {
     handleDelete() {
         console.log(this.props.auth);
         console.log(this.state.openNotification);
-        axios.delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
-            { auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password
-                }})
-            .then(r => {
-                console.log("Notification deleted!");
+        axios
+            .delete(
+                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
+                {
+                    auth: {
+                        username: this.props.auth.email,
+                        password: this.props.auth.password,
+                    },
+                }
+            )
+            .then(() => {
+                console.log('Notification deleted!');
                 this.fetchData();
             })
             .catch(err => console.log(err.message));
@@ -172,46 +188,50 @@ class NotificationPage extends Component {
             openNotification: 1,
             open: false,
             openCreate: false,
-            subject: "",
-            description: ""
+            subject: '',
+            description: '',
         });
     }
 
     fetchData() {
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
+        axios
+            .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
             .then(res => {
-                console.log("Found the truck!");
+                console.log('Found the truck!');
                 this.setState({
                     truck: res.data,
                     truckName: res.data.name,
-                    truckID: res.data.id
+                    truckID: res.data.id,
                 });
-                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`)
-            }).then(res2 => {
-            this.setState( {
-                notifications: res2.data,
-                truckFound: true
+                return axios.get(
+                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`
+                );
+            })
+            .then(res2 => {
+                this.setState({
+                    notifications: res2.data,
+                    truckFound: true,
+                });
+                console.log(this.state);
+            })
+            .catch(err => {
+                console.log(err.message);
+                // eslint-disable-next-line quotes
+                console.log("Cant't get notifications");
             });
-            console.log(this.state);
-        }).catch(err => {
-            console.log(err.message);
-            console.log("Cant't get notifications");
-        });
     }
 
     /**
      * Displays all the information about the truck who's id is being
      * used in the URL
      */
-    componentDidMount() {
-
-    }
+    componentDidMount() {}
 
     /**
      * Continuously updates the truck information on the page
      */
     componentDidUpdate() {
-        if(!this.state.truckFound && this.props.router.query.truck_id !== undefined) {
+        if (!this.state.truckFound && this.props.router.query.truck_id !== undefined) {
             this.fetchData();
         }
     }
@@ -220,30 +240,31 @@ class NotificationPage extends Component {
         return (
             <div>
                 <h2>Notifications for {this.state.truckName} </h2>
-                {this.state.notifications.map((n) =>
+                {this.state.notifications.map(n => (
                     <Card key={n.id} variant="outlined">
                         <CardContent>
-                            <CardHeader
-                                title={n.subject}
-                            />
-                            {n.published &&
-                            <CardHeader
-                                subheader={format(new Date(n.postedTimestamp), "HH:mm, MM-dd-yyyy")}
-                            />}
+                            <CardHeader title={n.subject} />
+                            {n.published && (
+                                <CardHeader subheader={format(new Date(n.postedTimestamp), 'HH:mm, MM-dd-yyyy')} />
+                            )}
                             <Typography align="left" variant="body3" component="p">
                                 {n.description}
                             </Typography>
                         </CardContent>
                         <CardActions>
-                            <Button onClick={() => this.handleClick(n)} color="primary" variant="outlined"> Manage </Button>
+                            <Button onClick={() => this.handleClick(n)} color="primary" variant="outlined">
+                                {' '}
+                                Manage{' '}
+                            </Button>
                         </CardActions>
                     </Card>
-                )}
+                ))}
                 <Dialog open={this.state.open || this.state.openCreate} aria-labelledby="form-dialog-title">
                     <DialogTitle id="form-dialog-title">Manage Notification</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Click "Publish" to publish or "Save" to save and publish later. If already published, you may only "Delete".
+                            Click &quot;Publish&quot; to publish or &quot;Save&quot; to save and publish later. If
+                            already published, you may only &quot;Delete&quot;.
                         </DialogContentText>
                         <TextField
                             autoFocus
@@ -253,10 +274,9 @@ class NotificationPage extends Component {
                             type="email"
                             fullWidth={true}
                             defaultValue={this.state.subject}
-                            onChange={e => this.handleInputChange(e, "subject")}
+                            onChange={e => this.handleInputChange(e, 'subject')}
                         />
-                        <InputLabel>
-                        </InputLabel>
+                        <InputLabel></InputLabel>
                         <TextField
                             id="description"
                             label="Description"
@@ -264,36 +284,53 @@ class NotificationPage extends Component {
                             rows={4}
                             fullWidth={true}
                             defaultValue={this.state.description}
-                            onChange={e => this.handleInputChange(e,"description")}
+                            onChange={e => this.handleInputChange(e, 'description')}
                         />
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleCancel} color="primary" variant="outlined">
                             Cancel
                         </Button>
-                        {!this.state.published && <Button onClick={() => this.handleClose(false)} color="primary" variant="outlined">
-                            Save
-                        </Button>}
-                        {!this.state.published && <Button onClick={() => this.handleClose(true)} color="primary" variant="outlined">
-                            Publish
-                        </Button>}
-                        {!this.state.published && <Button onClick={this.handleDelete} color="primary" variant="outlined">
-                            Delete
-                        </Button>}
+                        {!this.state.published && (
+                            <Button onClick={() => this.handleClose(false)} color="primary" variant="outlined">
+                                Save
+                            </Button>
+                        )}
+                        {!this.state.published && (
+                            <Button onClick={() => this.handleClose(true)} color="primary" variant="outlined">
+                                Publish
+                            </Button>
+                        )}
+                        {!this.state.published && (
+                            <Button onClick={this.handleDelete} color="primary" variant="outlined">
+                                Delete
+                            </Button>
+                        )}
                     </DialogActions>
                 </Dialog>
-                <Button onClick={() => this.handleClick(null)} variant="outlined"> + </Button>
-                <Button href={`/owner/trucks/${this.props.router.query.truck_id}`} variant="outlined"> Back </Button>
+                <Button onClick={() => this.handleClick(null)} variant="outlined">
+                    {' '}
+                    +{' '}
+                </Button>
+                <Button href={`/owner/trucks/${this.props.router.query.truck_id}`} variant="outlined">
+                    {' '}
+                    Back{' '}
+                </Button>
             </div>
-        )
+        );
     }
 }
-const mapStateToProps = state => {
-    const { auth } = state
-    return { auth }
+
+NotificationPage.propTypes = {
+    router: PropTypes.any,
+    auth: PropTypes.any,
 };
 
-const mapDispatchToProps = {
-}
+const mapStateToProps = state => {
+    const { auth } = state;
+    return { auth };
+};
+
+const mapDispatchToProps = {};
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(NotificationPage));
