@@ -1,19 +1,18 @@
-import React from "react";
-import Link from 'next/link';
-import { useRouter } from 'next/router';
+import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 
 import { makeStyles } from '@material-ui/core/styles';
 import FriendAvatar from './FriendAvatar';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     root: {
         display: 'flex',
         justifyContent: 'center',
         '& > *': {
-            margin: "0 5px"
-        }
-    }
+            margin: '0 5px',
+        },
+    },
 }));
 
 function FriendAvatarGroup(props) {
@@ -23,14 +22,16 @@ function FriendAvatarGroup(props) {
     const childCount = React.Children.count(children);
     const childArray = _.take(React.Children.toArray(children), props.max - (childCount > props.max ? 1 : 0));
     if (childCount > props.max) {
-        childArray.push(<FriendAvatar name={`+${childCount - (props.max - 1)}`} url={props.extraURL}/>)
+        childArray.push(<FriendAvatar name={`+${childCount - (props.max - 1)}`} url={props.extraURL} />);
     }
 
-    return (
-        <div className={classes.root}>
-            {childArray}
-        </div>
-    );
+    return <div className={classes.root}>{childArray}</div>;
 }
+
+FriendAvatarGroup.propTypes = {
+    children: PropTypes.array,
+    max: PropTypes.number.isRequired,
+    extraURL: PropTypes.string.isRequired,
+};
 
 export default FriendAvatarGroup;

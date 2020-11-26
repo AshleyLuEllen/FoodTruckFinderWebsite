@@ -246,6 +246,7 @@ class SearchServiceTest {
     public void testSearchByRating() {
         // Get search results
         SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setLocation(new Location(0.0, 0.0));
         List<Truck> searchResults = this.recommendationService.getSearchResults(searchQuery);
         assertArrayEquals(Stream.of(new Truck[] {
             this.furtherTruck,

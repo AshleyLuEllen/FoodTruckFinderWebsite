@@ -6,10 +6,13 @@ import { connect } from 'react-redux';
 
 import Link from "next/link";
 import { withStyles } from '@material-ui/core/styles';
-import { Container, Grid, Avatar, Typography, Box, Button } from "@material-ui/core";
+import {Container, Grid, Avatar, Typography, Box, Button, CardContent} from "@material-ui/core";
 import FriendAvatar from '../../../components/FriendAvatar';
 import FriendAvatarGroup from '../../../components/FriendAvatarGroup';
 import TruckCard from '../../../components/TruckCard';
+import CardHeader from "@material-ui/core/CardHeader";
+import ReviewCard from "../../../components/ReviewCard";
+import Card from "@material-ui/core/Card";
 
 const styles = theme => ({
     root: {
@@ -26,6 +29,10 @@ const styles = theme => ({
     },
     truckCard: {
         marginBottom: "20px"
+    },
+    reviewCard: {
+        marginBottom: "20px",
+        marginRight: "20px"
     },
     editButton: {
         width: 'auto',
@@ -48,7 +55,7 @@ class UserPage extends Component {
                 { firstName: "Remy", lastName: "Sharp", avatarURL: "/static/images/avatar/1.jpg", id: 1 },
                 { firstName: "Remy", lastName: "Sharp", avatarURL: "/static/images/avatar/1.jpg", id: 1 },
             ],
-            subscribedTrucks: [],viewerId: undefined
+            subscribedTrucks: [],viewerId: undefined, reviews:[]
         };
         this.fetchData = this.fetchData.bind(this);
     }
@@ -88,6 +95,12 @@ class UserPage extends Component {
             .then(res => {
                 this.setState({
                     subscribedTrucks: res.data
+                })
+                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/reviews`)
+            })
+            .then(res => {
+                this.setState({
+                    reviews: res.data
                 })
             })
             .catch(err => {
@@ -134,6 +147,12 @@ class UserPage extends Component {
                                 <FriendAvatar user={f} />
                             ))}
                         </FriendAvatarGroup>
+                        <Typography variant="h4" style={{ marginTop: "20px", marginBottom: "5px" }}>Reviews</Typography>
+                        <div align={"left"}>
+                            {this.state.reviews.map((r, i) => (
+                                <ReviewCard className={classes.reviewCard} key={i} r={r} user={true}/>
+                            ))}
+                        </div>
                     </Grid>
                     <Grid item xs={12} md={6}>
                         <Typography variant="h4" style={{ marginTop: "20px", marginBottom: "5px" }}>{this.state.user?.firstName}'s Subscriptions</Typography>

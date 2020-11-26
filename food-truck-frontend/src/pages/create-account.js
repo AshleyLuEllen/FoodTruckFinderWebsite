@@ -1,25 +1,62 @@
 import React, { Component } from 'react';
-import Link from "next/link";
-import axios from "axios";
-import withRouter from "next/dist/client/with-router";
+import axios from 'axios';
+import withRouter from 'next/dist/client/with-router';
+import isEmail from 'validator/lib/isEmail';
+
+import { Paper, withStyles, TextField, Button, Snackbar, Typography } from '@material-ui/core';
+import Alert from '@material-ui/lab/Alert';
+
+const styles = theme => ({
+    root: {
+        width: '360px',
+        margin: '20px auto',
+        padding: theme.spacing(2),
+    },
+    form: {
+        display: 'flex',
+        flexDirection: 'column',
+        '& > *': {
+            margin: '5px',
+        },
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    text: {
+        width: '300px',
+    },
+    button: {
+        width: '180px',
+    },
+});
 
 class CreateAccount extends Component {
-
     constructor(props) {
         super(props);
-        this.state = {email: '', password: '', passConf:'', firstName:'', lastName:''};
+
+        this.state = {
+            email: '',
+            password: '',
+            passConf: '',
+            firstName: '',
+            lastName: '',
+            errorOpen: false,
+            errorMsg: '',
+            vertical: 'top',
+            horizontal: 'center',
+            triedCreate: false,
+        };
+
         this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleChangeStatus = this.handleChangeStatus.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.createAccount = this.createAccount.bind(this);
+        this.handleErrorClose = this.handleErrorClose.bind(this);
+
+        this.passwordPat = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_])(?=.{8,})');
     }
 
-    handleChangeStatus(event) {
-    }
-
-    handleInputChange(event) {
+    handleInputChange(event, name_of_attribute) {
         this.setState({
-                [event.target.name]: event.target.value
+            [name_of_attribute]: event.target.value,
         });
     }
 
@@ -27,104 +64,207 @@ class CreateAccount extends Component {
         event.preventDefault();
     }
 
-    componentDidMount() {
+    handleErrorClose(event, reason) {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        this.setState({
+            errorOpen: false,
+        });
     }
 
-    createAccount(){
+    createAccount() {
+        this.setState({
+            triedCreate: true,
+        });
+
         const user = {
             emailAddress: this.state.email,
             firstName: this.state.firstName,
             lastName: this.state.lastName,
-            password: this.state.password
-        }
+            password: this.state.password,
+        };
 
-        if (this.state.password === this.state.passConf) {
-            axios.post(process.env.FOOD_TRUCK_API_URL + "/users", user)
-                .then((res) => {
-                    this.props.router.push('/login')
-                })
-                .catch((err) => {
-                    alert("Email already exists.")
-                    console.log(err);
+        const test = this.passwordPat.test(this.state.password);
+        if (this.state.email.length === 0) {
+            this.setState({
+                errorOpen: true,
+                errorMsg: 'Email cannot be blank.',
+            });
+        } else if (!isEmail(this.state.email)) {
+            this.setState({
+                errorOpen: true,
+                errorMsg: 'Invalid email address.',
+            });
+        } else if (this.state.firstName.length === 0) {
+            this.setState({
+                errorOpen: true,
+                errorMsg: 'First name cannot be blank.',
+            });
+        } else if (this.state.lastName.length === 0) {
+            this.setState({
+                errorOpen: true,
+                errorMsg: 'Last name cannot be blank.',
+            });
+        } else if (this.state.password.length === 0) {
+            this.setState({
+                errorOpen: true,
+                errorMsg: 'Password cannot be blank.',
+            });
+        } else if (this.state.password === this.state.passConf) {
+            if (test) {
+                axios
+                    .post(process.env.FOOD_TRUCK_API_URL + '/users', user)
+                    .then(res => {
+                        this.props.router.push('/login');
+                    })
+                    .catch(err => {
+                        this.setState({
+                            errorOpen: true,
+                            errorMsg: 'Email already exists.',
+                        });
+                    });
+            } else {
+                this.setState({
+                    errorOpen: true,
+                    errorMsg: 'Password is not secure enough.',
                 });
-        }
-        else {
-            alert("Passwords do no match.")
+            }
+        } else {
+            this.setState({
+                errorOpen: true,
+                errorMsg: 'Passwords do not match.',
+            });
         }
 
-        console.log("create account!");
+        console.log('create account!');
     }
 
     render() {
+        const { classes } = this.props;
         return (
-            <div className="create-account-form">
-                <h2>Create Account</h2>
-                <form onSubmit={this.handleSubmit} method="post">
-                    <table className="login-form-details">
-                        <tbody>
-                        <tr>
-                            <td>
-                                <label for="email">
-                                    Email:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="email" email="email" type="text" value={this.state.email} onChange={this.handleInputChange} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label htmlFor="firstName">
-                                    First Name:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="firstName" type="text" value={this.state.firstName} onChange={this.handleInputChange}/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label htmlFor="lastName">
-                                    Last Name:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="lastName" type="text" value={this.state.lastName} onChange={this.handleInputChange}/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="password">
-                                    Password:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="password" type="password" value={this.state.password} onChange={this.handleInputChange} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label htmlFor="passConf">
-                                    Re-enter Password:
-                                </label>
-                            </td>
-                            <td>
-                                <input name="passConf" type="password" value={this.state.passConf} onChange={this.handleInputChange}/>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <button className="login-submit-button" onClick={this.createAccount}>Create Account</button>
+            <Paper className={classes.root} elevation={3} alignItems="center">
+                <Typography variant="h4" style={{ textAlign: 'center' }}>
+                    Create Account
+                </Typography>
+                <form className={classes.form} onSubmit={this.handleSubmit} method="post">
+                    <TextField
+                        className={classes.text}
+                        variant="outlined"
+                        value={this.state.email}
+                        onChange={e => this.handleInputChange(e, 'email')}
+                        id="email"
+                        label="Email"
+                        type="email"
+                        helperText={
+                            this.state.triedCreate && this.state.email.length === 0 && 'Email must not be blank'
+                        }
+                        autoFocus
+                        required
+                        error={this.state.triedCreate && this.state.email.length === 0}
+                    />
+                    <TextField
+                        className={classes.text}
+                        variant="outlined"
+                        value={this.state.firstName}
+                        onChange={e => this.handleInputChange(e, 'firstName')}
+                        id="firstName"
+                        label="First Name"
+                        helperText={
+                            this.state.triedCreate &&
+                            this.state.firstName.length === 0 &&
+                            'First name must not be blank'
+                        }
+                        required
+                        error={this.state.triedCreate && this.state.firstName.length === 0}
+                    />
+                    <TextField
+                        className={classes.text}
+                        variant="outlined"
+                        value={this.state.lastName}
+                        onChange={e => this.handleInputChange(e, 'lastName')}
+                        id="lastName"
+                        label="Last Name"
+                        helperText={
+                            this.state.triedCreate && this.state.lastName.length === 0 && 'Last name must not be blank'
+                        }
+                        required
+                        error={this.state.triedCreate && this.state.lastName.length === 0}
+                    />
+                    <TextField
+                        className={classes.text}
+                        variant="outlined"
+                        value={this.state.password}
+                        onChange={e => this.handleInputChange(e, 'password')}
+                        justify="center"
+                        id="password"
+                        label="Password"
+                        type="password"
+                        helperText={
+                            this.state.triedCreate &&
+                            (this.state.password.length === 0 || !this.passwordPat.test(this.state.password)) && (
+                                <div>
+                                    Password must contain the following:
+                                    <ul style={{ margin: 0 }}>
+                                        <li>at least 1 lowercase letter</li>
+                                        <li>at least 1 uppercase letter</li>
+                                        <li>at least 1 digit</li>
+                                        <li>at least 1 special character (!@#$%^&*()_)</li>
+                                        <li>at least 8 characters</li>
+                                    </ul>
+                                </div>
+                            )
+                        }
+                        required
+                        error={
+                            this.state.triedCreate &&
+                            (this.state.password.length === 0 || !this.passwordPat.test(this.state.password))
+                        }
+                    />
+                    <TextField
+                        className={classes.text}
+                        variant="outlined"
+                        value={this.state.passConf}
+                        onChange={e => this.handleInputChange(e, 'passConf')}
+                        justify="center"
+                        id="password"
+                        label="Confirm Password"
+                        type="password"
+                        helperText={
+                            this.state.triedCreate &&
+                            (this.state.passConf.length === 0 || this.state.password !== this.state.passConf) &&
+                            'Passwords must match'
+                        }
+                        required
+                        error={
+                            this.state.triedCreate &&
+                            (this.state.passConf.length === 0 || this.state.password !== this.state.passConf)
+                        }
+                    />
+                    <Button
+                        className={classes.button}
+                        justify="center"
+                        variant="contained"
+                        color="primary"
+                        onClick={this.createAccount}
+                    >
+                        Create Account
+                    </Button>
                 </form>
-                <br />
                 <label>{this.state.message}</label>
-                <li>
-                    <Link href="/">
-                        <a>Cancel</a>
-                    </Link>
-                </li>
-            </div>
+                <Snackbar
+                    open={this.state.errorOpen}
+                    autoHideDuration={6000}
+                    onClose={this.handleErrorClose}
+                    anchorOrigin={{ vertical: this.state.vertical, horizontal: this.state.horizontal }}
+                >
+                    <Alert variant="filled" severity="error" onClose={this.handleErrorClose}>
+                        {this.state.errorMsg}
+                    </Alert>
+                </Snackbar>
+            </Paper>
         );
     }
 }
-export default withRouter(CreateAccount);
+export default withStyles(styles, { withTheme: true })(withRouter(CreateAccount));
