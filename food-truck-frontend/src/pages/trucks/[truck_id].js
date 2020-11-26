@@ -23,6 +23,8 @@ import Table from "@material-ui/core/Table";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import TableBody from "@material-ui/core/TableBody";
+import Box from "@material-ui/core/Box";
+import ReviewCard from "../../components/ReviewCard";
 
 const truckPageStyles = (theme) => ({
     text: {
@@ -45,13 +47,17 @@ const truckPageStyles = (theme) => ({
     ratingContainer: {
         display: "flex",
         height: "50px",
-        alignItems: "center",
+        alignItems: "left",
         justifyContent: "center"
     },
     review: {
         fontSize: '14 px',
         marginBottom: 10,
         margin: theme.spacing(1)
+    },
+    reviewCard: {
+        marginBottom: "20px",
+        marginRight: "20px"
     },
     reviewDialog: {
         maxWidth: '500px'
@@ -276,7 +282,9 @@ class TruckPage extends Component {
                 {/**SUBSCRIBE BUTTON*/}
                 {this.state.truckFound && this.state.userId &&
                 <div align="center">
-                    <Button color={this.state.subscribed ? "secondary" : "primary"} variant="contained" onClick={this.toggleSubscribe}>{this.state.subscribed ? "Unsubscribe" : "Subscribe"}</Button>
+                    <Box mt={1}>
+                        <Button color={this.state.subscribed ? "secondary" : "primary"} variant="contained" onClick={this.toggleSubscribe}>{this.state.subscribed ? "Unsubscribe" : "Subscribe"}</Button>
+                    </Box>
                 </div>}
 
                 {/**DESCRIPTION*/}
@@ -340,7 +348,6 @@ class TruckPage extends Component {
                                             </Typography>
                                         </TableCell>
                                     </TableRow>
-
                                 ))}
                             </TableBody>
                         </Table>
@@ -352,26 +359,14 @@ class TruckPage extends Component {
                 <Divider/>
                 {this.state.truckFound && this.state.reviews.length > 0 &&
                 <Card>
-                    <CardHeader title="Reviews"/>
+                    <CardHeader title={"Reviews"}/>
                     <CardContent>
-                    {this.state.reviews.map((r, i) => (
-                        <div>
-                            <Typography variant="h8" component="h3" gutterBottom>
-                                {format(new Date(r.reviewTimestamp), "MM-dd-yyyy, HH:mm")}
-                            </Typography>
-                            <Link href={`/user/${r.user.id}`}>
-                                <Typography variant="subtitle 1" component="h5" className={classes.review} gutterBottom>
-                                    By: {r.user.firstName} {r.user.lastName}
-                                </Typography>
-                            </Link>
-
-                            <Rating precision={0.5} value={r.rating} size="small" readOnly/>
-                                {r.comment?.split('\n').map(line => <p>{line}</p>)}
-                            <Divider/>
-                        </div>
-                    ))}
+                        {this.state.reviews.map((r, i) => (
+                            <ReviewCard className={truckPageStyles.reviewCard} key={i} r={r} user={false}/>
+                        ))}
                     </CardContent>
-                </Card>}
+                </Card>
+                }
 
                 {this.state.truckFound && this.state.reviews.length === 0 &&
                 <Card>
@@ -384,8 +379,8 @@ class TruckPage extends Component {
                 </Card>
                 }
 
-                {this.state.truckFound &&
-                <Button variant={"outline"} onClick={this.writeReview}>
+                {this.state.truckFound && this.props.auth.isLoggedIn &&
+                <Button variant="contained" onClick={this.writeReview}>
                     <Typography variant="button" gutterBottom display="block" color={"primary"}>
                         Write Review
                     </Typography>
@@ -397,25 +392,26 @@ class TruckPage extends Component {
                         <InputLabel>
                             Rating
                         </InputLabel>
-                        <div className={classes.ratingContainer}>
+                        <Box align={"left"} mt={1} ml={1} >
                             <Rating
+                                align="left"
                                 name="preferredRating" precision={0.5} value={this.state.rating}
                                 onChange={(event, newValue) => {
                                     this.handleInputChange(event, newValue);
                                 }}
                                 size="medium"
                             />
-                        </div>
-                        <TextField id="reviewComment" label="Review Comment (optional)"
-                            multiline rows={4} fullWidth={true} defaultValue=""
+                        </Box>
+                        <TextField variant="outlined" id="reviewComment" label="Review Comment (optional)"
+                            multiline rows={4} fullWidth={true} value={this.state.reviewComment}
                             onChange={e => this.handleInputChange(e, null)}
                         />
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.handleCancel} color="primary" variant="outlined">
+                        <Button onClick={this.handleCancel} color="primary" variant="contained">
                             Cancel
                         </Button>
-                        <Button onClick={this.createReview} color="primary" variant="outlined">
+                        <Button onClick={this.createReview} color="primary" variant="contained">
                             Save
                         </Button>
                     </DialogActions>
@@ -423,7 +419,7 @@ class TruckPage extends Component {
 
                 {/**BACK*/}
                 <br/>
-                <Button variant="outlined" href="/">
+                <Button variant="contained" href="/">
                     <Typography variant="button" gutterBottom display="block">
                         Back
                     </Typography>

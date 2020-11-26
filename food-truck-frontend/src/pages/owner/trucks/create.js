@@ -3,7 +3,7 @@ import Link from "next/link";
 import axios from "axios";
 import { withRouter } from "next/router";
 import { connect } from "react-redux";
-import {Button, Grid, InputLabel, TextField} from "@material-ui/core";
+import {Button, Grid, InputLabel, TextField, Box} from "@material-ui/core";
 import ChipSelector from "../../../components/ChipSelector";
 import Container from "@material-ui/core/Container";
 
@@ -18,6 +18,8 @@ class CreateNewTruck extends Component {
             licensePlate: '',
             allTags: [],
             truckTags: [],
+            paymentTags: [],
+            paymentTruckTags: [],
 
             truckFound: false,
             menuOpen: false,
@@ -39,8 +41,15 @@ class CreateNewTruck extends Component {
     }
 
     handleTagChange(event, tag) {
-        console.log(tag);
-        this.setState({ truckTags: tag});
+        if(tag.length < 6) {
+            this.setState({ truckTags: tag});
+        }
+    }
+
+    handlePaymentTagChange(event, tag) {
+        if(tag.length < 3) {
+            this.setState({ paymentTruckTags: tag});
+        }
     }
 
     handleSubmit(event) {
@@ -54,7 +63,8 @@ class CreateNewTruck extends Component {
     componentDidMount() {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/tags`).then(r => {
             this.setState({
-                allTags: r.data,
+                allTags: r.data.filter(t => t.description !== 'payment'),
+                paymentTags: r.data.filter(t => t.description === 'payment'),
             });
         }).catch(error => {
             console.log(error.message);
@@ -62,12 +72,23 @@ class CreateNewTruck extends Component {
     }
 
     createNewTruck(){
+        if(this.state.licensePlate.length < 1) {
+            alert("Missing Information: License Plate Number");
+            return;
+        }
+        if(this.state.name.length < 1) {
+            alert("Missing Information: Food Truck Name");
+            return;
+        }
+
         const truck = {
             licensePlate: this.state.licensePlate,
             payment_types: 0,
             description: this.state.description,
             name: this.state.name
         }
+
+
 
         axios.post(process.env.FOOD_TRUCK_API_URL + "/trucks", truck, {
             auth: {
@@ -77,6 +98,15 @@ class CreateNewTruck extends Component {
         })
             .then((res) => {
                 this.state.truckTags.forEach(t => {
+                    axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${res.data.id}/tags/${t.id}`, {},
+                        { auth: {
+                                username: this.props.auth.email,
+                                password: this.props.auth.password
+                            }}).then().catch(error => {
+                        console.log(error.message);
+                    })
+                })
+                this.state.paymentTruckTags.forEach(t => {
                     axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${res.data.id}/tags/${t.id}`, {},
                         { auth: {
                                 username: this.props.auth.email,
@@ -105,69 +135,75 @@ class CreateNewTruck extends Component {
                 <Grid container spacing={4} >
                     <Grid item xs={12}>
                         <br/>
-                        <InputLabel>
-                            Food Truck Name
-                        </InputLabel>
                         <TextField
                             id="name"
-                            label=""
+                            variant="outlined"
+                            label="Food Truck Name"
                             value={this.state.name}
                             fullWidth={true}
                             onChange={e => this.handleInputChange(e, "name")}
                         />
                     </Grid>
                     <Grid item xs={12}>
-                        <InputLabel>
-                            License Plate Number
-                        </InputLabel>
                         <TextField
+                            variant="outlined"
                             id="licensePlate"
-                            label=""
+                            label="License Plate Number"
                             value={this.state.licensePlate}
                             fullWidth={true}
                             onChange={e => this.handleInputChange(e, "licensePlate")}
                         />
                     </Grid>
                     <Grid item xs={12}>
-                        <InputLabel>
-                            Description
-                        </InputLabel>
                         <TextField
                             id="description"
-                            label=""
+                            label="Description"
+                            variant="outlined"
                             multiline
                             rows={4}
                             fullWidth={true}
-                            defaultValue={this.state.description}
+                            value={this.state.description}
                             onChange={e => this.handleInputChange(e, "description")}
                         />
                     </Grid>
                     <Grid item xs={12} >
                         <ChipSelector
-                            label="Tags"
+                            maxCount={5}
+                            label="Tags (select at most 5)"
                             options={this.state.allTags}
                             selectedOptions={this.state.truckTags}
                             onChange={(event, value) => { this.handleTagChange(event, value) }}
                         />
+                        <br/>
+                        <ChipSelector
+                            maxCount={2}
+                            label="Payment Types (select at most 2)"
+                            options={this.state.paymentTags}
+                            selectedOptions={this.state.paymentTruckTags}
+                            onChange={(event, value) => { this.handlePaymentTagChange(event, value) }}
+                        />
                     </Grid>
-                    <Grid item xs={6} sm={3}>
+                    <Grid item xs={3}>
                         <Button
-                            variant="outlined"
+                            variant="contained"
                             color="primary"
                             onClick={this.createNewTruck}
                             width={1/3}>
                             Create
                         </Button>
+                        <Box mr={1} mt={1} mb={1}>
+                            <Button
+                                variant="contained"
+                                onClick={this.handleCancel}
+                                href={`/owner/trucks`}
+                                width={1/3}>
+                                Cancel
+                            </Button>
+                        </Box>
+
                     </Grid>
-                    <Grid item xs={6} sm={3}>
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            onClick={this.handleCancel}
-                            href={`/owner/trucks`}
-                            width={1/3}>
-                            Cancel
-                        </Button>
+                    <Grid item xs={3}>
+
                     </Grid>
                 </Grid>
             </Container>

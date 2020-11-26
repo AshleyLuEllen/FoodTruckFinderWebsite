@@ -1,9 +1,25 @@
 import React, { Component } from 'react';
-import Link from "next/link";
+import Link from "@material-ui/core/Link";
 import axios from "axios";
 import {login as authLogin, logout as authLogout} from "../../../redux/actions/auth";
 import {withRouter} from "next/router";
 import { connect, useDispatch } from 'react-redux';
+import OwnerTruckCard from "../../../components/OwnerTruckCard";
+import withStyles from "@material-ui/core/styles/withStyles";
+import TruckCard from "../../../components/TruckCard";
+import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import AddIcon from '@material-ui/icons/Add'
+import Box from "@material-ui/core/Box";
+
+const dashboardStyles = theme => ({
+    truckCard: {
+        marginBottom: '5px'
+    },
+    links: {
+        marginLeft: '35px',
+    }
+});
 
 class Dashboard extends Component {
     constructor(props) {
@@ -70,19 +86,28 @@ class Dashboard extends Component {
     };
 
     render() {
+        const { classes } = this.props;
         return (
             <div>
-                <h2>Dashboard</h2>
+                <Typography variant={'h2'}>
+                    My Trucks
+                </Typography>
                 <ol>
-                    {this.state.truckData.map(tr => (
-                        <li>
-                            <Link href={"/owner/trucks/"+tr.id}>
-                                <a>{tr.name}</a>
-                            </Link>
-                        </li>
+                    {this.state.truckData.map((tr, i) => (
+                        <OwnerTruckCard key={i} className={classes.truckCard} truck={tr} tags={tr.tags.map(tag => tag.tag.name)} onClick={evt => this.setState({currentlySelected: i})} userId={this.state.userId}/>
                     ))}
                 </ol>
-                Want to create a truck? Click <Link href="/owner/trucks/create">here</Link>
+                {this.state.truckData.length > 0 &&
+                    <Box ml={5}>
+                        <Button variant={"contained"} href="/owner/trucks/create">
+                            <AddIcon/>
+                        </Button>
+                    </Box>
+                }
+                {this.state.truckData.length === 0 &&
+                <Typography className={classes.links} variant={'button'}>
+                    Click <Link href="/owner/trucks/create">here</Link> to add your first Truck!
+                </Typography>}
             </div>
         );
     }
@@ -98,4 +123,4 @@ const mapDispatchToProps = {
     authLogout
 }
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Dashboard));
+export default withStyles(dashboardStyles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(Dashboard)));

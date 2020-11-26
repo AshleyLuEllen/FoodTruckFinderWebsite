@@ -189,7 +189,7 @@ function Header(props) {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MuiLink className={classes.link} href="/owner" color="inherit">
+            <MuiLink className={classes.link} href="/owner/trucks" color="inherit">
                 <MenuItem onClick={handleMenuClose}>Owner Dashboard</MenuItem>
             </MuiLink>
             <MuiLink className={classes.link} href="/account" color="inherit">
