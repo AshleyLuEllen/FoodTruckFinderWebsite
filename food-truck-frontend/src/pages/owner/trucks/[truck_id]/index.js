@@ -35,6 +35,7 @@ class Information extends Component {
             paymentTruckTags: [],
             paymentTags: [],
             truckFound: false,
+            loadingInfo: false,
         };
     }
 
@@ -179,7 +180,8 @@ class Information extends Component {
      * Continuously updates the truck information on the page
      */
     componentDidUpdate() {
-        if (!this.state.truckFound && this.props.router.query.truck_id !== undefined) {
+        if (!this.state.truckFound && this.props.router.query.truck_id !== undefined && !this.state.loadingInfo) {
+            this.setState({ loadingInfo: true });
             this.fetchData();
         }
     }
@@ -317,9 +319,7 @@ class Information extends Component {
                             />
                             <Box mt={1} ml={1} mr={1} mb={1}>
                                 <Button variant="contained" pt={10} pl={10} onClick={this.saveInfo}>
-                                    <Typography variant="button" gutterBottom display="block">
-                                        Save
-                                    </Typography>
+                                    Save
                                 </Button>
                             </Box>
                         </Grid>
@@ -331,9 +331,7 @@ class Information extends Component {
                                     pl={10}
                                     href={`/owner/trucks/${this.props.router.query.truck_id}/notifications`}
                                 >
-                                    <Typography variant="button" gutterBottom display="block">
-                                        <a>Manage Notifications</a>
-                                    </Typography>
+                                    Manage Notifications
                                 </Button>
                             </Box>
                             <Box mt={1} ml={1} mr={1} mb={1}>
@@ -343,23 +341,17 @@ class Information extends Component {
                                     pl={10}
                                     href={`/trucks/${this.props.router.query.truck_id}`}
                                 >
-                                    <Typography variant="button" gutterBottom display="block">
-                                        View Live Page
-                                    </Typography>
+                                    View Live Page
                                 </Button>
                             </Box>
                             <Box mt={1} ml={1} mr={1} mb={1}>
                                 <Button variant="contained" pt={10} pl={10} href="/owner/trucks">
-                                    <Typography variant="button" gutterBottom display="block">
-                                        Back
-                                    </Typography>
+                                    Back
                                 </Button>
                             </Box>
                             <Box mt={1} ml={1} mr={1} mb={1}>
                                 <Button variant="contained" pt={10} pl={10} href="/">
-                                    <Typography variant="button" gutterBottom display="block">
-                                        Home
-                                    </Typography>
+                                    Home
                                 </Button>
                             </Box>
                             <br />
@@ -372,9 +364,7 @@ class Information extends Component {
                                     color="secondary"
                                     onClick={this.removeTruck}
                                 >
-                                    <Typography variant="button" gutterBottom display="block">
-                                        Delete
-                                    </Typography>
+                                    Delete
                                 </Button>
                             </Box>
                         </Grid>
@@ -412,9 +402,7 @@ class Information extends Component {
                                                 variant="contained"
                                                 href={`/owner/trucks/${this.props.router.query.truck_id}/schedule`}
                                             >
-                                                <Typography variant="button" gutterBottom display="block">
-                                                    <a>Manage Schedule</a>
-                                                </Typography>
+                                                <a>Manage Schedule</a>
                                             </Button>
                                         </Box>
                                     </CardContent>
