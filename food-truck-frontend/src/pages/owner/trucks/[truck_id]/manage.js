@@ -27,7 +27,10 @@ class ManagePage extends Component {
             truckFound: false,
             menuOpen: false,
             anchor: null,
+
+            menu: undefined,
         };
+        this.menuInputRef = React.createRef();
 
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -78,6 +81,8 @@ class ManagePage extends Component {
             .catch(err => {
                 console.log(err.message);
             });
+
+        this.handleMenuUpload();
     }
 
     /**
@@ -218,6 +223,28 @@ class ManagePage extends Component {
         }
     }
 
+    handleMenuUpload() {
+        const formData = new FormData();
+        formData.append('file', this.state.menu);
+
+        axios
+            .put(`${process.env.FOOD_TRUCK_API_URL}/media/profiles/me`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                auth: {
+                    username: this.props.auth.email,
+                    password: this.props.auth.password,
+                },
+            })
+            .then(() => {
+                console.log('Success');
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
     render() {
         return (
             <div>
@@ -255,6 +282,21 @@ class ManagePage extends Component {
                                 defaultValue={this.state.description}
                                 onChange={e => this.handleInputChange(e, 'description')}
                             />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <div>
+                                <Button variant="contained" component="label" style={{ width: 'auto', height: 'auto' }}>
+                                    Upload Menu
+                                    <input
+                                        type="file"
+                                        style={{ display: 'none' }}
+                                        ref={this.menuInputRef}
+                                        accept="image/jpeg,image/png,image/gif,application/pdf"
+                                        onChange={e => this.setState({ menu: e.target.files[0] })}
+                                    />
+                                </Button>
+                                {this.state.menu && `Selected file: ${this.state.menu.name}`}
+                            </div>
                         </Grid>
                         <Grid item xs={12}>
                             <ChipSelector

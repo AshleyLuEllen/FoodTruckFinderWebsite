@@ -107,7 +107,7 @@ public class MediaEndpoint {
 
         Media newMedia = new Media();
 
-        if (file.getName().endsWith(".pdf")) {
+        if (file.getOriginalFilename() != null && file.getOriginalFilename().endsWith(".pdf")) {
             newMedia.setDataType(MediaType.MENU_PDF);
         } else {
             newMedia.setDataType(MediaType.MENU_IMAGE);

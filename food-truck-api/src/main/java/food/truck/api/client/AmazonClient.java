@@ -106,6 +106,8 @@ public class AmazonClient {
     public String uploadMenu(MultipartFile multipartFile, Truck truck) {
         String fileUrl = "";
 
+        this.deleteMenu(truck);
+
         try {
             File file = convertMultiPartToFile(multipartFile);
             String fileName = "menus/" + truck.getId() + getFileExtension(multipartFile);
@@ -120,6 +122,10 @@ public class AmazonClient {
     }
 
     public void deleteMenu(Truck truck) {
+        if (truck.getMenu() == null) {
+            return;
+        }
+
         String fileName = truck.getMenu().getUrl().substring(truck.getMenu().getUrl().lastIndexOf('/') + 1);
         log.info(fileName);
         s3client.deleteObject(new DeleteObjectRequest(bucketName, "menus/" + fileName));
