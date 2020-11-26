@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 import withRouter from 'next/dist/client/with-router';
 import isEmail from 'validator/lib/isEmail';
@@ -116,10 +117,10 @@ class CreateAccount extends Component {
             if (test) {
                 axios
                     .post(process.env.FOOD_TRUCK_API_URL + '/users', user)
-                    .then(res => {
+                    .then(() => {
                         this.props.router.push('/login');
                     })
-                    .catch(err => {
+                    .catch(() => {
                         this.setState({
                             errorOpen: true,
                             errorMsg: 'Email already exists.',
@@ -267,4 +268,10 @@ class CreateAccount extends Component {
         );
     }
 }
+
+CreateAccount.propTypes = {
+    router: PropTypes.any,
+    classes: PropTypes.any,
+};
+
 export default withStyles(styles, { withTheme: true })(withRouter(CreateAccount));

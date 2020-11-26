@@ -1,8 +1,8 @@
 import React from 'react';
-import Link from 'next/link'
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-function FriendsPage(props) {
+function FriendsPage() {
     const router = useRouter();
 
     return (
@@ -13,7 +13,7 @@ function FriendsPage(props) {
                 <Link href={`/user/${router.query.user_id}`}>Back</Link>
             </li>
         </ul>
-    )
+    );
 }
 
 export default FriendsPage;
