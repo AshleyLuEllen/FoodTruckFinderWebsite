@@ -12,6 +12,7 @@ import { CardContent, Grid, TextField } from '@material-ui/core';
 import CardHeader from '@material-ui/core/CardHeader';
 
 import ChipSelector from '../../../../components/ChipSelector';
+import ScheduleCard from '../../../../components/ScheduleCard';
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -391,21 +392,22 @@ class Information extends Component {
                                 <Card>
                                     <CardHeader title={'Schedule'} />
                                     <CardContent>
-                                        <Table size="small">
-                                            <TableBody>
-                                                {this.state.schedules.map((s, i) => (
-                                                    <TableRow key={i}>
-                                                        <TableCell>
-                                                            <Typography variant="body1">
-                                                                <ScheduleIconRounded /> {s.location}:{' '}
-                                                                {format(new Date(s.timeFrom), 'MM/dd/yyyy HH:mm')} to{' '}
-                                                                {format(new Date(s.timeTo), 'MM/dd/yyyy HH:mm')}
-                                                            </Typography>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
+                                        <ScheduleCard schedules={this.state.schedules}/>
+                                        {/*<Table size="small">*/}
+                                        {/*    <TableBody>*/}
+                                        {/*        {this.state.schedules.map((s, i) => (*/}
+                                        {/*            <TableRow key={i}>*/}
+                                        {/*                <TableCell>*/}
+                                        {/*                    <Typography variant="body1">*/}
+                                        {/*                        <ScheduleIconRounded /> {s.location}:{' '}*/}
+                                        {/*                        {format(new Date(s.timeFrom), 'MM/dd/yyyy HH:mm')} to{' '}*/}
+                                        {/*                        {format(new Date(s.timeTo), 'MM/dd/yyyy HH:mm')}*/}
+                                        {/*                    </Typography>*/}
+                                        {/*                </TableCell>*/}
+                                        {/*            </TableRow>*/}
+                                        {/*        ))}*/}
+                                        {/*    </TableBody>*/}
+                                        {/*</Table>*/}
                                         <br />
                                         <Box mt={1} ml={1} mr={1} mb={1}>
                                             <Button

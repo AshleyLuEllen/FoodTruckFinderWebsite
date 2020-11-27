@@ -10,6 +10,9 @@
   "dependencies": {
     "@bessemer/cornerstone": "1.0.23",
     "@date-io/date-fns": "1.x",
+    "@devexpress/dx-react-core": "^2.7.3",
+    "@devexpress/dx-react-scheduler": "^2.7.3",
+    "@devexpress/dx-react-scheduler-material-ui": "^2.7.3",
     "@material-ui/core": "4.11.0",
     "@material-ui/data-grid": "^4.0.0-alpha.9",
     "@material-ui/icons": "4.9.1",
@@ -30,14 +33,17 @@
     "moment": "^2.29.1",
     "msal": "^1.4.0",
     "next": "9.5.2",
+    "prop-types": "^15.7.2",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-draggable": "^4.4.3",
     "react-final-form": "6.5.1",
     "react-geolocated": "^3.1.0",
+    "react-material-ui-calendar": "^0.2.3",
     "react-native-calendar-picker": "^7.0.3",
     "react-redux": "7.2.1",
     "redux-persist": "6.0.0",
+    "simple-react-calendar": "^2.2.8",
     "validator": "^13.1.17"
   },
   "devDependencies": {
