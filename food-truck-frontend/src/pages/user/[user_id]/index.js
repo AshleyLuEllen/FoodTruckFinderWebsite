@@ -92,9 +92,12 @@ class UserPage extends Component {
                 if (this.state.userID == res.data.id) {
                     this.setState({
                         isMe: true,
-                        viewerId: res.data.id,
                     });
                 }
+
+                this.setState({
+                    viewerId: res.data.id,
+                });
 
                 return axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/subscriptions`);
             })

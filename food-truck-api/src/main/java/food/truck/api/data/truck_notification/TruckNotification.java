@@ -42,7 +42,7 @@ public class TruckNotification {
     @Column(name = "notification_subject")
     String subject;
 
-    @Column(name = "notification_description")
+    @Column(name = "notification_description", columnDefinition = "VARCHAR(2000)")
     String description;
 
     @Column(name = "published")
