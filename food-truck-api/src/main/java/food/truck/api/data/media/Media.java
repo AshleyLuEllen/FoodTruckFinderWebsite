@@ -1,6 +1,7 @@
 package food.truck.api.data.media;
 
 import food.truck.api.data.truck.Truck;
+import food.truck.api.data.user.User;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -9,7 +10,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = Media.TABLE_NAME)
 public class Media {
-    public static final String TABLE_NAME = "truck_media";
+    public static final String TABLE_NAME = "media";
 
     @Id
     @GeneratedValue(generator = TABLE_NAME + "_GENERATOR")

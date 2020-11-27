@@ -1,5 +1,6 @@
 package food.truck.api.data.user;
 
+import food.truck.api.data.media.Media;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
@@ -57,8 +58,9 @@ public class User {
     @Column(name = "user_description")
     String description;
 
-    @Column(name = "user_avatar")
-    String avatarURL;
+    @JoinColumn(name = "user_avatar")
+    @OneToOne
+    Media avatar;
 
     @Column(name = "user_since", columnDefinition = "TIMESTAMP")
     ZonedDateTime sinceTime;

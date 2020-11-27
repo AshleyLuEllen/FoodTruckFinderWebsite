@@ -45,61 +45,9 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-function TruckCard(props) {
+function OwnerTruckCard(props) {
     const classes = useStyles();
     const router = useRouter();
-
-    const [subscribed, setSubscribed] = useState(false);
-
-    useEffect(() => {
-        if (props.userId)
-            axios
-                .get(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/subscriptions/${props.truck.id}`)
-                .then(() => {
-                    setSubscribed(true);
-                })
-                .catch(() => {});
-
-        console.log(props.truck);
-    }, []);
-
-    const toggleSubscribe = () => {
-        if (!props.auth.isLoggedIn) {
-            alert(
-                'To subscribe to a food truck, you need to be logged in. Click the log-in button in the top right to log in or create an account.'
-            );
-        } else {
-            if (!subscribed) {
-                axios
-                    .post(
-                        `${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/subscriptions/${props.truck.id}`,
-                        {},
-                        {
-                            auth: {
-                                username: props.auth.email,
-                                password: props.auth.password,
-                            },
-                        }
-                    )
-                    .then(() => {
-                        setSubscribed(true);
-                    })
-                    .catch(err => console.log(err));
-            } else {
-                axios
-                    .delete(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/subscriptions/${props.truck.id}`, {
-                        auth: {
-                            username: props.auth.email,
-                            password: props.auth.password,
-                        },
-                    })
-                    .then(() => {
-                        setSubscribed(false);
-                    })
-                    .catch(err => console.log(err));
-            }
-        }
-    };
 
     const noMediaClass = clsx({
         [classes.noMedia]: !props.image,
@@ -108,15 +56,8 @@ function TruckCard(props) {
     return (
         <Card className={props.className}>
             <CardHeader
-                title={<Link href={`/trucks/${props.truck.id}`}>{props.truck.name}</Link>}
+                title={<Link href={`/owner/trucks/${props.truck.id}`}>{props.truck.name}</Link>}
                 subheader={props.truck.description}
-                action={
-                    props.userId ? (
-                        <IconButton aria-label="settings" onClick={toggleSubscribe}>
-                            {subscribed ? <NotificationsOff /> : <Notifications />}
-                        </IconButton>
-                    ) : undefined
-                }
             />
             <div className={classes.rating}>
                 <Rating name="rating" precision={0.5} value={props.truck.rating} size="medium" readOnly />
@@ -152,7 +93,7 @@ function TruckCard(props) {
     );
 }
 
-TruckCard.propTypes = {
+OwnerTruckCard.propTypes = {
     userId: PropTypes.any,
     tags: PropTypes.array,
     truck: PropTypes.object.isRequired,
@@ -168,4 +109,4 @@ function mapStateToProps(state) {
 
 const mapDispatchToProps = {};
 
-export default connect(mapStateToProps, mapDispatchToProps)(TruckCard);
+export default connect(mapStateToProps, mapDispatchToProps)(OwnerTruckCard);

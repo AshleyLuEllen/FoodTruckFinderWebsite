@@ -51,7 +51,7 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-function FriendsPage(props) {
+function FriendsPage() {
     const router = useRouter();
     const classes = useStyles();
     

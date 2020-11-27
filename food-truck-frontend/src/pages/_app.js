@@ -1,17 +1,18 @@
+/* eslint-disable react/prop-types */
 import React from 'react';
 import { Provider } from 'react-redux';
 import { buildStore } from '../redux/redux';
-import { PersistGate } from 'redux-persist/integration/react'
+import { PersistGate } from 'redux-persist/integration/react';
 
 import Head from 'next/head';
 import { CssBaseline } from '@material-ui/core';
 import { FoodTruckThemeProvider } from '../util/theme';
 
 import DefaultLayout from '../components/Layout';
-import "./styles.css";
+import './styles.css';
 
 let initialState = {};
-let {store, persistor} = buildStore(initialState);
+let { store, persistor } = buildStore(initialState);
 
 const FoodTruckApp = ({ Component, pageProps }) => {
     const Layout = Component.Layout || DefaultLayout;
@@ -25,12 +26,15 @@ const FoodTruckApp = ({ Component, pageProps }) => {
     }, []);
 
     return (
-        <Provider store={ store }>
+        <Provider store={store}>
             <PersistGate loading={null} persistor={persistor}>
                 <Head>
                     <title>My page</title>
                     <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
-                    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+                    <link
+                        rel="stylesheet"
+                        href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+                    />
                 </Head>
 
                 <FoodTruckThemeProvider>
@@ -43,9 +47,7 @@ const FoodTruckApp = ({ Component, pageProps }) => {
                 </FoodTruckThemeProvider>
             </PersistGate>
         </Provider>
-    )
-
-
+    );
 };
 
 export default FoodTruckApp;

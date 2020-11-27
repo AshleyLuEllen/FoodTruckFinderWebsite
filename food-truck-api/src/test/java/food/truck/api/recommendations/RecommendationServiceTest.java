@@ -222,7 +222,6 @@ class RecommendationServiceTest {
         }).map(Truck::getName).toArray(), recommendationsWithoutSubscriptions.stream().map(Truck::getName).toArray());
     }
 
-
     @Test
     public void testRecommendationsRating() {
         int numTrucks = 0;

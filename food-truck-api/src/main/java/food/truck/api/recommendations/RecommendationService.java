@@ -58,14 +58,6 @@ public class RecommendationService {
         return this.getRecommendationComputer().getRecommendations(trucksWithinDistanceFromLocation, subscriptions, location, includeSubscriptions, maxNum);
     }
 
-    public List<Truck> getRecommendations(List<Truck> subscriptions, Location location, boolean includeSubscriptions) {
-        return this.getRecommendations(subscriptions, location, includeSubscriptions, 10);
-    }
-
-    public List<Truck> getRecommendationsForLocation(Location location) {
-        return this.getRecommendations(List.of(), location, true);
-    }
-
     public List<Truck> getRecommendationsForUser(User user, long maxCount, boolean includeSubscriptions) {
         List<Truck> subscribedTrucks = subscriptionService.findUserSubscriptions(user);
 
@@ -86,11 +78,13 @@ public class RecommendationService {
     }
 
     public List<Truck> getSearchResults(SearchQuery query) {
+        Location loc = query.getPlaceId() != null ? googlePlaceService.getLocationFromPlaceId(query.getPlaceId()) : query.getLocation();
+
         return this.getRecommendationComputer().getSearchResults(
-            truckService.findAll(),
+            scheduleService.getAllTrucksWithinDistanceFromLocation(loc, this.recommendationComputer.getMaxDistance()),
             query.getQuery(),
             query.getTags(),
-            query.getPlaceId() != null ? googlePlaceService.getLocationFromPlaceId(query.getPlaceId()) : query.getLocation(),
+            loc,
             query.getPreferredRating() != null ? query.getPreferredRating() : 0,
             20
         );
