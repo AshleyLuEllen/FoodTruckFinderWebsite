@@ -5,7 +5,8 @@ public enum MediaType {
     PROFILE_IMAGE(Scope.USER),
     MENU_IMAGE(Scope.MENU),
     MENU_PDF(Scope.MENU),
-    REVIEW_IMAGE(Scope.REVIEW);
+    REVIEW_IMAGE(Scope.REVIEW),
+    NOTIFICATION_IMAGE(Scope.NOTIFICATION);
 
     private Scope scope;
 
@@ -21,6 +22,7 @@ public enum MediaType {
         TRUCK,
         USER,
         MENU,
-        REVIEW
+        REVIEW,
+        NOTIFICATION
     }
 }

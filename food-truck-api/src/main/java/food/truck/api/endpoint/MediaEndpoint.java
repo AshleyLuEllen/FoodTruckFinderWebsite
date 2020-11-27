@@ -6,6 +6,8 @@ import food.truck.api.data.media.MediaService;
 import food.truck.api.data.media.MediaType;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckService;
+import food.truck.api.data.truck_notification.TruckNotification;
+import food.truck.api.data.truck_notification.TruckNotificationService;
 import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
@@ -32,6 +34,9 @@ public class MediaEndpoint {
 
     @Autowired
     private MediaService mediaService;
+
+    @Autowired
+    private TruckNotificationService notificationService;
 
     @Autowired
     MediaEndpoint(AmazonClient amazonClient) {
@@ -139,6 +144,44 @@ public class MediaEndpoint {
         truckService.saveTruck(truck);
 
         mediaService.deleteMedia(menu);
+    }
+
+    @PutMapping("/notifications/{notId}/media")
+    public Media uploadNotificationMedia(@RequestPart(value = "file") MultipartFile file, @PathVariable Long notId, Principal principal) {
+        TruckNotification notification = notificationService.findTruckNotification(notId).orElseThrow(ResourceNotFoundException::new);
+
+        String url = this.amazonClient.uploadNotificationMedia(file, notification);
+
+        Media newMedia = new Media();
+
+        newMedia.setDataType(MediaType.NOTIFICATION_IMAGE);
+        newMedia.setHidden(false);
+        newMedia.setUrl(url);
+
+        Media dbMedia = mediaService.createMedia(newMedia);
+
+        notification.setMedia(dbMedia);
+        notificationService.saveTruckNotification(notification);
+
+        return dbMedia;
+    }
+
+    @DeleteMapping("/notifications/{notId}/media")
+    public void deleteNotificationMedia(@PathVariable Long notId, Principal principal) {
+        TruckNotification notification = notificationService.findTruckNotification(notId).orElseThrow(ResourceNotFoundException::new);
+
+        if (notification.getMedia() == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        this.amazonClient.deleteNotificationMedia(notification);
+
+        Media media = notification.getMedia();
+
+        notification.setMedia(null);
+        notificationService.saveTruckNotification(notification);
+
+        mediaService.deleteMedia(media);
 
     }
 

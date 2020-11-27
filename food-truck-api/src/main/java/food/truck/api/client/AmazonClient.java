@@ -8,6 +8,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import food.truck.api.data.truck.Truck;
+import food.truck.api.data.truck_notification.TruckNotification;
 import food.truck.api.data.user.User;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -129,5 +130,33 @@ public class AmazonClient {
         String fileName = truck.getMenu().getUrl().substring(truck.getMenu().getUrl().lastIndexOf('/') + 1);
         log.info(fileName);
         s3client.deleteObject(new DeleteObjectRequest(bucketName, "menus/" + fileName));
+    }
+
+    public String uploadNotificationMedia(MultipartFile multipartFile, TruckNotification notification) {
+        String fileUrl = "";
+
+        this.deleteNotificationMedia(notification);
+
+        try {
+            File file = convertMultiPartToFile(multipartFile);
+            String fileName = "notifications/" + notification.getId() + getFileExtension(multipartFile);
+            fileUrl = endpointUrl + "/" + bucketName + "/" + fileName;
+            uploadFileTos3bucket(fileName, file);
+            file.delete();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return fileUrl;
+    }
+
+    public void deleteNotificationMedia(TruckNotification notification) {
+        if (notification.getMedia() == null) {
+            return;
+        }
+
+        String fileName = notification.getMedia().getUrl().substring(notification.getMedia().getUrl().lastIndexOf('/') + 1);
+        log.info(fileName);
+        s3client.deleteObject(new DeleteObjectRequest(bucketName, "notifications/" + fileName));
     }
 }
