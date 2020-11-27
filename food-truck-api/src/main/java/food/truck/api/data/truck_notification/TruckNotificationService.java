@@ -5,6 +5,7 @@ import food.truck.api.data.schedule.ScheduleService;
 import food.truck.api.data.subscription.SubscriptionRepository;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckService;
+import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
 import food.truck.api.data.user_notification.UserNotification;
 import food.truck.api.data.user_notification.UserNotificationRepository;
@@ -61,7 +62,6 @@ public class TruckNotificationService {
                         var un = new UserNotification();
                         un.setNotification(truckNotification);
                         un.setUser(sub.getUser());
-                        un.setSaved(false);
                         un.setUnread(true);
                         return un;
                     }).collect(Collectors.toList())
@@ -75,7 +75,6 @@ public class TruckNotificationService {
                         var un = new UserNotification();
                         un.setNotification(truckNotification);
                         un.setUser(user);
-                        un.setSaved(true);
                         un.setUnread(true);
                         return un;
                     }).collect(Collectors.toList())
@@ -89,6 +88,7 @@ public class TruckNotificationService {
         boolean notifySubscribers = false;
 
         truckNotification.setTruck(truck);
+        truckNotification.setType(NotificationType.TRUCK);
         if (truckNotification.published != null && truckNotification.getPublished()) {
             truckNotification.setPostedTimestamp(ZonedDateTime.now());
             notifySubscribers = true;
@@ -103,7 +103,6 @@ public class TruckNotificationService {
                         var un = new UserNotification();
                         un.setNotification(truckNotification);
                         un.setUser(sub.getUser());
-                        un.setSaved(false);
                         un.setUnread(true);
                         return un;
                     }).collect(Collectors.toList())
@@ -116,7 +115,6 @@ public class TruckNotificationService {
                             var un = new UserNotification();
                             un.setNotification(truckNotification);
                             un.setUser(user);
-                            un.setSaved(true);
                             un.setUnread(true);
                             return un;
                         }).peek(un -> log.info(un.getUser().getLastName())).collect(Collectors.toList())
@@ -127,12 +125,20 @@ public class TruckNotificationService {
         return tn;
     }
 
+    public TruckNotification createFriendNotification(User user, User newFriend){
+
+    }
+
+    public TruckNotification createSubscriptionNotification(Truck truck, User user){
+
+    }
+
     public void deleteTruckNotification(long truckNotificationId) {
         truckNotificationRepository.deleteById(truckNotificationId);
     }
 
     public List<TruckNotification> getNotsOwnedByTruck(Truck truck) {
-        return truckNotificationRepository.findAllByTruck(truck);
+        return truckNotificationRepository.findAllByTruckAndType(truck, NotificationType.TRUCK);
     }
 
 }
