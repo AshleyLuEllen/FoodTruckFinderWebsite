@@ -68,6 +68,7 @@ public class TruckNotificationService {
             );
             Truck truck = truckService.findTruck(truckNotification.getTruck().getId()).orElseThrow(ResourceNotFoundException::new);
             Schedule currentLocation = truck.getCurrentLocation();
+            if (currentLocation != null)
             userNotificationRepository.saveAll(
                 userService.findUsersNearLocation(new Location(currentLocation.getLatitude(), currentLocation.getLongitude())).stream()
                     .map(user -> {

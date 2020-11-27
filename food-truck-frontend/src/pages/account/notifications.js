@@ -26,7 +26,7 @@ import {
     CheckBoxOutlined,
     Flag,
     FlagOutlined,
-    AttachFileIcon,
+    AttachFile as AttachFileIcon,
     EmailOutlined, DraftsOutlined
 } from '@material-ui/icons';
 
@@ -58,7 +58,6 @@ function stableSort(array, comparator) {
 
 const headCells = [
     { id: 'unread', align: 'left', disablePadding: true, label: 'Unread' },
-    { id: 'saved', align: 'left', disablePadding: true, label: 'Saved' },
     { id: 'truck_name', align: 'left', disablePadding: false, label: 'Food Truck' },
     { id: 'subject', align: 'left', disablePadding: false, label: 'Subject' },
     { id: 'date', align: 'right', disablePadding: false, label: 'Date' },
@@ -520,7 +519,7 @@ class Notifications extends Component {
                                         {row.unread ? <EmailOutlined/> : <DraftsOutlined/> }
                                     </TableCell>
                                     <TableCell>{row.truck_name}</TableCell>
-                                    <TableCell>{row.subject} {row.media && <AttachFileIcon/>} </TableCell> //TODO
+                                    <TableCell>{row.subject} {row.media && <AttachFileIcon style={{height:'20px',marginBottom:'-5px'}}/>} </TableCell>
                                     <TableCell align="right">{row.date}</TableCell>
                                 </TableRow>
                             );
@@ -552,11 +551,7 @@ class Notifications extends Component {
                 >
                     <DialogTitle id="dialog-title">{this.state.selectedNotification?.subject} - {this.state.selectedNotification?.truck_name}</DialogTitle>
                     <DialogContent dividers>
-                        <DialogContentText
-                          id="dialog-description"
-                        >
-                            {this.state.selectedNotification?.description?.split('\n').map(par => <p>{par}</p>)}
-                        </DialogContentText>
+                        {this.state.selectedNotification?.description?.split('\n').map((par, i) => <DialogContentText key={i}>{par}</DialogContentText>)}
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleClose} color="primary">

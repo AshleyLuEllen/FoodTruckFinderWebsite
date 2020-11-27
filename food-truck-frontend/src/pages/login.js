@@ -37,6 +37,7 @@ class Login extends React.Component {
         this.state = { email: '', password: '', loginFailed: false };
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.createAccount = this.createAccount.bind(this);
     }
 
     handleInputChange(event, name_of_attribute) {

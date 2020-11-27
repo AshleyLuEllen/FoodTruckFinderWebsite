@@ -77,7 +77,7 @@ class NotificationPage extends Component {
 
     handleMediaUpload(notId) {
         if (!this.state.media) {
-            return new Promise();
+            return Promise.resolve(0);
         }
 
         const formData = new FormData();
