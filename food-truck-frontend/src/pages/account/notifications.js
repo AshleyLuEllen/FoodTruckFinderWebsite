@@ -25,7 +25,14 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import axios from 'axios';
 import { logout as authLogout } from '../../redux/actions/auth';
 import { connect } from 'react-redux';
-import { CheckBox, CheckBoxOutlined, Flag, FlagOutlined } from '@material-ui/icons';
+import {
+    CheckBox,
+    CheckBoxOutlined,
+    Flag,
+    FlagOutlined,
+    AttachFileIcon,
+    EmailOutlined, DraftsOutlined
+} from '@material-ui/icons';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -139,14 +146,6 @@ const EnhancedTableToolbar = (props) => {
   const classes = useToolbarStyles();
   const { numSelected } = props;
 
-    const markAllAsFlagged = () => {
-        props.markAllAsFlagged ? props.markAllAsFlagged() : undefined;
-    }
-
-    const markAllAsUnflagged = () => {
-        props.markAllAsUnflagged ? props.markAllAsUnflagged() : undefined;
-    }
-
     const markAllAsRead = () => {
         props.markAllAsRead ? props.markAllAsRead() : undefined;
     }
@@ -181,16 +180,6 @@ const EnhancedTableToolbar = (props) => {
             <Tooltip title="Unread">
                 <IconButton aria-label="unread" onClick={markAllAsUnread}>
                     <CheckBox />
-                </IconButton>
-            </Tooltip>
-            <Tooltip title="Flag">
-                <IconButton aria-label="flag" onClick={markAllAsFlagged}>
-                    <Flag />
-                </IconButton>
-            </Tooltip>
-            <Tooltip title="Unflag">
-                <IconButton aria-label="unflag" onClick={markAllAsUnflagged}>
-                    <FlagOutlined />
                 </IconButton>
             </Tooltip>
         </Fragment>
@@ -235,8 +224,8 @@ const notificationStyles = (theme) => ({
   },
 });
 
-function createData(unread, saved, truck_name, subject, date, id, description) {
-    return { unread, saved, truck_name, subject, date, id, description };
+function createData(unread, truck_name, subject, date, id, description, media ) {
+    return { unread, truck_name, subject, date, id, description, media };
 }
 
 class Notifications extends Component {
@@ -253,8 +242,6 @@ class Notifications extends Component {
             userId: undefined
         }
 
-        this.markAllAsFlagged = this.markAllAsFlagged.bind(this);
-        this.markAllAsUnflagged = this.markAllAsUnflagged.bind(this);
         this.markAllAsUnread = this.markAllAsUnread.bind(this);
         this.markAllAsRead = this.markAllAsRead.bind(this);
         this.fetchData = this.fetchData.bind(this);
@@ -291,36 +278,6 @@ class Notifications extends Component {
         .catch(err => console.log(err));
     }
 
-    markAllAsFlagged() {
-        Promise.all(this.state.selected.map(id => this.state.rows.find(row => row.id === id)).map(not => {
-            return axios.patch(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${not.id}`, {
-                saved: true
-            }, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password
-                }
-            })
-        }))
-        .then(this.fetchData)
-        .catch(err => console.log(err));
-    }
-
-    markAllAsUnflagged() {
-        Promise.all(this.state.selected.map(id => this.state.rows.find(row => row.id === id)).map(not => {
-            axios.patch(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${not.id}`, {
-                saved: false
-            }, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password
-                }
-            })
-        }))
-        .then(this.fetchData)
-        .catch(err => console.log(err));
-    }
-
     fetchData() {
         axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
             auth: {
@@ -341,7 +298,7 @@ class Notifications extends Component {
         })
         .then(res => {
             this.setState({
-                rows: res.data.map(not => createData(not.unread, not.saved, not.truck.name, not.subject, not.postedTimestamp, not.id, not.description))
+                rows: res.data.map(not => createData(not.unread, not.truck.name, not.subject, not.postedTimestamp, not.id, not.description, not.media))
             })
         })
         .catch(err => console.log(err));
@@ -479,9 +436,8 @@ class Notifications extends Component {
                         <colgroup>
                             <col style={{width:'5%'}}/>
                             <col style={{width:'5%'}}/>
-                            <col style={{width:'5%'}}/>
                             <col style={{width:'15%'}}/>
-                            <col style={{width:'50%'}}/>
+                            <col style={{width:'55%'}}/>
                             <col style={{width:'20%'}}/>
                         </colgroup>
                         <EnhancedTableHead
@@ -519,13 +475,10 @@ class Notifications extends Component {
                                         />
                                     </TableCell>
                                     <TableCell padding="none">
-                                        {row.unread ? <CheckBox/> : <CheckBoxOutlined/> }
-                                    </TableCell>
-                                    <TableCell padding="none">
-                                        {row.saved ? <Flag/> : <FlagOutlined/> }
+                                        {row.unread ? <EmailOutlined/> : <DraftsOutlined/> }
                                     </TableCell>
                                     <TableCell>{row.truck_name}</TableCell>
-                                    <TableCell>{row.subject}</TableCell>
+                                    <TableCell>{row.subject} {row.media && <AttachFileIcon/>} </TableCell> //TODO
                                     <TableCell align="right">{row.date}</TableCell>
                                 </TableRow>
                             );

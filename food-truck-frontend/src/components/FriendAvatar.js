@@ -20,7 +20,7 @@ function FriendAvatar(props) {
     return (
         <Link href={props.url || `/user/${props.user.id}`}>
             <Avatar
-                className={classes.root}
+                className={classes.root + ` ${props.className || ''}`}
                 alt={props.name ? undefined : `${props.user.firstName} ${props.user.lastName}`}
                 src="/static/images/avatar/1.jpg" 
             >{props.name || `${props.user.firstName.charAt(0)}${props.user.lastName.charAt(0)}`}</Avatar>
