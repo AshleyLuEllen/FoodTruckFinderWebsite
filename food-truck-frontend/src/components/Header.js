@@ -158,11 +158,14 @@ function Header(props) {
             })
             .catch(err => {
                 if (
+                    err.includes &&
                     err.includes('Network Error') &&
                     !err.response?.status &&
                     !router.asPath.startsWith('/maintenance')
                 ) {
                     setTransferToMaintenancePage(true);
+                } else if (err.response.status == 401) {
+                    props.authLogout();
                 }
             });
     }, []);
@@ -274,6 +277,7 @@ Header.propTypes = {
     isGeolocationEnabled: PropTypes.any,
     isGeolocationAvailable: PropTypes.any,
     classes: PropTypes.any,
+    authLogout: PropTypes.any,
 };
 
 function mapStateToProps(state) {

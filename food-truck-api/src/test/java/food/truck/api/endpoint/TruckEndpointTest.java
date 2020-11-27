@@ -72,7 +72,7 @@ class TruckEndpointTest {
             }
         };
 
-        authEndpoint.authenticate();
+        authEndpoint.authenticate(p);
         Truck found = truckEndpoint.createTruck(p, truck);
         assertThat(found.getOwner().equals(user1));
     }

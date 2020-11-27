@@ -471,6 +471,7 @@ class ScheduleManagementPage extends Component {
         );
     }
 }
+
 ScheduleManagementPage.propTypes = {
     router: PropTypes.any,
     auth: PropTypes.object,

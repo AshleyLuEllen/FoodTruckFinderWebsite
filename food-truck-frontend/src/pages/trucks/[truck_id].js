@@ -1,35 +1,41 @@
 import React, { Component } from 'react';
-import Link from "next/link";
-import axios from "axios";
+import PropTypes from 'prop-types';
+import axios from 'axios';
 import { withRouter } from 'next/router';
-import { connect } from "react-redux";
-import Typography from "@material-ui/core/Typography";
-import {CardContent, Chip, InputLabel, TextField} from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import MyLocationIcon from '@material-ui/icons/MyLocation';
-import ScheduleIconRounded from '@material-ui/icons/ScheduleRounded';
-import {format} from "date-fns";
-import Card from "@material-ui/core/Card";
-import CardHeader from "@material-ui/core/CardHeader";
-import {Rating} from "@material-ui/lab";
-import Divider from "@material-ui/core/Divider";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogActions from "@material-ui/core/DialogActions";
-import Dialog from "@material-ui/core/Dialog";
-import Table from "@material-ui/core/Table";
-import TableCell from "@material-ui/core/TableCell";
-import TableRow from "@material-ui/core/TableRow";
-import TableBody from "@material-ui/core/TableBody";
-import Box from "@material-ui/core/Box";
-import ReviewCard from "../../components/ReviewCard";
+import { connect } from 'react-redux';
+import { format } from 'date-fns';
 
-const truckPageStyles = (theme) => ({
+import { withStyles } from '@material-ui/core/styles';
+
+import {
+    CardContent,
+    Chip,
+    InputLabel,
+    TextField,
+    Typography,
+    Button,
+    Card,
+    CardHeader,
+    Divider,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Dialog,
+    Table,
+    TableCell,
+    TableRow,
+    TableBody,
+    Box,
+} from '@material-ui/core';
+import { Rating } from '@material-ui/lab';
+import { MyLocation as MyLocationIcon, ScheduleRounded as ScheduleIconRounded } from '@material-ui/icons';
+
+import ReviewCard from '../../components/ReviewCard';
+
+const truckPageStyles = theme => ({
     text: {
         marginLeft: theme.spacing(2),
-        margin: theme.spacing(1)
+        margin: theme.spacing(1),
     },
     truckTags: {
         display: 'flex',
@@ -39,29 +45,29 @@ const truckPageStyles = (theme) => ({
     },
     truckTag: {
         marginLeft: '5px',
-        marginRight: '5px'
+        marginRight: '5px',
     },
     currentLocation: {
-        fontSize: '20px'
+        fontSize: '20px',
     },
     ratingContainer: {
-        display: "flex",
-        height: "50px",
-        alignItems: "left",
-        justifyContent: "center"
+        display: 'flex',
+        height: '50px',
+        alignItems: 'left',
+        justifyContent: 'center',
     },
     review: {
         fontSize: '14 px',
         marginBottom: 10,
-        margin: theme.spacing(1)
+        margin: theme.spacing(1),
     },
     reviewCard: {
-        marginBottom: "20px",
-        marginRight: "20px"
+        marginBottom: '20px',
+        marginRight: '20px',
     },
     reviewDialog: {
-        maxWidth: '500px'
-    }
+        maxWidth: '500px',
+    },
 });
 
 /**
@@ -82,8 +88,8 @@ class TruckPage extends Component {
             subscribed: false,
             userId: false,
 
-            reviewComment: "",
-            rating: -1
+            reviewComment: '',
+            rating: -1,
         };
 
         this.toggleSubscribe = this.toggleSubscribe.bind(this);
@@ -94,110 +100,126 @@ class TruckPage extends Component {
     }
 
     fetchData() {
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`).then(res => {
-            this.setState({
-                truck: res.data
-            });
-            return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`);
-        }).then(res2 => {
-            this.setState({
-                tags: res2.data
-            });
-            return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`);
-        }).then(res3 => {
-            this.setState({
-                schedules: res3.data
-            });
-            return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`);
-        }).then(res4 => {
-            this.setState({
-                reviews: res4.data,
-                truckFound: true
-            });
-            console.log("Got all information!");
-        })
-        .catch(err => {
-            this.setState({
-                truck: '',
-                tags: []
-            });
-        });
-
-        axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
-            auth: {
-                username: this.props.auth.email,
-                password: this.props.auth.password
-            }
-        })
-        .then(res => {
-            this.setState({
-                userId: res.data.id
-            });
-            axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/subscriptions/${this.props.router.query.truck_id}`)
+        axios
+            .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
             .then(res => {
                 this.setState({
-                    subscribed: true
+                    truck: res.data,
                 });
+                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`);
             })
-            .catch(err => {
+            .then(res2 => {
                 this.setState({
-                    subscribed: false
+                    tags: res2.data,
                 });
+                return axios.get(
+                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`
+                );
             })
-        })
-        .catch(err => {
-            this.setState({
-                userId: undefined
+            .then(res3 => {
+                this.setState({
+                    schedules: res3.data,
+                });
+                return axios.get(
+                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`
+                );
+            })
+            .then(res4 => {
+                this.setState({
+                    reviews: res4.data,
+                    truckFound: true,
+                });
+                console.log('Got all information!');
+            })
+            .catch(() => {
+                this.setState({
+                    truck: '',
+                    tags: [],
+                });
             });
-        });
+
+        axios
+            .get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
+                auth: {
+                    username: this.props.auth.email,
+                    password: this.props.auth.password,
+                },
+            })
+            .then(res => {
+                this.setState({
+                    userId: res.data.id,
+                });
+                axios
+                    .get(
+                        `${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/subscriptions/${this.props.router.query.truck_id}`
+                    )
+                    .then(() => {
+                        this.setState({
+                            subscribed: true,
+                        });
+                    })
+                    .catch(() => {
+                        this.setState({
+                            subscribed: false,
+                        });
+                    });
+            })
+            .catch(() => {
+                this.setState({
+                    userId: undefined,
+                });
+            });
     }
 
     writeReview() {
-        this.setState( {
-            openReview: true
-        })
+        this.setState({
+            openReview: true,
+        });
     }
 
     handleCancel() {
-        this.setState( {
+        this.setState({
             openReview: false,
             rating: 0,
-            comment: ""
-        })
+            comment: '',
+        });
     }
 
     createReview() {
         const review = {
             comment: this.state.reviewComment,
-            rating: this.state.rating
-        }
+            rating: this.state.rating,
+        };
         console.log(this.state.reviewComment);
         console.log(review.comment);
-        axios.post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`, review,
-            { auth: {
+        axios
+            .post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`, review, {
+                auth: {
                     username: this.props.auth.email,
-                    password: this.props.auth.password
-                }}).then (res => {
-                console.log("created review!");
-        }).catch(err => console.log(err.message));
+                    password: this.props.auth.password,
+                },
+            })
+            .then(() => {
+                console.log('created review!');
+            })
+            .catch(err => console.log(err.message));
 
         this.setState({
             openReview: false,
             truckFound: false,
             rating: 0,
-            comment: ""
+            comment: '',
         });
     }
 
     handleInputChange(e, value) {
-        if(value == null) {
-            this.setState( {
-                reviewComment: e.target.value
-            });
-        }
-        else {
+        if (value == null) {
             this.setState({
-                rating: value
+                reviewComment: e.target.value,
+            });
+        } else {
+            this.setState({
+                rating: value,
             });
         }
     }
@@ -214,41 +236,52 @@ class TruckPage extends Component {
      * Continuously updates the truck information on the page
      */
     componentDidUpdate() {
-        if(!this.state.truckFound && this.props.router.query.truck_id !== undefined) {
+        if (!this.state.truckFound && this.props.router.query.truck_id !== undefined) {
             this.fetchData();
         }
     }
 
     toggleSubscribe() {
         if (!this.props.auth.isLoggedIn) {
-            alert("To subscribe to a food truck, you need to be logged in. Click the log-in button in the top right to log in or create an account.");
+            alert(
+                'To subscribe to a food truck, you need to be logged in. Click the log-in button in the top right to log in or create an account.'
+            );
         } else {
             if (!this.state.subscribed) {
-                axios.post(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/subscriptions/${this.state.truck.id}`, {}, {
-                    auth: {
-                        username: this.props.auth.email,
-                        password: this.props.auth.password
-                    }
-                })
-                .then(res => {
-                    this.setState({
-                        subscribed: true
-                    });
-                })
-                .catch(err => console.log(err));
+                axios
+                    .post(
+                        `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/subscriptions/${this.state.truck.id}`,
+                        {},
+                        {
+                            auth: {
+                                username: this.props.auth.email,
+                                password: this.props.auth.password,
+                            },
+                        }
+                    )
+                    .then(() => {
+                        this.setState({
+                            subscribed: true,
+                        });
+                    })
+                    .catch(err => console.log(err));
             } else {
-                axios.delete(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/subscriptions/${this.state.truck.id}`, {
-                    auth: {
-                        username: this.props.auth.email,
-                        password: this.props.auth.password
-                    }
-                })
-                .then(res => {
-                    this.setState({
-                        subscribed: false
-                    });
-                })
-                .catch(err => console.log(err));
+                axios
+                    .delete(
+                        `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/subscriptions/${this.state.truck.id}`,
+                        {
+                            auth: {
+                                username: this.props.auth.email,
+                                password: this.props.auth.password,
+                            },
+                        }
+                    )
+                    .then(() => {
+                        this.setState({
+                            subscribed: false,
+                        });
+                    })
+                    .catch(err => console.log(err));
             }
         }
     }
@@ -261,34 +294,45 @@ class TruckPage extends Component {
         return (
             <div>
                 {/**TRUCK NAME*/}
-                {this.state.truckFound &&
-                <Typography variant="h2" align="center">
-                            {this.state.truck.name}
-                </Typography>}
+                {this.state.truckFound && (
+                    <Typography variant="h2" align="center">
+                        {this.state.truck.name}
+                    </Typography>
+                )}
 
                 {/**TAGS*/}
-                {this.state.truckFound && this.state.tags.length > 0 && <div align="center" className={classes.truckTags}>
-                    {this.state.tags.map((t, i) => (
-                        <Chip className={classes.truckTag} key={i} label={t.name}/>
-                    ))}
-                </div>}
+                {this.state.truckFound && this.state.tags.length > 0 && (
+                    <div align="center" className={classes.truckTags}>
+                        {this.state.tags.map((t, i) => (
+                            <Chip className={classes.truckTag} key={i} label={t.name} />
+                        ))}
+                    </div>
+                )}
 
                 {/**RATING*/}
-                {this.state.truckFound && this.state.truck.rating !== null &&
-                <div align="center">
-                    <Rating name="rating" precision={0.5} value={this.state.truck.rating} size="medium" readOnly />
-                </div>}
+                {this.state.truckFound && this.state.truck.rating !== null && (
+                    <div align="center">
+                        <Rating name="rating" precision={0.5} value={this.state.truck.rating} size="medium" readOnly />
+                    </div>
+                )}
 
                 {/**SUBSCRIBE BUTTON*/}
-                {this.state.truckFound && this.state.userId &&
-                <div align="center">
-                    <Box mt={1}>
-                        <Button color={this.state.subscribed ? "secondary" : "primary"} variant="contained" onClick={this.toggleSubscribe}>{this.state.subscribed ? "Unsubscribe" : "Subscribe"}</Button>
-                    </Box>
-                </div>}
+                {this.state.truckFound && this.state.userId && (
+                    <div align="center">
+                        <Box mt={1}>
+                            <Button
+                                color={this.state.subscribed ? 'secondary' : 'primary'}
+                                variant="contained"
+                                onClick={this.toggleSubscribe}
+                            >
+                                {this.state.subscribed ? 'Unsubscribe' : 'Subscribe'}
+                            </Button>
+                        </Box>
+                    </div>
+                )}
 
                 {/**DESCRIPTION*/}
-                {this.state.truckFound &&
+                {this.state.truckFound && (
                     <React.Fragment>
                         <Typography variant="title" component="h2" gutterbottom>
                             Description
@@ -296,12 +340,12 @@ class TruckPage extends Component {
                         <Typography variant="body1" component="p" gutterbottom className={classes.text}>
                             {this.state.truck.description}
                         </Typography>
-                        <Divider/>
+                        <Divider />
                     </React.Fragment>
-                }
+                )}
 
                 {/**LICENSE*/}
-                {this.state.truckFound &&
+                {this.state.truckFound && (
                     <React.Fragment>
                         <Typography variant="title" component="h2" gutterbottom>
                             License Plate
@@ -309,12 +353,12 @@ class TruckPage extends Component {
                         <Typography variant="body1" component="p" gutterbottom className={classes.text}>
                             {this.state.truck.licensePlate}
                         </Typography>
-                        <Divider/>
+                        <Divider />
                     </React.Fragment>
-                }
+                )}
 
                 {/**OWNER*/}
-                {this.state.truckFound &&
+                {this.state.truckFound && (
                     <React.Fragment>
                         <Typography variant="title" component="h2" gutterbottom>
                             Owner
@@ -322,88 +366,101 @@ class TruckPage extends Component {
                         <Typography variant="body1" component="p" gutterbottom className={classes.text}>
                             {this.state.truck.owner.firstName} {this.state.truck.owner.lastName}
                         </Typography>
-                        <Divider/>
+                        <Divider />
                     </React.Fragment>
-                }
+                )}
 
-                <br/>
+                <br />
                 {/**CURRENT LOCATION*/}
-                {this.state.truckFound && this.state.truck.currentLocation && <div className={classes.currentLocation}>
-                    <CardHeader title={"Current Location"}/>
-                    <MyLocationIcon/>  <strong>{this.state.truck.currentLocation?.location}</strong>
-                </div>}
+                {this.state.truckFound && this.state.truck.currentLocation && (
+                    <div className={classes.currentLocation}>
+                        <CardHeader title={'Current Location'} />
+                        <MyLocationIcon /> <strong>{this.state.truck.currentLocation?.location}</strong>
+                    </div>
+                )}
 
-                <br/>
+                <br />
                 {/**SCHEDULE*/}
-                {this.state.truckFound && this.state.schedules.length > 0 && <Card>
-                    <CardHeader title={"Schedule"}/>
-                    <CardContent>
-                        <Table size="small">
-                            <TableBody>
-                                {this.state.schedules.map((s, i) => (
-                                    <TableRow>
-                                        <TableCell>
-                                            <Typography key={i} variant="body1">
-                                                <ScheduleIconRounded/> {s.location}: {format(new Date(s.timeFrom), "MM/dd/yyyy HH:mm")} to {format(new Date(s.timeTo), "MM/dd/yyyy HH:mm")}
-                                            </Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>}
-                <br/>
+                {this.state.truckFound && this.state.schedules.length > 0 && (
+                    <Card>
+                        <CardHeader title={'Schedule'} />
+                        <CardContent>
+                            <Table size="small">
+                                <TableBody>
+                                    {this.state.schedules.map((s, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell>
+                                                <Typography variant="body1">
+                                                    <ScheduleIconRounded /> {s.location}:{' '}
+                                                    {format(new Date(s.timeFrom), 'MM/dd/yyyy HH:mm')} to{' '}
+                                                    {format(new Date(s.timeTo), 'MM/dd/yyyy HH:mm')}
+                                                </Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                )}
+                <br />
 
                 {/**REVIEWS*/}
-                <Divider/>
-                {this.state.truckFound && this.state.reviews.length > 0 &&
-                <Card>
-                    <CardHeader title={"Reviews"}/>
-                    <CardContent>
-                        {this.state.reviews.map((r, i) => (
-                            <ReviewCard className={truckPageStyles.reviewCard} key={i} r={r} user={false}/>
-                        ))}
-                    </CardContent>
-                </Card>
-                }
+                <Divider />
+                {this.state.truckFound && this.state.reviews.length > 0 && (
+                    <Card>
+                        <CardHeader title={'Reviews'} />
+                        <CardContent>
+                            {this.state.reviews.map((r, i) => (
+                                <ReviewCard className={truckPageStyles.reviewCard} key={i} r={r} user={false} />
+                            ))}
+                        </CardContent>
+                    </Card>
+                )}
 
-                {this.state.truckFound && this.state.reviews.length === 0 &&
-                <Card>
-                    <CardHeader title={"Reviews"}/>
-                    <CardContent>
-                        <Typography variant="body1" component="p" gutterbottom className={classes.text}>
-                            No reviews for <strong>{this.state.truck.name}</strong>
+                {this.state.truckFound && this.state.reviews.length === 0 && (
+                    <Card>
+                        <CardHeader title={'Reviews'} />
+                        <CardContent>
+                            <Typography variant="body1" component="p" gutterbottom className={classes.text}>
+                                No reviews for <strong>{this.state.truck.name}</strong>
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {this.state.truckFound && this.props.auth.isLoggedIn && (
+                    <Button variant="contained" onClick={this.writeReview}>
+                        <Typography variant="button" gutterBottom display="block" color={'primary'}>
+                            Write Review
                         </Typography>
-                    </CardContent>
-                </Card>
-                }
-
-                {this.state.truckFound && this.props.auth.isLoggedIn &&
-                <Button variant="contained" onClick={this.writeReview}>
-                    <Typography variant="button" gutterBottom display="block" color={"primary"}>
-                        Write Review
-                    </Typography>
-                </Button>}
+                    </Button>
+                )}
 
                 <Dialog fullWidth maxWidth="md" open={this.state.openReview} aria-labelledby="form-dialog-title">
                     <DialogTitle id="form-dialog-title">Review for {this.state.truck.name}</DialogTitle>
                     <DialogContent>
-                        <InputLabel>
-                            Rating
-                        </InputLabel>
-                        <Box align={"left"} mt={1} ml={1} >
+                        <InputLabel>Rating</InputLabel>
+                        <Box align={'left'} mt={1} ml={1}>
                             <Rating
                                 align="left"
-                                name="preferredRating" precision={0.5} value={this.state.rating}
+                                name="preferredRating"
+                                precision={0.5}
+                                value={this.state.rating}
                                 onChange={(event, newValue) => {
                                     this.handleInputChange(event, newValue);
                                 }}
                                 size="medium"
                             />
                         </Box>
-                        <TextField variant="outlined" id="reviewComment" label="Review Comment (optional)"
-                            multiline rows={4} fullWidth={true} value={this.state.reviewComment}
+                        <TextField
+                            variant="outlined"
+                            id="reviewComment"
+                            label="Review Comment (optional)"
+                            multiline
+                            rows={4}
+                            fullWidth={true}
+                            value={this.state.reviewComment}
                             onChange={e => this.handleInputChange(e, null)}
                         />
                     </DialogContent>
@@ -418,7 +475,7 @@ class TruckPage extends Component {
                 </Dialog>
 
                 {/**BACK*/}
-                <br/>
+                <br />
                 <Button variant="contained" href="/">
                     <Typography variant="button" gutterBottom display="block">
                         Back
@@ -428,12 +485,20 @@ class TruckPage extends Component {
         );
     }
 }
-const mapStateToProps = state => {
-    const { auth } = state
-    return { auth }
+
+TruckPage.propTypes = {
+    router: PropTypes.any,
+    auth: PropTypes.any,
+    classes: PropTypes.any,
 };
 
-const mapDispatchToProps = {
-}
+const mapStateToProps = state => {
+    const { auth } = state;
+    return { auth };
+};
 
-export default withStyles(truckPageStyles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(TruckPage)));
+const mapDispatchToProps = {};
+
+export default withStyles(truckPageStyles, { withTheme: true })(
+    withRouter(connect(mapStateToProps, mapDispatchToProps)(TruckPage))
+);
