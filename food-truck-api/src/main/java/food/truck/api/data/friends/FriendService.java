@@ -18,7 +18,8 @@ public class FriendService {
     private FriendPairRepository friendPairRepository;
 
     public boolean areFriends(User user1, User user2) {
-        return friendPairRepository.existsByUser1AndUser2(user1, user2) || friendPairRepository.existsByUser1AndUser2(user2, user1);
+        return friendPairRepository.existsByUser1AndUser2(user1, user2);
+        // return friendPairRepository.existsByUser1AndUser2(user1, user2) || friendPairRepository.existsByUser1AndUser2(user2, user1);
     }
 
     public Optional<FriendPair> findFriendPair(User user1, User user2) {
@@ -59,6 +60,6 @@ public class FriendService {
         }
 
         friendPairRepository.deleteById(new FriendPairId(user1.getId(), user2.getId()));
-        friendPairRepository.deleteById(new FriendPairId(user2.getId(), user1.getId()));
+        // friendPairRepository.deleteById(new FriendPairId(user2.getId(), user1.getId()));
     }
 }

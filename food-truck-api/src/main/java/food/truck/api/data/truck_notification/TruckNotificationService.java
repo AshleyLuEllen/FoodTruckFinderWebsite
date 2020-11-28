@@ -126,11 +126,36 @@ public class TruckNotificationService {
     }
 
     public TruckNotification createFriendNotification(User user, User newFriend){
+        TruckNotification notification = new TruckNotification();
 
+        notification.setType(NotificationType.FRIEND);
+        notification.setSubject("You have a new friend!");
+        notification.setDescription("Your new friend is " + newFriend.getFirstName() + ' ' + newFriend.getLastName() + ".");
+        notification.setMedia(null);
+        notification.setUser(newFriend);
+        notification.setPublished(true);
+
+        notification.setType(NotificationType.FRIEND);
+        notification.setSubject("You have a new friend following you.");
+        notification.setDescription(newFriend.getFirstName() + ' ' + newFriend.getLastName() + " just started following you. You can f.");
+        notification.setMedia(null);
+        notification.setUser(newFriend);
+        notification.setPublished(true);
+
+        return truckNotificationRepository.save(notification);
     }
 
     public TruckNotification createSubscriptionNotification(Truck truck, User user){
+        TruckNotification notification = new TruckNotification();
 
+        notification.setType(NotificationType.SUBSCRIPTION);
+        notification.setSubject("You have subscribed to a new food truck!");
+        notification.setDescription("Your new subscription is is " + truck.getName() + ".");
+        notification.setMedia(null);
+        notification.setTruck(truck);
+        notification.setPublished(true);
+
+        return truckNotificationRepository.save(notification);
     }
 
     public void deleteTruckNotification(long truckNotificationId) {
