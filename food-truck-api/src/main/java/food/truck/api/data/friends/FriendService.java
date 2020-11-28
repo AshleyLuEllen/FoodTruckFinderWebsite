@@ -1,6 +1,7 @@
 package food.truck.api.data.friends;
 
 import food.truck.api.data.tag.Tag;
+import food.truck.api.data.truck_notification.TruckNotificationService;
 import food.truck.api.data.truck_tag.TruckTag;
 import food.truck.api.data.user.User;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
@@ -17,6 +18,9 @@ public class FriendService {
     @Autowired
     private FriendPairRepository friendPairRepository;
 
+    @Autowired
+    private TruckNotificationService notificationService;
+
     public boolean areFriends(User user1, User user2) {
         return friendPairRepository.existsByUser1AndUser2(user1, user2);
         // return friendPairRepository.existsByUser1AndUser2(user1, user2) || friendPairRepository.existsByUser1AndUser2(user2, user1);
@@ -25,19 +29,21 @@ public class FriendService {
     public Optional<FriendPair> findFriendPair(User user1, User user2) {
         // Check left-association
         Optional<FriendPair> friendPairOpt = friendPairRepository.findById(new FriendPairId(user1.getId(), user2.getId()));
-        if (friendPairOpt.isPresent()) {
-            return friendPairOpt;
-        }
+        return friendPairOpt;
+//        if (friendPairOpt.isPresent()) {
+//            return friendPairOpt;
+//        }
 
-        // Check right-association
-        return friendPairRepository.findById(new FriendPairId(user2.getId(), user1.getId()));
+//        // Check right-association
+//        return friendPairRepository.findById(new FriendPairId(user2.getId(), user1.getId()));
     }
 
     public List<User> findAllFriendsOfUser(User user) {
         Stream<User> leftStream = friendPairRepository.findAllByUser1(user).stream().map(FriendPair::getUser2);
-        Stream<User> rightStream = friendPairRepository.findAllByUser2(user).stream().map(FriendPair::getUser1);
+//        Stream<User> rightStream = friendPairRepository.findAllByUser2(user).stream().map(FriendPair::getUser1);
 
-        return Stream.concat(leftStream, rightStream).collect(Collectors.toList());
+//        return Stream.concat(leftStream, rightStream).collect(Collectors.toList());
+        return leftStream.collect(Collectors.toList());
     }
 
     public FriendPair becomeFriends(User user1, User user2) {
@@ -50,6 +56,8 @@ public class FriendService {
         FriendPair friendPair = new FriendPair();
         friendPair.setUser1(user1);
         friendPair.setUser2(user2);
+
+        notificationService.createFriendNotifications(user1, user2);
 
         return friendPairRepository.save(friendPair);
     }

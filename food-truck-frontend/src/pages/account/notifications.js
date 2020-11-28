@@ -316,7 +316,7 @@ class Notifications extends Component {
                     rows: res.data.map(not =>
                         createData(
                             not.unread,
-                            not.truck.name,
+                            not.truck?.name || "",
                             not.subject,
                             not.postedTimestamp,
                             not.id,
@@ -549,7 +549,7 @@ class Notifications extends Component {
                     aria-labelledby="dialog-title"
                     aria-describedby="dialog-description"
                 >
-                    <DialogTitle id="dialog-title">{this.state.selectedNotification?.subject} - {this.state.selectedNotification?.truck_name}</DialogTitle>
+                    <DialogTitle id="dialog-title">{this.state.selectedNotification?.subject}{this.state.selectedNotification?.truck_name && ` - ${this.state.selectedNotification?.truck_name}`}</DialogTitle>
                     <DialogContent dividers>
                         {this.state.selectedNotification?.description?.split('\n').map((par, i) => <DialogContentText key={i}>{par}</DialogContentText>)}
                     </DialogContent>

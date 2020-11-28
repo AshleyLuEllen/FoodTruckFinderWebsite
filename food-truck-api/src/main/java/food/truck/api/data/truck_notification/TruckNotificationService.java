@@ -9,6 +9,7 @@ import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
 import food.truck.api.data.user_notification.UserNotification;
 import food.truck.api.data.user_notification.UserNotificationRepository;
+import food.truck.api.data.user_notification.UserNotificationService;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.util.Location;
 import lombok.extern.log4j.Log4j2;
@@ -37,6 +38,9 @@ public class TruckNotificationService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserNotificationService userNotificationService;
 
     @Autowired
     private ScheduleService scheduleService;
@@ -69,16 +73,16 @@ public class TruckNotificationService {
             Truck truck = truckService.findTruck(truckNotification.getTruck().getId()).orElseThrow(ResourceNotFoundException::new);
             Schedule currentLocation = truck.getCurrentLocation();
             if (currentLocation != null)
-            userNotificationRepository.saveAll(
-                userService.findUsersNearLocation(new Location(currentLocation.getLatitude(), currentLocation.getLongitude())).stream()
-                    .map(user -> {
-                        var un = new UserNotification();
-                        un.setNotification(truckNotification);
-                        un.setUser(user);
-                        un.setUnread(true);
-                        return un;
-                    }).collect(Collectors.toList())
-            );
+                userNotificationRepository.saveAll(
+                    userService.findUsersNearLocation(new Location(currentLocation.getLatitude(), currentLocation.getLongitude())).stream()
+                        .map(user -> {
+                            var un = new UserNotification();
+                            un.setNotification(truckNotification);
+                            un.setUser(user);
+                            un.setUnread(true);
+                            return un;
+                        }).collect(Collectors.toList())
+                );
         }
 
         return tn;
@@ -125,37 +129,57 @@ public class TruckNotificationService {
         return tn;
     }
 
-    public TruckNotification createFriendNotification(User user, User newFriend){
-        TruckNotification notification = new TruckNotification();
+    public void createFriendNotifications(User user, User newFriend) {
+        TruckNotification notification1 = new TruckNotification();
+        notification1.setType(NotificationType.FRIEND);
+        notification1.setSubject("You have a new friend!");
+        notification1.setDescription("Your new friend is " + newFriend.getFirstName() + ' ' + newFriend.getLastName() + ".");
+        notification1.setMedia(null);
+        notification1.setUser(user);
+        notification1.setPublished(true);
 
-        notification.setType(NotificationType.FRIEND);
-        notification.setSubject("You have a new friend!");
-        notification.setDescription("Your new friend is " + newFriend.getFirstName() + ' ' + newFriend.getLastName() + ".");
-        notification.setMedia(null);
-        notification.setUser(newFriend);
-        notification.setPublished(true);
+        TruckNotification not1 = truckNotificationRepository.save(notification1);
+        UserNotification userNot1 = new UserNotification();
+        userNot1.setUnread(true);
+        userNot1.setUser(user);
+        userNot1.setNotification(not1);
+        userNotificationRepository.save(userNot1);
 
-        notification.setType(NotificationType.FRIEND);
-        notification.setSubject("You have a new friend following you.");
-        notification.setDescription(newFriend.getFirstName() + ' ' + newFriend.getLastName() + " just started following you. You can f.");
-        notification.setMedia(null);
-        notification.setUser(newFriend);
-        notification.setPublished(true);
+        TruckNotification notification2 = new TruckNotification();
+        notification2.setType(NotificationType.FRIEND);
+        notification2.setSubject("You have a new friend following you.");
+        notification2.setDescription(user.getFirstName() + ' ' + user.getLastName() + " just started following you. If you are not friends with them already, you can follow them by clicking <a href=\"/users/" + user.getId() + "\">here</a>");
+        notification2.setMedia(null);
+        notification2.setUser(newFriend);
+        notification2.setPublished(true);
 
-        return truckNotificationRepository.save(notification);
+        TruckNotification not2 = truckNotificationRepository.save(notification2);
+        UserNotification userNot2 = new UserNotification();
+        userNot2.setUnread(true);
+        userNot2.setUser(newFriend);
+        userNot2.setNotification(not2);
+        userNotificationRepository.save(userNot2);
     }
 
-    public TruckNotification createSubscriptionNotification(Truck truck, User user){
+    public TruckNotification createSubscriptionNotification(Truck truck, User user) {
         TruckNotification notification = new TruckNotification();
 
         notification.setType(NotificationType.SUBSCRIPTION);
         notification.setSubject("You have subscribed to a new food truck!");
-        notification.setDescription("Your new subscription is is " + truck.getName() + ".");
+        notification.setDescription("You recently subscribed to a new food truck called " + truck.getName() + ". You will now receive notifications from them.");
         notification.setMedia(null);
         notification.setTruck(truck);
+        notification.setUser(user);
         notification.setPublished(true);
 
-        return truckNotificationRepository.save(notification);
+
+        TruckNotification not = truckNotificationRepository.save(notification);
+        UserNotification userNot = new UserNotification();
+        userNot.setUnread(true);
+        userNot.setUser(user);
+        userNot.setNotification(not);
+        userNotificationRepository.save(userNot);
+        return not;
     }
 
     public void deleteTruckNotification(long truckNotificationId) {
