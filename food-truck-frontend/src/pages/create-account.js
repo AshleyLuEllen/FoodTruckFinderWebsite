@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import * as requests from '../util/requests';
 import withRouter from 'next/dist/client/with-router';
 import isEmail from 'validator/lib/isEmail';
 
@@ -115,8 +115,8 @@ class CreateAccount extends Component {
             });
         } else if (this.state.password === this.state.passConf) {
             if (test) {
-                axios
-                    .post(process.env.FOOD_TRUCK_API_URL + '/users', user)
+                requests
+                    ._post(process.env.FOOD_TRUCK_API_URL + '/users', user)
                     .then(() => {
                         this.props.router.push('/login');
                     })

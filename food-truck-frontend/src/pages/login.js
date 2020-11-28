@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'next/router';
-import axios from 'axios';
 import * as requests from '../util/requests';
 import { connect } from 'react-redux';
 import { login as authLogin, logout as authLogout } from '../redux/actions/auth';
@@ -51,8 +50,8 @@ class Login extends React.Component {
 
         let jwt;
 
-        axios
-            .post(`${process.env.FOOD_TRUCK_API_URL}/login`, {
+        requests
+            ._post(`${process.env.FOOD_TRUCK_API_URL}/login`, {
                 emailAddress: this.state.email,
                 password: this.state.password,
             })

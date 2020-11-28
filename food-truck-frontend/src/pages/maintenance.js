@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
 import { logout } from '../redux/actions/auth';
-import axios from 'axios';
+import * as requests from '../util/requests';
 
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -24,8 +24,8 @@ export default function MaintenancePage() {
 
     useEffect(() => {
         if (router.query.next) {
-            axios
-                .get(`${process.env.FOOD_TRUCK_API_URL}/ping`)
+            requests
+                ._get(`${process.env.FOOD_TRUCK_API_URL}/ping`)
                 .then(() => {
                     router.push(router.query.next);
                 })

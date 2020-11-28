@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { geolocated } from 'react-geolocated';
 import { withRouter } from 'next/router';
-import axios from 'axios';
+import * as requests from '../util/requests';
 import { connect } from 'react-redux';
 import { logout as authLogout } from '../redux/actions/auth';
 
@@ -52,8 +52,8 @@ class DashboardPage extends Component {
 
     loadTrucks(userId) {
         Promise.all([
-            axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userId}/recommendations`),
-            axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userId}/subscriptions`),
+            requests._get(`${process.env.FOOD_TRUCK_API_URL}/users/${userId}/recommendations`),
+            requests._get(`${process.env.FOOD_TRUCK_API_URL}/users/${userId}/subscriptions`),
         ])
             .then(results => {
                 this.setState({
@@ -85,13 +85,8 @@ class DashboardPage extends Component {
                         positionUpdated: true,
                     });
 
-                    axios
-                        .put(`${process.env.FOOD_TRUCK_API_URL}/users/me/location`, position, {
-                            auth: {
-                                username: this.props.auth.email,
-                                password: this.props.auth.password,
-                            },
-                        })
+                    requests
+                        .putWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me/location`, position, this.props.auth)
                         .then(() => {
                             console.log('position updated');
                             this.loadTrucks(this.state.userId);
@@ -107,13 +102,8 @@ class DashboardPage extends Component {
     }
 
     componentDidMount() {
-        axios
-            .get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password,
-                },
-            })
+        requests
+            .getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, this.props.auth)
             .then(userres => {
                 this.setState(
                     {
