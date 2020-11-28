@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 
@@ -21,8 +21,10 @@ function ManageAccountPage(props) {
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
-    const [avatar, setAvatar] = useState('');
+    const [avatar, setAvatar] = useState(undefined);
     const [bio, setBio] = useState('');
+
+    const avatarInputRef = useRef(null);
 
     useEffect(() => {
         axios
@@ -36,7 +38,6 @@ function ManageAccountPage(props) {
                 setEmail(res.data.emailAddress);
                 setFirstName(res.data.firstName);
                 setLastName(res.data.lastName);
-                setAvatar(res.data.avatarURL);
                 setBio(res.data.description);
             })
             .catch(() => {
@@ -101,6 +102,26 @@ function ManageAccountPage(props) {
     }
 
     function submitInfoChange() {
+        const formData = new FormData();
+        formData.append('file', avatar);
+
+        axios
+            .put(`${process.env.FOOD_TRUCK_API_URL}/media/profiles/me`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                auth: {
+                    username: props.auth.email,
+                    password: props.auth.password,
+                },
+            })
+            .then(() => {
+                console.log('Success');
+            })
+            .catch(err => {
+                console.log(err);
+            });
+
         axios
             .patch(
                 `${process.env.FOOD_TRUCK_API_URL}/users/me`,
@@ -108,7 +129,6 @@ function ManageAccountPage(props) {
                     firstName,
                     lastName,
                     description: bio,
-                    avatarURL: avatar,
                 },
                 {
                     auth: {
@@ -135,6 +155,7 @@ function ManageAccountPage(props) {
                         id="email"
                         label="Email Address"
                         type="email"
+                        variant="outlined"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
                     />
@@ -143,6 +164,7 @@ function ManageAccountPage(props) {
                         id="confEmail"
                         label="Confirm Email Address"
                         type="email"
+                        variant="outlined"
                         value={confEmail}
                         onChange={e => setConfEmail(e.target.value)}
                     />
@@ -163,6 +185,7 @@ function ManageAccountPage(props) {
                         id="oldPassword"
                         label="Old Password"
                         type="password"
+                        variant="outlined"
                         value={oldPassword}
                         onChange={e => setOldPassword(e.target.value)}
                     />
@@ -171,6 +194,7 @@ function ManageAccountPage(props) {
                         id="password"
                         label="New Password"
                         type="password"
+                        variant="outlined"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                     />
@@ -179,6 +203,7 @@ function ManageAccountPage(props) {
                         id="confPassword"
                         label="Confirm Password"
                         type="password"
+                        variant="outlined"
                         value={confPassword}
                         onChange={e => setConfPassword(e.target.value)}
                     />
@@ -199,6 +224,7 @@ function ManageAccountPage(props) {
                         id="firstName"
                         label="First Name"
                         type="text"
+                        variant="outlined"
                         value={firstName}
                         onChange={e => setFirstName(e.target.value)}
                     />
@@ -206,28 +232,33 @@ function ManageAccountPage(props) {
                         id="lastName"
                         label="Last Name"
                         type="text"
+                        variant="outlined"
                         value={lastName}
                         onChange={e => setLastName(e.target.value)}
-                    />
-                    <br />
-                    <TextField
-                        id="avatar"
-                        label="Avatar URL"
-                        type="text"
-                        style={{ width: '90%' }}
-                        value={avatar}
-                        onChange={e => setAvatar(e.target.value)}
                     />
                     <br />
                     <TextField
                         id="bio"
                         label="Bio"
                         type="text"
+                        variant="outlined"
                         style={{ width: '90%' }}
                         value={bio}
                         onChange={e => setBio(e.target.value)}
                     />
-                    <br />
+                    <div>
+                        <Button variant="contained" component="label" style={{ width: 'auto', height: 'auto' }}>
+                            Upload Avatar
+                            <input
+                                type="file"
+                                style={{ display: 'none' }}
+                                ref={avatarInputRef}
+                                accept="image/jpeg,image/png,image/gif"
+                                onChange={e => setAvatar(e.target.files[0])}
+                            />
+                        </Button>
+                        {avatar && `Selected file: ${avatar.name}`}
+                    </div>
                     <Button
                         variant="contained"
                         color="primary"
