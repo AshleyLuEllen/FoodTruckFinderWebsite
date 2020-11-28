@@ -1,12 +1,7 @@
 import { ACTION_LOGIN, ACTION_LOGOUT, ACTION_UPDATE } from '../actions/auth';
 
 const initialState = {
-<<<<<<< HEAD
     jwt: null,
-=======
-    email: '',
-    password: '',
->>>>>>> media
     isLoggedIn: false,
 };
 
@@ -16,23 +11,13 @@ export function reducer(state = initialState, action) {
         case ACTION_UPDATE:
             return {
                 ...state,
-<<<<<<< HEAD
                 jwt: action.jwt,
-=======
-                email: action.email,
-                password: action.password,
->>>>>>> media
                 isLoggedIn: true,
             };
         case ACTION_LOGOUT:
             return {
                 ...state,
-<<<<<<< HEAD
                 jwt: null,
-=======
-                email: '',
-                password: '',
->>>>>>> media
                 isLoggedIn: false,
             };
         default:
