@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import { connect } from 'react-redux';
 import clsx from 'clsx';
 
-import { Card, CardHeader, CardMedia, CardContent, IconButton, Chip } from '@material-ui/core';
+import { Card, CardHeader, CardMedia, CardContent, Chip } from '@material-ui/core';
 import { Rating } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
-import { Notifications, NotificationsOff } from '@material-ui/icons';
 
 const useStyles = makeStyles(theme => ({
     root: {
