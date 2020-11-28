@@ -6,7 +6,18 @@ import { useRouter } from 'next/router';
 import { connect, useDispatch } from 'react-redux';
 import { logout as authLogout, authUpdate } from '../../redux/actions/auth';
 
-import { TextField, Container, Grid, Button, Typography, Avatar, Hidden } from '@material-ui/core';
+import {
+    TextField,
+    Container,
+    Grid,
+    Button,
+    Typography,
+    Avatar,
+    Hidden,
+    CircularProgress,
+    Snackbar,
+} from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 
 // eslint-disable-next-line no-unused-vars
@@ -55,8 +66,21 @@ const useStyles = makeStyles(theme => ({
     },
     removeAvatarButton: {
         display: 'block',
+    },
+    removeAvatarWrapper: {
         margin: '0 auto',
         marginTop: '10px',
+    },
+    buttonWrapper: {
+        position: 'relative',
+        width: '200px',
+    },
+    buttonProgress: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        marginTop: -12,
+        marginLeft: -12,
     },
 }));
 
@@ -77,6 +101,15 @@ function ManageAccountPage(props) {
     const [avatar, setAvatar] = useState(undefined);
     const [bio, setBio] = useState('');
 
+    const [loadingInfo, setLoadingInfo] = useState(false);
+    const [loadingDelete, setLoadingDelete] = useState(false);
+    const [loadingEmail, setLoadingEmail] = useState(false);
+    const [loadingPassword, setLoadingPassword] = useState(false);
+
+    const [errorMsg, setErrorMsg] = useState('');
+    const [errorOpen, setErrorOpen] = useState(false);
+    const [errorSeverity, setErrorSeverity] = useState('error');
+
     const avatarInputRef = useRef(null);
 
     useEffect(() => {
@@ -96,94 +129,149 @@ function ManageAccountPage(props) {
     }, []);
 
     function removeUserAvatar() {
+        setLoadingDelete(true);
         requests
             .deleteWithAuth(`${process.env.FOOD_TRUCK_API_URL}/media/profiles/me`, props.auth)
             .then(() => requests.getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, props.auth))
-            .then(res => setUser(res.data))
-            .catch(() => alert('removed profile'));
+            .then(res => {
+                setUser(res.data);
+                setLoadingDelete(false);
+                setErrorSeverity('success');
+                setErrorMsg('Avatar removed.');
+                setErrorOpen(true);
+            })
+            .catch(err => {
+                console.error(err);
+                setErrorMsg('Error: avatar not removed! Check console for more information.');
+                setErrorOpen(true);
+                setLoadingDelete(false);
+            });
     }
 
     function submitEmailChange() {
         if (email === confEmail) {
-            requests
-                .patchWithAuth(
-                    `${process.env.FOOD_TRUCK_API_URL}/users/me`,
-                    {
-                        emailAddress: email,
-                    },
-                    props.auth
-                )
-                .then(() => {
-                    alert('Email changed!');
-                    dispatch(props.authUpdate(email, props.auth.password));
-                })
-                .then(() => {})
-                .catch(err => {
-                    alert('Error: email not changed!');
-                    alert(err);
-                });
+            if (isEmail(email)) {
+                setLoadingEmail(true);
+                requests
+                    .patchWithAuth(
+                        `${process.env.FOOD_TRUCK_API_URL}/users/me`,
+                        {
+                            emailAddress: email,
+                        },
+                        props.auth
+                    )
+                    .then(() => {
+                        setLoadingEmail(false);
+                        dispatch(props.authLogout());
+                        router.push('/login');
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        setErrorMsg('Error: email address not changed! Check console for more information.');
+                        setErrorOpen(true);
+                        setLoadingEmail(false);
+                    });
+            } else {
+                setErrorMsg('Email address is not valid.');
+                setErrorOpen(true);
+            }
         } else {
-            alert('Emails do not match');
+            setErrorMsg('Email addresses do not match.');
+            setErrorOpen(true);
         }
     }
 
     function submitPasswordChange() {
+        const passwordPat = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_])(?=.{8,})');
+
         if (password !== '' && password === confPassword) {
-            requests
-                .patchWithAuth(
-                    `${process.env.FOOD_TRUCK_API_URL}/users/me`,
-                    {
-                        password,
-                    },
-                    props.auth
-                )
-                .then(() => {
-                    alert('Password changed!');
-                    dispatch(props.authUpdate(props.auth.email, password));
-                })
-                .catch(err => {
-                    alert(`Error: password not changed! ${err}`);
-                });
+            if (passwordPat.test(password)) {
+                setLoadingPassword(true);
+                requests
+                    .patchWithAuth(
+                        `${process.env.FOOD_TRUCK_API_URL}/users/me`,
+                        {
+                            password,
+                        },
+                        props.auth
+                    )
+                    .then(() => {
+                        setLoadingPassword(false);
+                        dispatch(props.authLogout());
+                        router.push('/login');
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        setErrorMsg('Error: password not changed! Check console for more information.');
+                        setErrorOpen(true);
+                        setLoadingPassword(false);
+                    });
+            } else {
+                setErrorMsg('Password is not secure enough.');
+                setErrorOpen(true);
+            }
         } else {
-            alert('Passwords do not match');
+            setErrorMsg('Passwords do not match.');
+            setErrorOpen(true);
         }
     }
 
     function submitInfoChange() {
+        setLoadingInfo(true);
+
         const formData = new FormData();
         formData.append('file', avatar);
 
+        const list = [];
+
         if (avatar) {
-            requests
-                .putWithAuth(`${process.env.FOOD_TRUCK_API_URL}/media/profiles/me`, formData, props.auth, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                })
-                .then(() => {
-                    console.log('Success');
-                })
-                .catch(err => {
-                    console.log(err);
-                });
+            list.push(
+                requests
+                    .putWithAuth(`${process.env.FOOD_TRUCK_API_URL}/media/profiles/me`, formData, props.auth, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    })
+                    .then(res => {
+                        setUser({ ...user, avatar: res.data });
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        setErrorMsg('Error: avatar not changed! Check console for more information.');
+                        setErrorOpen(true);
+                        setLoadingInfo(false);
+                    })
+            );
         }
 
-        requests
-            .patchWithAuth(
-                `${process.env.FOOD_TRUCK_API_URL}/users/me`,
-                {
-                    firstName,
-                    lastName,
-                    description: bio,
-                },
-                props.auth
-            )
-            .then(() => {
-                alert('Information changed!');
-            })
-            .catch(() => {
-                alert('Error: name not changed!');
-            });
+        list.push(
+            requests
+                .patchWithAuth(
+                    `${process.env.FOOD_TRUCK_API_URL}/users/me`,
+                    {
+                        firstName,
+                        lastName,
+                        description: bio,
+                    },
+                    props.auth
+                )
+                .then(() => {
+                    console.log('Information changed!');
+                })
+                .catch(err => {
+                    console.error(err);
+                    setErrorMsg('Error: user info not changed! Check console for more information.');
+                    setErrorOpen(true);
+                    setLoadingInfo(false);
+                })
+        );
+
+        Promise.all(list).then(() => {
+            setLoadingInfo(false);
+            setErrorSeverity('success');
+            setErrorMsg('User information updated.');
+            setErrorOpen(true);
+        });
     }
 
     return (
@@ -246,9 +334,18 @@ function ManageAccountPage(props) {
                         </label>
                         {avatar && <div className={classes.selectedFileText}>{`Selected file: ${avatar.name}`}</div>}
                     </div>
-                    <Button className={classes.button} variant="contained" color="primary" onClick={submitInfoChange}>
-                        Save Information
-                    </Button>
+                    <div className={classes.buttonWrapper}>
+                        <Button
+                            className={classes.button}
+                            variant="contained"
+                            color="primary"
+                            onClick={submitInfoChange}
+                            disabled={loadingInfo || firstName === '' || lastName === ''}
+                        >
+                            Save Information
+                        </Button>
+                        {loadingInfo && <CircularProgress size={24} className={classes.buttonProgress} />}
+                    </div>
                 </Grid>
                 <Hidden smDown>
                     <Grid item md={5}>
@@ -261,14 +358,18 @@ function ManageAccountPage(props) {
                             Current Avatar
                         </Typography>
                         {user?.avatar && (
-                            <Button
-                                className={classes.button + ' ' + classes.removeAvatarButton}
-                                variant="contained"
-                                color="secondary"
-                                onClick={removeUserAvatar}
-                            >
-                                Remove Avatar
-                            </Button>
+                            <div className={classes.buttonWrapper + ' ' + classes.removeAvatarWrapper}>
+                                <Button
+                                    className={classes.button + ' ' + classes.removeAvatarButton}
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={removeUserAvatar}
+                                    disabled={loadingDelete}
+                                >
+                                    Remove Avatar
+                                </Button>
+                                {loadingDelete && <CircularProgress size={24} className={classes.buttonProgress} />}
+                            </div>
                         )}
                     </Grid>
                 </Hidden>
@@ -277,74 +378,118 @@ function ManageAccountPage(props) {
                         Email Address
                     </Typography>
                     <p>
-                        Please note that changing your email address will also change your login credentials.
+                        Please note that changing your email address will also change your login credentials.{' '}
                         <strong>This action will log you out of your account.</strong>
                     </p>
                     <TextField
                         className={classes.textField}
-                        id="email"
-                        label="Email Address"
+                        id="emailReset"
+                        label="New Email Address"
                         type="email"
                         variant="outlined"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
+                        autoComplete="off"
                     />
                     <TextField
                         className={classes.textField}
-                        id="confEmail"
+                        id="confEmailReset"
                         label="Confirm Email Address"
                         type="email"
                         variant="outlined"
                         value={confEmail}
                         onChange={e => setConfEmail(e.target.value)}
+                        autoComplete="off"
                     />
-                    <Button
-                        className={classes.button}
-                        variant="contained"
-                        color="primary"
-                        onClick={submitEmailChange}
-                        disabled={email !== confEmail}
-                    >
-                        Save Email Address
-                    </Button>
+                    <div className={classes.buttonWrapper}>
+                        <Button
+                            className={classes.button}
+                            variant="contained"
+                            color="primary"
+                            onClick={submitEmailChange}
+                            disabled={loadingEmail || email !== confEmail}
+                        >
+                            Save Email Address
+                        </Button>
+                        {loadingEmail && <CircularProgress size={24} className={classes.buttonProgress} />}
+                    </div>
                 </Grid>
                 <Grid item xs={12}>
                     <Typography className={classes.subheader} variant="h5">
                         Password
                     </Typography>
+                    <div>
+                        Password must contain the following:
+                        <ul style={{ margin: 0 }}>
+                            <li>at least 1 lowercase letter</li>
+                            <li>at least 1 uppercase letter</li>
+                            <li>at least 1 digit</li>
+                            <li>at least 1 special character (!@#$%^&*()_)</li>
+                            <li>at least 8 characters</li>
+                        </ul>
+                    </div>
                     <p>
-                        Please note that changing your password will also change your login credentials.
+                        Please note that changing your password will also change your login credentials.{' '}
                         <strong>This action will log you out of your account.</strong>
                     </p>
                     <TextField
                         className={classes.textField}
-                        id="password"
+                        id="passwordReset"
                         label="New Password"
                         type="password"
                         variant="outlined"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
+                        autoComplete="off"
                     />
                     <TextField
                         className={classes.textField}
-                        id="confPassword"
+                        id="confPasswordReset"
                         label="Confirm Password"
                         type="password"
                         variant="outlined"
                         value={confPassword}
                         onChange={e => setConfPassword(e.target.value)}
+                        autoComplete="off"
                     />
-                    <Button
-                        className={classes.button}
-                        variant="contained"
-                        color="primary"
-                        onClick={submitPasswordChange}
-                        disabled={password === '' || password !== confPassword}
-                    >
-                        Save Password
-                    </Button>
+
+                    <div className={classes.buttonWrapper}>
+                        <Button
+                            className={classes.button}
+                            variant="contained"
+                            color="primary"
+                            onClick={submitPasswordChange}
+                            disabled={loadingPassword || password === '' || password !== confPassword}
+                        >
+                            Save Password
+                        </Button>
+                        {loadingPassword && <CircularProgress size={24} className={classes.buttonProgress} />}
+                    </div>
                 </Grid>
             </Grid>
+            <Snackbar
+                open={errorOpen}
+                autoHideDuration={5000}
+                onClose={(_event, reason) => {
+                    if (reason === 'clickaway') {
+                        return;
+                    }
+
+                    setErrorOpen(false);
+                }}
+                onExited={() => setErrorSeverity('error')}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert
+                    variant="filled"
+                    severity={errorSeverity}
+                    onClose={() => {
+                        setErrorOpen(false);
+                    }}
+                >
+                    {errorMsg}
+                </Alert>
+            </Snackbar>
         </Container>
     );
 }
