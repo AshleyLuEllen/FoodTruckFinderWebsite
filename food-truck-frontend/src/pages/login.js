@@ -55,11 +55,12 @@ class Login extends React.Component {
                 emailAddress: this.state.email,
                 password: this.state.password,
             })
-            .then(() =>
+            .then(res => {
+                jwt = res.headers.authorization;
                 requests.getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
                     jwt,
-                })
-            )
+                });
+            })
             .then(() => {
                 this.props.authLogin(jwt);
                 this.props.router.push('/');
