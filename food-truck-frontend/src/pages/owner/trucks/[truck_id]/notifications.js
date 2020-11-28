@@ -149,7 +149,6 @@ class NotificationPage extends Component {
                 postedTimestamp: this.state.postedTimestamp,
                 notificationType: null,
             };
-            console.log(this.notification);
 
             requests
                 .post(
