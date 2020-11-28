@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { geolocated } from 'react-geolocated';
 import { withRouter } from 'next/router';
-import * as requests from '../util/requests';
+import requests from '../util/requests';
 import { connect } from 'react-redux';
 import { logout as authLogout } from '../redux/actions/auth';
 
@@ -52,8 +52,8 @@ class DashboardPage extends Component {
 
     loadTrucks(userId) {
         Promise.all([
-            requests._get(`${process.env.FOOD_TRUCK_API_URL}/users/${userId}/recommendations`),
-            requests._get(`${process.env.FOOD_TRUCK_API_URL}/users/${userId}/subscriptions`),
+            requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userId}/recommendations`),
+            requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${userId}/subscriptions`),
         ])
             .then(results => {
                 this.setState({

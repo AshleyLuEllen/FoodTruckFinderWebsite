@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import * as requests from '../../util/requests';
+import requests from '../../util/requests';
 
 import { useRouter } from 'next/router';
 import { connect } from 'react-redux';

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import * as requests from '../util/requests';
+import requests from '../util/requests';
 import clsx from 'clsx';
 import { geolocated } from 'react-geolocated';
 import { useRouter } from 'next/router';
@@ -92,7 +92,7 @@ function SearchPage(props) {
 
     useEffect(() => {
         requests
-            ._get(`${process.env.FOOD_TRUCK_API_URL}/tags`)
+            .get(`${process.env.FOOD_TRUCK_API_URL}/tags`)
             .then(res => {
                 setTagOptions(res.data);
                 // const truckTags = [{id: 1, name: "A", description: "Test description"}];
@@ -167,7 +167,7 @@ function SearchPage(props) {
                         preferredRating,
                     };
                     requests
-                        ._post(`${process.env.FOOD_TRUCK_API_URL}/search`, queryObj)
+                        .post(`${process.env.FOOD_TRUCK_API_URL}/search`, queryObj)
                         .then(res => {
                             setTruckResults(res.data);
                             // setCurrentlySelected(0);
@@ -186,7 +186,7 @@ function SearchPage(props) {
                     preferredRating,
                 };
                 requests
-                    ._post(`${process.env.FOOD_TRUCK_API_URL}/search`, queryObj)
+                    .post(`${process.env.FOOD_TRUCK_API_URL}/search`, queryObj)
                     .then(res => {
                         setTruckResults(res.data);
                         // setCurrentlySelected(0);

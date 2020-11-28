@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import * as requests from '../util/requests';
+import requests from '../util/requests';
 import { connect } from 'react-redux';
 import clsx from 'clsx';
 
@@ -54,7 +54,7 @@ function TruckCard(props) {
     useEffect(() => {
         if (props.userId)
             requests
-                ._get(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/subscriptions/${props.truck.id}`)
+                .get(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/subscriptions/${props.truck.id}`)
                 .then(() => {
                     setSubscribed(true);
                 })

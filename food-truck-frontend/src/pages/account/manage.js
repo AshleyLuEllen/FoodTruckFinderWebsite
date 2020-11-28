@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import * as requests from 'requests';
+import requests from 'requests';
 
 import { TextField, Container, Grid, Button } from '@material-ui/core';
 

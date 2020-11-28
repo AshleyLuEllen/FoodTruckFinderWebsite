@@ -17,7 +17,7 @@ import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
-import * as requests from '../../util/requests';
+import requests from '../../util/requests';
 import { logout as authLogout } from '../../redux/actions/auth';
 import { connect } from 'react-redux';
 import { CheckBox, CheckBoxOutlined, Flag, FlagOutlined } from '@material-ui/icons';

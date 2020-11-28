@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'next/router';
-import * as requests from '../../../util/requests';
+import requests from '../../../util/requests';
 import { format } from 'date-fns';
 import { connect } from 'react-redux';
 
@@ -91,13 +91,13 @@ class UserPage extends Component {
                     });
                 }
 
-                return requests._get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/subscriptions`);
+                return requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/subscriptions`);
             })
             .then(res => {
                 this.setState({
                     subscribedTrucks: res.data,
                 });
-                return requests._get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/reviews`);
+                return requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/reviews`);
             })
             .then(res => {
                 this.setState({

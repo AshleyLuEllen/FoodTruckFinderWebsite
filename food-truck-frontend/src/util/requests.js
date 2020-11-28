@@ -84,3 +84,16 @@ export async function patchWithAuth(url, data, authObj, config = {}) {
         ...config,
     });
 }
+
+export default {
+    get: _get,
+    getWithAuth,
+    delete: _delete,
+    deleteWithAuth,
+    put: _put,
+    putWithAuth,
+    post: _post,
+    postWithAuth,
+    patch: _patch,
+    patchWithAuth,
+};

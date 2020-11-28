@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import requests from '../../../../util/requests';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 import { format } from 'date-fns';
@@ -43,7 +43,7 @@ class Information extends Component {
     }
 
     fetchData() {
-        axios
+        requests
             .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
             .then(res => {
                 this.setState({
@@ -54,7 +54,7 @@ class Information extends Component {
                     description: res.data.description,
                     licensePlate: res.data.licensePlate,
                 });
-                return axios.get(
+                return requests.get(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`
                 );
             })
@@ -62,7 +62,7 @@ class Information extends Component {
                 this.setState({
                     schedules: res3.data,
                 });
-                return axios.get(
+                return requests.get(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`
                 );
             })
@@ -70,14 +70,16 @@ class Information extends Component {
                 this.setState({
                     reviews: res4.data,
                 });
-                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/tags`);
+                return requests.get(`${process.env.FOOD_TRUCK_API_URL}/tags`);
             })
             .then(res5 => {
                 this.setState({
                     allTags: res5.data.filter(t => t.description !== 'payment'),
                     paymentTags: res5.data.filter(t => t.description === 'payment'),
                 });
-                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`);
+                return requests.get(
+                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`
+                );
             })
             .then(res6 => {
                 this.setState({
@@ -145,7 +147,7 @@ class Information extends Component {
         };
         console.log(truck);
 
-        axios
+        requests
             .put(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`, truck)
             .then(() => {
                 console.log('Truck Edited');
@@ -159,13 +161,11 @@ class Information extends Component {
      * Removes the truck that's currently being edited
      */
     removeTruck() {
-        axios
-            .delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password,
-                },
-            })
+        requests
+            .deleteWithAuth(
+                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`,
+                this.props.auth
+            )
             .then(res => {
                 console.log(res.statusText);
                 this.props.router.push('/owner/trucks').then();
@@ -199,16 +199,17 @@ class Information extends Component {
         const formData = new FormData();
         formData.append('file', this.state.menu);
 
-        axios
-            .put(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/menu`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password,
-                },
-            })
+        requests
+            .putWithAuth(
+                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/menu`,
+                formData,
+                this.props.auth,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            )
             .then(() => {
                 console.log('Success');
             })
@@ -268,16 +269,11 @@ class Information extends Component {
                                 }}
                                 onSelectOption={t => {
                                     if (this.state.truckTags.length < 5) {
-                                        axios
-                                            .post(
+                                        requests
+                                            .postWithAuth(
                                                 `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
                                                 {},
-                                                {
-                                                    auth: {
-                                                        username: this.props.auth.email,
-                                                        password: this.props.auth.password,
-                                                    },
-                                                }
+                                                this.props.auth
                                             )
                                             .then()
                                             .catch(error => {
@@ -286,15 +282,10 @@ class Information extends Component {
                                     }
                                 }}
                                 onDeselectOption={t =>
-                                    axios
-                                        .delete(
+                                    requests
+                                        .deleteWithAuth(
                                             `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
-                                            {
-                                                auth: {
-                                                    username: this.props.auth.email,
-                                                    password: this.props.auth.password,
-                                                },
-                                            }
+                                            this.props.auth
                                         )
                                         .then()
                                         .catch(error => {
@@ -314,16 +305,11 @@ class Information extends Component {
                                 }}
                                 onSelectOption={t => {
                                     if (this.state.paymentTags.length < 2) {
-                                        axios
-                                            .post(
+                                        requests
+                                            .postWithAuth(
                                                 `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
                                                 {},
-                                                {
-                                                    auth: {
-                                                        username: this.props.auth.email,
-                                                        password: this.props.auth.password,
-                                                    },
-                                                }
+                                                this.props.auth
                                             )
                                             .then()
                                             .catch(error => {
@@ -332,15 +318,10 @@ class Information extends Component {
                                     }
                                 }}
                                 onDeselectOption={t =>
-                                    axios
-                                        .delete(
+                                    requests
+                                        .deleteWithAuth(
                                             `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
-                                            {
-                                                auth: {
-                                                    username: this.props.auth.email,
-                                                    password: this.props.auth.password,
-                                                },
-                                            }
+                                            this.props.auth
                                         )
                                         .then()
                                         .catch(error => {

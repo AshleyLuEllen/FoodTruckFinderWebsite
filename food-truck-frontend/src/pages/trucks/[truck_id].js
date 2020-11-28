@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import * as requests from '../../util/requests';
+import requests from '../../util/requests';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 import { format } from 'date-fns';
@@ -104,12 +104,12 @@ class TruckPage extends Component {
     fetchData() {
         Promise.all([
             requests
-                ._get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
+                .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
                 .then(res => {
                     this.setState({
                         truck: res.data,
                     });
-                    return requests._get(
+                    return requests.get(
                         `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`
                     );
                 })
@@ -117,7 +117,7 @@ class TruckPage extends Component {
                     this.setState({
                         tags: res2.data,
                     });
-                    return requests._get(
+                    return requests.get(
                         `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`
                     );
                 })
@@ -125,7 +125,7 @@ class TruckPage extends Component {
                     this.setState({
                         schedules: res3.data,
                     });
-                    return requests._get(
+                    return requests.get(
                         `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`
                     );
                 })
@@ -150,7 +150,7 @@ class TruckPage extends Component {
                         userId: res.data.id,
                     });
                     requests
-                        ._get(
+                        .get(
                             `${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/subscriptions/${this.props.router.query.truck_id}`
                         )
                         .then(() => {

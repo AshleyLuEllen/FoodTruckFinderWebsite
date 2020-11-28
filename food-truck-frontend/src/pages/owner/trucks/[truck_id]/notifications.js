@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import requests from '../../../../util/requests';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 import { format } from 'date-fns';
@@ -83,14 +83,10 @@ class NotificationPage extends Component {
         const formData = new FormData();
         formData.append('file', this.state.media);
 
-        return axios
-            .put(`${process.env.FOOD_TRUCK_API_URL}/notifications/${notId}/media`, formData, {
+        return requests
+            .putWithAuth(`${process.env.FOOD_TRUCK_API_URL}/notifications/${notId}/media`, formData, this.props.auth, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                },
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password,
                 },
             })
             .then(() => {
@@ -117,7 +113,7 @@ class NotificationPage extends Component {
                 postedTimestamp: this.state.postedTimestamp,
             };
 
-            axios
+            requests
                 .put(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
                     notification
@@ -155,7 +151,7 @@ class NotificationPage extends Component {
             };
             console.log(this.notification);
 
-            axios
+            requests
                 .post(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`,
                     notification
@@ -197,15 +193,10 @@ class NotificationPage extends Component {
     handleDelete() {
         console.log(this.props.auth);
         console.log(this.state.openNotification);
-        axios
-            .delete(
+        requests
+            .deleteWithAuth(
                 `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
-                {
-                    auth: {
-                        username: this.props.auth.email,
-                        password: this.props.auth.password,
-                    },
-                }
+                this.props.auth
             )
             .then(() => {
                 console.log('Notification deleted!');
@@ -223,7 +214,7 @@ class NotificationPage extends Component {
     }
 
     fetchData() {
-        axios
+        requests
             .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
             .then(res => {
                 console.log('Found the truck!');
@@ -232,7 +223,7 @@ class NotificationPage extends Component {
                     truckName: res.data.name,
                     truckID: res.data.id,
                 });
-                return axios.get(
+                return requests.get(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`
                 );
             })
