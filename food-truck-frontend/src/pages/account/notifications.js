@@ -28,6 +28,7 @@ import {
     EmailOutlined,
     DraftsOutlined,
 } from '@material-ui/icons';
+import ReactMarkdown from 'react-markdown';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -536,9 +537,7 @@ class Notifications extends Component {
                             ` - ${this.state.selectedNotification?.truck_name}`}
                     </DialogTitle>
                     <DialogContent dividers>
-                        {this.state.selectedNotification?.description?.split('\n').map((par, i) => (
-                            <DialogContentText key={i}>{par}</DialogContentText>
-                        ))}
+                        <ReactMarkdown children={this.state.selectedNotification?.description || ''} />
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleClose} color="primary">
