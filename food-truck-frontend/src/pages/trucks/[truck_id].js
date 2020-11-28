@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import requests from '../../util/requests';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 import { format } from 'date-fns';
@@ -103,13 +103,13 @@ class TruckPage extends Component {
 
     fetchData() {
         Promise.all([
-            axios
+            requests
                 .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
                 .then(res => {
                     this.setState({
                         truck: res.data,
                     });
-                    return axios.get(
+                    return requests.get(
                         `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`
                     );
                 })
@@ -117,7 +117,7 @@ class TruckPage extends Component {
                     this.setState({
                         tags: res2.data,
                     });
-                    return axios.get(
+                    return requests.get(
                         `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`
                     );
                 })
@@ -125,7 +125,7 @@ class TruckPage extends Component {
                     this.setState({
                         schedules: res3.data,
                     });
-                    return axios.get(
+                    return requests.get(
                         `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`
                     );
                 })
@@ -143,18 +143,13 @@ class TruckPage extends Component {
                     });
                 }),
 
-            axios
-                .get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
-                    auth: {
-                        username: this.props.auth.email,
-                        password: this.props.auth.password,
-                    },
-                })
+            requests
+                .getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, this.props.auth)
                 .then(res => {
                     this.setState({
                         userId: res.data.id,
                     });
-                    axios
+                    requests
                         .get(
                             `${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/subscriptions/${this.props.router.query.truck_id}`
                         )
@@ -200,13 +195,12 @@ class TruckPage extends Component {
         };
         console.log(this.state.reviewComment);
         console.log(review.comment);
-        axios
-            .post(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`, review, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password,
-                },
-            })
+        requests
+            .postWithAuth(
+                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`,
+                review,
+                this.props.auth
+            )
             .then(() => {
                 console.log('created review!');
             })
@@ -257,16 +251,11 @@ class TruckPage extends Component {
             );
         } else {
             if (!this.state.subscribed) {
-                axios
-                    .post(
+                requests
+                    .postWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/subscriptions/${this.state.truck.id}`,
                         {},
-                        {
-                            auth: {
-                                username: this.props.auth.email,
-                                password: this.props.auth.password,
-                            },
-                        }
+                        this.props.auth
                     )
                     .then(() => {
                         this.setState({
@@ -275,15 +264,10 @@ class TruckPage extends Component {
                     })
                     .catch(err => console.log(err));
             } else {
-                axios
-                    .delete(
+                requests
+                    .deleteWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/subscriptions/${this.state.truck.id}`,
-                        {
-                            auth: {
-                                username: this.props.auth.email,
-                                password: this.props.auth.password,
-                            },
-                        }
+                        this.props.auth
                     )
                     .then(() => {
                         this.setState({

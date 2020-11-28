@@ -18,16 +18,15 @@ import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
-import axios from 'axios';
+import requests from '../../util/requests';
 import { logout as authLogout } from '../../redux/actions/auth';
 import { connect } from 'react-redux';
 import {
     CheckBox,
     CheckBoxOutlined,
-    Flag,
-    FlagOutlined,
     AttachFile as AttachFileIcon,
-    EmailOutlined, DraftsOutlined
+    EmailOutlined,
+    DraftsOutlined,
 } from '@material-ui/icons';
 
 function descendingComparator(a, b, orderBy) {
@@ -139,7 +138,7 @@ const useToolbarStyles = makeStyles(theme => ({
 const EnhancedTableToolbar = props => {
     const classes = useToolbarStyles();
     const { numSelected } = props;
-    
+
     const markAllAsRead = () => {
         props.markAllAsRead ? props.markAllAsRead() : undefined;
     };
@@ -149,44 +148,44 @@ const EnhancedTableToolbar = props => {
     };
 
     return (
-    <Toolbar
-        className={clsx(classes.root, {
-            [classes.highlight]: numSelected > 0,
-        })}
-    >
-      {numSelected > 0 ? (
-        <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
-          {numSelected} selected
-        </Typography>
-      ) : (
-        <Typography className={classes.title} variant="h4" id="tableTitle" component="div">
-            Notifications
-        </Typography>
-      )}
+        <Toolbar
+            className={clsx(classes.root, {
+                [classes.highlight]: numSelected > 0,
+            })}
+        >
+            {numSelected > 0 ? (
+                <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
+                    {numSelected} selected
+                </Typography>
+            ) : (
+                <Typography className={classes.title} variant="h4" id="tableTitle" component="div">
+                    Notifications
+                </Typography>
+            )}
 
-      {numSelected > 0 ? (
-        <Fragment>
-            <Tooltip title="Read">
-                <IconButton aria-label="read" onClick={markAllAsRead}>
-                    <CheckBoxOutlined />
-                </IconButton>
-            </Tooltip>
-            <Tooltip title="Unread">
-                <IconButton aria-label="unread" onClick={markAllAsUnread}>
-                    <CheckBox />
-                </IconButton>
-            </Tooltip>
-        </Fragment>
-      ) : (
-        // <Tooltip title="Filter list">
-        //   <IconButton aria-label="filter list">
-        //     <FilterListIcon />
-        //   </IconButton>
-        // </Tooltip>
-        <div></div>
-      )}
-    </Toolbar>
-  );
+            {numSelected > 0 ? (
+                <Fragment>
+                    <Tooltip title="Read">
+                        <IconButton aria-label="read" onClick={markAllAsRead}>
+                            <CheckBoxOutlined />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Unread">
+                        <IconButton aria-label="unread" onClick={markAllAsUnread}>
+                            <CheckBox />
+                        </IconButton>
+                    </Tooltip>
+                </Fragment>
+            ) : (
+                // <Tooltip title="Filter list">
+                //   <IconButton aria-label="filter list">
+                //     <FilterListIcon />
+                //   </IconButton>
+                // </Tooltip>
+                <div></div>
+            )}
+        </Toolbar>
+    );
 };
 
 EnhancedTableToolbar.propTypes = {
@@ -222,7 +221,7 @@ const notificationStyles = theme => ({
     },
 });
 
-function createData(unread, truck_name, subject, date, id, description, media ) {
+function createData(unread, truck_name, subject, date, id, description, media) {
     return { unread, truck_name, subject, date, id, description, media };
 }
 
@@ -251,17 +250,12 @@ class Notifications extends Component {
             this.state.selected
                 .map(id => this.state.rows.find(row => row.id === id))
                 .map(not => {
-                    axios.patch(
+                    requests.patchWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${not.id}`,
                         {
                             unread: false,
                         },
-                        {
-                            auth: {
-                                username: this.props.auth.email,
-                                password: this.props.auth.password,
-                            },
-                        }
+                        this.props.auth
                     );
                 })
         )
@@ -274,17 +268,12 @@ class Notifications extends Component {
             this.state.selected
                 .map(id => this.state.rows.find(row => row.id === id))
                 .map(not => {
-                    axios.patch(
+                    requests.patchWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${not.id}`,
                         {
                             unread: true,
                         },
-                        {
-                            auth: {
-                                username: this.props.auth.email,
-                                password: this.props.auth.password,
-                            },
-                        }
+                        this.props.auth
                     );
                 })
         )
@@ -293,30 +282,23 @@ class Notifications extends Component {
     }
 
     fetchData() {
-        axios
-            .get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password,
-                },
-            })
+        requests
+            .getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, this.props.auth)
             .then(res => {
                 this.setState({
                     userId: res.data.id,
                 });
-                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/notifications`, {
-                    auth: {
-                        username: this.props.auth.email,
-                        password: this.props.auth.password,
-                    },
-                });
+                return requests.getWithAuth(
+                    `${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/notifications`,
+                    this.props.auth
+                );
             })
             .then(res => {
                 this.setState({
                     rows: res.data.map(not =>
                         createData(
                             not.unread,
-                            not.truck?.name || "",
+                            not.truck?.name || '',
                             not.subject,
                             not.postedTimestamp,
                             not.id,
@@ -354,38 +336,27 @@ class Notifications extends Component {
         });
     }
 
-    handleClose(event) {
+    handleClose() {
         this.setState({
             open: false,
             // selectedNotification: undefined
         });
     }
 
-    handleClick = (event, id) => {
+    handleClick(_event, id) {
         this.setState({
             open: true,
             selectedNotification: this.state.rows.find(row => row.id === id),
         });
 
-        axios.patch(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${id}`, {
-            unread: false
-        }, {
-            auth: {
-                username: this.props.auth.email,
-                password: this.props.auth.password
-            }
-        })
-        .then(res => {
-            const i = this.state.rows.findIndex(row => row.id === id);
-            this.setState({
-                rows: [
-                    ...this.state.rows.slice(0, i),
-                    {
-                        ...this.state.rows[i],
-                        unread: false
-                    },
-                ]}
-            )})
+        requests
+            .patchWithAuth(
+                `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${id}`,
+                {
+                    unread: false,
+                },
+                this.props.auth
+            )
             .then(() => {
                 const i = this.state.rows.findIndex(row => row.id === id);
                 this.setState({
@@ -468,69 +439,79 @@ class Notifications extends Component {
                         markAllAsUnread={this.markAllAsUnread}
                     />
                     <TableContainer>
-                    <Table
-                        className={classes.table}
-                        aria-labelledby="tableTitle"
-                        size={this.state.dense ? 'small' : 'medium'}
-                        aria-label="enhanced table"
-                    >
-                        <colgroup>
-                            <col style={{width:'5%'}}/>
-                            <col style={{width:'5%'}}/>
-                            <col style={{width:'15%'}}/>
-                            <col style={{width:'55%'}}/>
-                            <col style={{width:'20%'}}/>
-                        </colgroup>
-                        <EnhancedTableHead
-                            classes={classes}
-                            numSelected={this.state.selected.length}
-                            order={this.state.order}
-                            orderBy={this.state.orderBy}
-                            onSelectAllClick={this.handleSelectAllClick}
-                            onRequestSort={this.handleRequestSort}
-                            rowCount={this.state.rows.length}
-                        />
-                        <TableBody>
-                        {stableSort(this.state.rows, getComparator(this.state.order, this.state.orderBy))
-                            .slice(this.state.page * this.state.rowsPerPage, this.state.page * this.state.rowsPerPage + this.state.rowsPerPage)
-                            .map((row, index) => {
-                            const isItemSelected = this.isSelected(row.id);
-                            const labelId = `enhanced-table-checkbox-${index}`;
+                        <Table
+                            className={classes.table}
+                            aria-labelledby="tableTitle"
+                            size={this.state.dense ? 'small' : 'medium'}
+                            aria-label="enhanced table"
+                        >
+                            <colgroup>
+                                <col style={{ width: '5%' }} />
+                                <col style={{ width: '5%' }} />
+                                <col style={{ width: '15%' }} />
+                                <col style={{ width: '55%' }} />
+                                <col style={{ width: '20%' }} />
+                            </colgroup>
+                            <EnhancedTableHead
+                                classes={classes}
+                                numSelected={this.state.selected.length}
+                                order={this.state.order}
+                                orderBy={this.state.orderBy}
+                                onSelectAllClick={this.handleSelectAllClick}
+                                onRequestSort={this.handleRequestSort}
+                                rowCount={this.state.rows.length}
+                            />
+                            <TableBody>
+                                {stableSort(this.state.rows, getComparator(this.state.order, this.state.orderBy))
+                                    .slice(
+                                        this.state.page * this.state.rowsPerPage,
+                                        this.state.page * this.state.rowsPerPage + this.state.rowsPerPage
+                                    )
+                                    .map((row, index) => {
+                                        const isItemSelected = this.isSelected(row.id);
+                                        const labelId = `enhanced-table-checkbox-${index}`;
 
-                            return (
-                                <TableRow
-                                hover
-                                onClick={(event) => this.handleClick(event, row.id)}
-                                role="checkbox"
-                                aria-checked={isItemSelected}
-                                tabIndex={-1}
-                                key={row.id}
-                                selected={isItemSelected}
-                                >
-                                    <TableCell padding="checkbox">
-                                        <Checkbox
-                                        checked={isItemSelected}
-                                        inputProps={{ 'aria-labelledby': labelId }}
-                                        onChange={event => this.handleSelectionChange(event, row.id)}
-                                        onClick={event => this.handleSelectClick(event, row.id)}
-                                        />
-                                    </TableCell>
-                                    <TableCell padding="none">
-                                        {row.unread ? <EmailOutlined/> : <DraftsOutlined/> }
-                                    </TableCell>
-                                    <TableCell>{row.truck_name}</TableCell>
-                                    <TableCell>{row.subject} {row.media && <AttachFileIcon style={{height:'20px',marginBottom:'-5px'}}/>} </TableCell>
-                                    <TableCell align="right">{row.date}</TableCell>
-                                </TableRow>
-                            );
-                            })}
-                        {emptyRows > 0 && (
-                            <TableRow style={{ height: (this.state.dense ? 33 : 53) * emptyRows }}>
-                            <TableCell colSpan={6} />
-                            </TableRow>
-                        )}
-                        </TableBody>
-                    </Table>
+                                        return (
+                                            <TableRow
+                                                hover
+                                                onClick={event => this.handleClick(event, row.id)}
+                                                role="checkbox"
+                                                aria-checked={isItemSelected}
+                                                tabIndex={-1}
+                                                key={row.id}
+                                                selected={isItemSelected}
+                                            >
+                                                <TableCell padding="checkbox">
+                                                    <Checkbox
+                                                        checked={isItemSelected}
+                                                        inputProps={{ 'aria-labelledby': labelId }}
+                                                        onChange={event => this.handleSelectionChange(event, row.id)}
+                                                        onClick={event => this.handleSelectClick(event, row.id)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell padding="none">
+                                                    {row.unread ? <EmailOutlined /> : <DraftsOutlined />}
+                                                </TableCell>
+                                                <TableCell>{row.truck_name}</TableCell>
+                                                <TableCell>
+                                                    {row.subject}{' '}
+                                                    {row.media && (
+                                                        <AttachFileIcon
+                                                            style={{ height: '20px', marginBottom: '-5px' }}
+                                                        />
+                                                    )}{' '}
+                                                </TableCell>
+                                                <TableCell align="right">{row.date}</TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                {emptyRows > 0 && (
+                                    <TableRow style={{ height: (this.state.dense ? 33 : 53) * emptyRows }}>
+                                        <TableCell colSpan={6} />
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
                     </TableContainer>
                     <TablePagination
                         rowsPerPageOptions={[5, 10, 25]}
@@ -549,9 +530,15 @@ class Notifications extends Component {
                     aria-labelledby="dialog-title"
                     aria-describedby="dialog-description"
                 >
-                    <DialogTitle id="dialog-title">{this.state.selectedNotification?.subject}{this.state.selectedNotification?.truck_name && ` - ${this.state.selectedNotification?.truck_name}`}</DialogTitle>
+                    <DialogTitle id="dialog-title">
+                        {this.state.selectedNotification?.subject}
+                        {this.state.selectedNotification?.truck_name &&
+                            ` - ${this.state.selectedNotification?.truck_name}`}
+                    </DialogTitle>
                     <DialogContent dividers>
-                        {this.state.selectedNotification?.description?.split('\n').map((par, i) => <DialogContentText key={i}>{par}</DialogContentText>)}
+                        {this.state.selectedNotification?.description?.split('\n').map((par, i) => (
+                            <DialogContentText key={i}>{par}</DialogContentText>
+                        ))}
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleClose} color="primary">
@@ -570,8 +557,8 @@ Notifications.propTypes = {
 };
 
 function mapStateToProps(state) {
-    const { auth } = state
-    return { auth }
+    const { auth } = state;
+    return { auth };
 }
 
 const mapDispatchToProps = {
