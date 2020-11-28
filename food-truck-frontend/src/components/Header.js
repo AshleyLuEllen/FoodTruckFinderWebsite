@@ -157,7 +157,7 @@ function Header(props) {
                     !router.asPath.startsWith('/maintenance')
                 ) {
                     setTransferToMaintenancePage(true);
-                } else if (err.response.status == 401) {
+                } else if (err.response?.status == 401) {
                     props.authLogout();
                 }
             });
