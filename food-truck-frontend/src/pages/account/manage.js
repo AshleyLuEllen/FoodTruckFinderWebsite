@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import * as requests from 'requests';
 
 import { TextField, Container, Grid, Button } from '@material-ui/core';
 
@@ -27,13 +27,8 @@ function ManageAccountPage(props) {
     const avatarInputRef = useRef(null);
 
     useEffect(() => {
-        axios
-            .get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
-                auth: {
-                    username: props.auth.email,
-                    password: props.auth.password,
-                },
-            })
+        requests
+            .getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, props.auth)
             .then(res => {
                 setEmail(res.data.emailAddress);
                 setFirstName(res.data.firstName);
@@ -48,18 +43,13 @@ function ManageAccountPage(props) {
 
     function submitEmailChange() {
         if (email === confEmail) {
-            axios
-                .patch(
+            requests
+                .patchWithAuth(
                     `${process.env.FOOD_TRUCK_API_URL}/users/me`,
                     {
                         emailAddress: email,
                     },
-                    {
-                        auth: {
-                            username: props.auth.email,
-                            password: props.auth.password,
-                        },
-                    }
+                    props.auth
                 )
                 .then(() => {
                     alert('Email changed!');
@@ -76,18 +66,13 @@ function ManageAccountPage(props) {
 
     function submitPasswordChange() {
         if (props.auth.password === oldPassword && password !== '' && password === confPassword) {
-            axios
-                .patch(
+            requests
+                .patchWithAuth(
                     `${process.env.FOOD_TRUCK_API_URL}/users/me`,
                     {
                         password,
                     },
-                    {
-                        auth: {
-                            username: props.auth.email,
-                            password: props.auth.password,
-                        },
-                    }
+                    props.auth
                 )
                 .then(() => {
                     alert('Password changed!');
@@ -105,14 +90,10 @@ function ManageAccountPage(props) {
         const formData = new FormData();
         formData.append('file', avatar);
 
-        axios
-            .put(`${process.env.FOOD_TRUCK_API_URL}/media/profiles/me`, formData, {
+        requests
+            .putWithAuth(`${process.env.FOOD_TRUCK_API_URL}/media/profiles/me`, formData, props.auth, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                },
-                auth: {
-                    username: props.auth.email,
-                    password: props.auth.password,
                 },
             })
             .then(() => {
@@ -122,20 +103,15 @@ function ManageAccountPage(props) {
                 console.log(err);
             });
 
-        axios
-            .patch(
+        requests
+            .patchWithAuth(
                 `${process.env.FOOD_TRUCK_API_URL}/users/me`,
                 {
                     firstName,
                     lastName,
                     description: bio,
                 },
-                {
-                    auth: {
-                        username: props.auth.email,
-                        password: props.auth.password,
-                    },
-                }
+                props.auth
             )
             .then(() => {
                 alert('Information changed!');

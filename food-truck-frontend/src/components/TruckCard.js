@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import axios from 'axios';
+import * as requests from '../util/requests';
 import { connect } from 'react-redux';
 import clsx from 'clsx';
 
@@ -53,8 +53,8 @@ function TruckCard(props) {
 
     useEffect(() => {
         if (props.userId)
-            axios
-                .get(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/subscriptions/${props.truck.id}`)
+            requests
+                ._get(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/subscriptions/${props.truck.id}`)
                 .then(() => {
                     setSubscribed(true);
                 })
@@ -70,29 +70,22 @@ function TruckCard(props) {
             );
         } else {
             if (!subscribed) {
-                axios
-                    .post(
+                requests
+                    .postWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/subscriptions/${props.truck.id}`,
                         {},
-                        {
-                            auth: {
-                                username: props.auth.email,
-                                password: props.auth.password,
-                            },
-                        }
+                        props.auth
                     )
                     .then(() => {
                         setSubscribed(true);
                     })
                     .catch(err => console.log(err));
             } else {
-                axios
-                    .delete(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/subscriptions/${props.truck.id}`, {
-                        auth: {
-                            username: props.auth.email,
-                            password: props.auth.password,
-                        },
-                    })
+                requests
+                    .deleteWithAuth(
+                        `${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/subscriptions/${props.truck.id}`,
+                        props.auth
+                    )
                     .then(() => {
                         setSubscribed(false);
                     })
