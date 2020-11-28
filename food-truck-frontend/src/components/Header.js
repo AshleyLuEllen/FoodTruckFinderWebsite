@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import * as requests from '../util/requests';
 import { useRouter } from 'next/router';
 import { connect } from 'react-redux';
 import { logout as authLogout } from '../redux/actions/auth';
@@ -137,20 +137,13 @@ function Header(props) {
     };
 
     React.useEffect(() => {
-        axios
-            .get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
-                auth: {
-                    username: props.auth.email,
-                    password: props.auth.password,
-                },
-            })
+        requests
+            .getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, props.auth)
             .then(res => {
-                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/notifications/unread`, {
-                    auth: {
-                        username: props.auth.email,
-                        password: props.auth.password,
-                    },
-                });
+                return requests.getWithAuth(
+                    `${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/notifications/unread`,
+                    props.auth
+                );
             })
             .then(res => {
                 console.log(res.data);
