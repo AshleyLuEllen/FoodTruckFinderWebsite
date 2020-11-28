@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'next/router';
 import axios from 'axios';
+import * as requests from '../util/requests';
 import { connect } from 'react-redux';
 import { login as authLogin, logout as authLogout } from '../redux/actions/auth';
 
@@ -48,15 +49,20 @@ class Login extends React.Component {
     handleSubmit(event) {
         event.preventDefault();
 
+        let jwt;
+
         axios
-            .get(`${process.env.FOOD_TRUCK_API_URL}/basicauth`, {
-                auth: {
-                    username: this.state.email,
-                    password: this.state.password,
-                },
+            .post(`${process.env.FOOD_TRUCK_API_URL}/login`, {
+                emailAddress: this.state.email,
+                password: this.state.password,
             })
+            .then(() =>
+                requests.getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
+                    jwt,
+                })
+            )
             .then(() => {
-                this.props.authLogin(this.state.email, this.state.password);
+                this.props.authLogin(jwt);
                 this.props.router.push('/');
             })
             .catch(err => {
@@ -124,6 +130,7 @@ class Login extends React.Component {
 }
 
 Login.propTypes = {
+    auth: PropTypes.any,
     authLogin: PropTypes.func,
     authLogout: PropTypes.func,
     classes: PropTypes.any,
