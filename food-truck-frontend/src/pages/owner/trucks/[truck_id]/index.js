@@ -313,7 +313,7 @@ class Information extends Component {
                                     this.handlePaymentTagChange(value);
                                 }}
                                 onSelectOption={t => {
-                                    if (this.state.paymentTags.length < 2) {
+                                    if (this.state.paymentTruckTags.length < 2) {
                                         axios
                                             .post(
                                                 `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
