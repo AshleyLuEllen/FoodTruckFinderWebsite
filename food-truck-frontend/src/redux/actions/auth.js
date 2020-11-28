@@ -5,7 +5,12 @@ export const ACTION_UPDATE = 'AUTH_UPDATE';
 export function login(jwt) {
     return {
         type: ACTION_LOGIN,
+<<<<<<< HEAD
         jwt,
+=======
+        email,
+        password,
+>>>>>>> media
     };
 }
 
@@ -18,6 +23,11 @@ export function logout() {
 export function authUpdate(jwt) {
     return {
         type: ACTION_UPDATE,
+<<<<<<< HEAD
         jwt,
+=======
+        email,
+        password,
+>>>>>>> media
     };
 }

@@ -9,7 +9,6 @@ import {
     Card,
     CardHeader,
     TextField,
-    InputLabel,
     DialogActions,
     DialogContent,
     DialogContentText,
@@ -36,6 +35,7 @@ class NotificationPage extends Component {
             truckFound: false,
 
             openNotification: 1,
+            openNotObj: undefined,
             open: false,
             openCreate: false,
             subject: '',
@@ -54,30 +54,52 @@ class NotificationPage extends Component {
 
     handleClick(notification) {
         if (notification !== null) {
-            axios
-                .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.truckID}/notifications/${notification.id}`)
-                .then(res => {
-                    this.setState({
-                        openNotification: notification.id,
-                        open: true,
-                        subject: res.data.subject,
-                        description: res.data.description,
-                        published: res.data.published,
-                        postedTimestamp: res.data.postedTimestamp,
-                    });
-                    console.log(this.state);
-                    this.fetchData();
-                })
-                .catch(err => console.log(err.message));
+            this.setState({
+                openNotification: notification.id,
+                openNotObj: { ...notification },
+                open: true,
+                subject: notification.subject,
+                description: notification.description,
+                published: notification.published,
+                postedTimestamp: notification.postedTimestamp,
+            });
         } else {
             this.setState({
                 openNotification: undefined,
+                openNotObj: undefined,
                 openCreate: true,
                 subject: '',
                 description: '',
                 published: false,
             });
         }
+    }
+
+    handleMediaUpload(notId) {
+        if (!this.state.media) {
+            return new Promise();
+        }
+
+        const formData = new FormData();
+        formData.append('file', this.state.media);
+
+        return axios
+            .put(`${process.env.FOOD_TRUCK_API_URL}/notifications/${notId}/media`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                auth: {
+                    username: this.props.auth.email,
+                    password: this.props.auth.password,
+                },
+            })
+            .then(() => {
+                console.log('Success');
+                this.setState({ media: undefined });
+            });
+        // .catch(err => {
+        //     console.log(err);
+        // });
     }
 
     handleClose(option) {
@@ -100,19 +122,22 @@ class NotificationPage extends Component {
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
                     notification
                 )
-                .then(() => {
+                .then(res => {
                     console.log('Notification saved!');
+                    console.log(res);
+                    return this.handleMediaUpload(res.data.id);
+                })
+                .then(() => {
                     this.fetchData();
+                    this.setState({
+                        openNotification: undefined,
+                        open: false,
+                        openCreate: false,
+                        subject: '',
+                        description: '',
+                    });
                 })
                 .catch(err => console.log(err.message));
-
-            this.setState({
-                openNotification: undefined,
-                open: false,
-                openCreate: false,
-                subject: '',
-                description: '',
-            });
         } else if (this.state.openCreate) {
             console.log('Creating notification');
 
@@ -135,19 +160,23 @@ class NotificationPage extends Component {
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`,
                     notification
                 )
+                .then(res => {
+                    console.log('Notification saved!');
+                    console.log(res);
+                    return this.handleMediaUpload(res.data.id);
+                })
                 .then(() => {
                     console.log('Notification saved!');
                     this.fetchData();
+                    this.setState({
+                        openNotification: undefined,
+                        open: false,
+                        openCreate: false,
+                        subject: '',
+                        description: '',
+                    });
                 })
                 .catch(err => console.log(err.message));
-
-            this.setState({
-                openNotification: undefined,
-                open: false,
-                openCreate: false,
-                subject: '',
-                description: '',
-            });
         }
     }
 
@@ -241,12 +270,12 @@ class NotificationPage extends Component {
                             {n.published && (
                                 <CardHeader subheader={format(new Date(n.postedTimestamp), 'HH:mm, MM-dd-yyyy')} />
                             )}
-                            <Typography align="left" variant="body3" component="p">
+                            <Typography align="left" variant="body2" component="p">
                                 {n.description}
                             </Typography>
                         </CardContent>
                         <CardActions>
-                            <Button onClick={() => this.handleClick(n)} color="primary" variant="outlined">
+                            <Button onClick={() => this.handleClick(n)} color="primary" variant="contained">
                                 {' '}
                                 Manage{' '}
                             </Button>
@@ -256,57 +285,77 @@ class NotificationPage extends Component {
                 <Dialog open={this.state.open || this.state.openCreate} aria-labelledby="form-dialog-title">
                     <DialogTitle id="form-dialog-title">Manage Notification</DialogTitle>
                     <DialogContent>
-                        <DialogContentText>
-                            Click &quot;Publish&quot; to publish or &quot;Save&quot; to save and publish later. If
-                            already published, you may only &quot;Delete&quot;.
-                        </DialogContentText>
+                        {!this.state.published && (
+                            <DialogContentText>
+                                Click &quot;Publish&quot; to publish or &quot;Save&quot; to save and publish later. If
+                                already published, you may only &quot;Delete&quot;.
+                            </DialogContentText>
+                        )}
                         <TextField
                             autoFocus
                             margin="dense"
                             id="subject"
                             label="Subject"
-                            type="email"
+                            variant="outlined"
                             fullWidth={true}
+                            disabled={this.state.published}
                             defaultValue={this.state.subject}
                             onChange={e => this.handleInputChange(e, 'subject')}
                         />
-                        <InputLabel></InputLabel>
                         <TextField
                             id="description"
                             label="Description"
                             multiline
                             rows={4}
+                            variant="outlined"
                             fullWidth={true}
+                            disabled={this.state.published}
                             defaultValue={this.state.description}
                             onChange={e => this.handleInputChange(e, 'description')}
                         />
+                        {!this.state.published && (
+                            <div>
+                                <Button variant="contained" component="label" style={{ width: 'auto', height: 'auto' }}>
+                                    Upload Media
+                                    <input
+                                        type="file"
+                                        style={{ display: 'none' }}
+                                        ref={this.mediaInputRef}
+                                        accept="image/jpeg,image/png,image/gif"
+                                        onChange={e => this.setState({ media: e.target.files[0] })}
+                                    />
+                                </Button>
+                                {this.state.media && `Selected file: ${this.state.media.name}`}
+                            </div>
+                        )}
+                        {this.state.openNotObj?.media && <img src={this.state.openNotObj.media.url}></img>}
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.handleCancel} color="primary" variant="outlined">
+                        <Button onClick={this.handleCancel} color="primary" variant="contained">
                             Cancel
                         </Button>
                         {!this.state.published && (
-                            <Button onClick={() => this.handleClose(false)} color="primary" variant="outlined">
+                            <Button onClick={() => this.handleClose(false)} color="primary" variant="contained">
                                 Save
                             </Button>
                         )}
                         {!this.state.published && (
-                            <Button onClick={() => this.handleClose(true)} color="primary" variant="outlined">
+                            <Button onClick={() => this.handleClose(true)} color="primary" variant="contained">
                                 Publish
                             </Button>
                         )}
-                        {!this.state.published && (
-                            <Button onClick={this.handleDelete} color="primary" variant="outlined">
+                        {!this.state.published && !this.state.openCreate && (
+                            <Button onClick={this.handleDelete} color="secondary" variant="contained">
                                 Delete
                             </Button>
                         )}
                     </DialogActions>
                 </Dialog>
-                <Button onClick={() => this.handleClick(null)} variant="outlined">
+                <Button onClick={() => this.handleClick(null)} variant="contained">
                     {' '}
                     +{' '}
                 </Button>
-                <Button href={`/owner/trucks/${this.props.router.query.truck_id}`} variant="outlined">
+                <Button href={`/owner/trucks/${this.props.router.query.truck_id}`} variant="contained">
                     {' '}
                     Back{' '}
                 </Button>

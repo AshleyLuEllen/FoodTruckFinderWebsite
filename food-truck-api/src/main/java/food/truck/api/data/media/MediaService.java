@@ -21,5 +21,9 @@ public class MediaService {
     public Media createMedia(Media media) {
         return mediaRepository.save(media);
     }
+
+    public void deleteMedia(Media media) {
+        mediaRepository.delete(media);
+    }
 }
 

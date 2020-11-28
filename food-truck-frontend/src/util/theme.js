@@ -1,9 +1,9 @@
 import React from 'react';
-import {createMuiTheme, ThemeProvider, StylesProvider, jssPreset, withStyles} from '@material-ui/core/styles';
-import {create} from 'jss';
+import { createMuiTheme, ThemeProvider, StylesProvider, jssPreset } from '@material-ui/core/styles';
+import { create } from 'jss';
 import rtl from 'jss-rtl';
 
-const jss = create({plugins: [...jssPreset().plugins, rtl()]});
+const jss = create({ plugins: [...jssPreset().plugins, rtl()] });
 
 const themeOptions = {
     typography: {
@@ -15,8 +15,8 @@ const themeOptions = {
         marginTop: 2,
         marginBottom: 2,
         body2: {
-            fontSize: 14
-        }
+            fontSize: 14,
+        },
     },
     shape: {
         borderRadius: 5,
@@ -33,23 +33,22 @@ const themeOptions = {
             //     // height: '48px',
             // },
             outlinedPrimary: {
-                border: '2px solid'
+                border: '2px solid',
             },
             outlinedSecondary: {
-                border: '2px solid'
+                border: '2px solid',
             },
         },
-    }
+    },
 };
 
 export const theme = createMuiTheme(themeOptions);
 
-export const FoodTruckThemeProvider = ({children}) => {
+// eslint-disable-next-line react/prop-types
+export const FoodTruckThemeProvider = ({ children }) => {
     return (
         <StylesProvider jss={jss}>
-            <ThemeProvider theme={theme}>
-                {children}
-            </ThemeProvider>
+            <ThemeProvider theme={theme}>{children}</ThemeProvider>
         </StylesProvider>
     );
 };
