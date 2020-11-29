@@ -20,6 +20,7 @@ import {
     DialogContentText,
     DialogTitle,
     Paper,
+    CircularProgress,
 } from '@material-ui/core';
 import { Add, Delete } from '@material-ui/icons';
 import { DateTimePicker } from '@material-ui/pickers';
@@ -179,9 +180,7 @@ const scheduleStyles = () => ({
         alignItems: 'center',
         height: 'calc(87vh - 51px)',
     },
-    progress: {
-        margin: '0 auto',
-    },
+    progress: { position: 'absolute', top: '50%', left: '50%', marginTop: -32, marginLeft: -32 },
     breadcrumb: {
         textDecoration: 'none',
     },
@@ -409,7 +408,7 @@ class ScheduleManagementPage extends Component {
                     </Breadcrumbs>
                     <Grid container spacing={0}>
                         <Grid item xs={12} md={6}>
-                            <Box style={{ textAlign: 'left', overflow: 'auto' }}>
+                            <Box style={{ textAlign: 'left', overflow: 'auto', position: 'relative' }}>
                                 <EnhancedTable
                                     columns={columns}
                                     rowActions={rowActions}
@@ -424,10 +423,11 @@ class ScheduleManagementPage extends Component {
                                         this.setState({ upcomingSelected: data });
                                     }}
                                 />
+                                {this.state.loading && <CircularProgress className={classes.progress} size={64} />}
                             </Box>
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <Box style={{ textAlign: 'left', overflow: 'auto' }}>
+                            <Box style={{ textAlign: 'left', overflow: 'auto', position: 'relative' }}>
                                 <EnhancedTable
                                     columns={columns}
                                     rowActions={rowActions.slice(1)}
@@ -438,6 +438,7 @@ class ScheduleManagementPage extends Component {
                                     orderBy="timeFrom"
                                     onSelectionChange={data => this.setState({ pastSelected: data })}
                                 />
+                                {this.state.loading && <CircularProgress className={classes.progress} size={64} />}
                             </Box>
                         </Grid>
                         {/* <Grid item xs={12} md={12}>
