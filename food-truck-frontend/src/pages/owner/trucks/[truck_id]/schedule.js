@@ -21,10 +21,12 @@ import {
     DialogTitle,
     Paper,
     CircularProgress,
+    Snackbar,
 } from '@material-ui/core';
 import { Add, Delete } from '@material-ui/icons';
 import { DateTimePicker } from '@material-ui/pickers';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
+import { Alert } from '@material-ui/lab';
 import Draggable from 'react-draggable';
 import EnhancedTable from '../../../../components/tables/EnhancedTable';
 import LocationInput from '../../../../components/LocationInput';
@@ -78,8 +80,6 @@ function DraggableDialog(props) {
             return;
         }
 
-        console.log(resultLocationStr);
-
         props.onSave &&
             props.onSave({
                 placeId,
@@ -112,7 +112,6 @@ function DraggableDialog(props) {
                         onChange={(event, newValue) => {
                             setPlaceId(newValue?.place_id);
                             setLocationChanged(true);
-                            console.log(newValue);
                             setResultLocationStr(newValue?.structured_formatting?.main_text || newValue?.description);
                         }}
                         required
@@ -198,6 +197,9 @@ class ScheduleManagementPage extends Component {
             initialData: undefined,
             upcomingSelected: [],
             pastSelected: [],
+            errorOpen: false,
+            errorMsg: '',
+            errorSeverity: 'error',
         };
 
         this.fetchData = this.fetchData.bind(this);
@@ -229,7 +231,12 @@ class ScheduleManagementPage extends Component {
                 this.setSchedules(schedules);
             })
             .catch(err => {
-                console.log(err);
+                console.error(err);
+                this.setState({
+                    errorMsg: 'Error: could not fetch schedule data! Check the console for more information.',
+                    errorOpen: true,
+                    loading: false,
+                });
             });
     }
 
@@ -252,7 +259,7 @@ class ScheduleManagementPage extends Component {
         });
     }
 
-    deleteScheduleById(event, id) {
+    deleteScheduleById(_event, id) {
         requests
             .deleteWithAuth(
                 `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${id}`,
@@ -261,7 +268,14 @@ class ScheduleManagementPage extends Component {
             .then(() => {
                 this.setSchedules([...this.state.upcoming, ...this.state.past].filter(s => s.id != id));
             })
-            .catch(err => console.log(err));
+            .catch(err => {
+                console.error(err);
+                this.setState({
+                    errorMsg: 'Error: could not delete schedule! Check the console for more information.',
+                    errorOpen: true,
+                    loading: false,
+                });
+            });
     }
 
     triggerCreation() {
@@ -282,7 +296,6 @@ class ScheduleManagementPage extends Component {
 
     deleteAll(table) {
         const toDelete = table === 'upcoming' ? this.state.upcomingSelected : this.state.pastSelected;
-        console.log('todelete', toDelete);
 
         Promise.all(
             toDelete.map(s => {
@@ -297,11 +310,17 @@ class ScheduleManagementPage extends Component {
                     [...this.state.past, ...this.state.upcoming].filter(s => !toDelete.some(td => s.id == td))
                 );
             })
-            .catch(err => console.log(err));
+            .catch(err => {
+                console.error(err);
+                this.setState({
+                    errorMsg: 'Error: could not delete schedule(s)! Check the console for more information.',
+                    errorOpen: true,
+                    loading: false,
+                });
+            });
     }
 
     handleSave(savedData) {
-        console.log(savedData);
         if (this.state.editing) {
             let schedule = {
                 id: savedData.id,
@@ -326,7 +345,14 @@ class ScheduleManagementPage extends Component {
                     });
                     this.fetchData();
                 })
-                .catch(err => console.log(err));
+                .catch(err => {
+                    console.error(err);
+                    this.setState({
+                        errorMsg: 'Error: could not save schedule data! Check the console for more information.',
+                        errorOpen: true,
+                        loading: false,
+                    });
+                });
         } else {
             let schedule = {
                 timeFrom: savedData.timeFrom,
@@ -347,7 +373,14 @@ class ScheduleManagementPage extends Component {
                     });
                     this.fetchData();
                 })
-                .catch(err => console.log(err));
+                .catch(err => {
+                    console.error(err);
+                    this.setState({
+                        errorMsg: 'Error: could not create schedule! Check the console for more information.',
+                        errorOpen: true,
+                        loading: false,
+                    });
+                });
         }
     }
 
@@ -419,7 +452,6 @@ class ScheduleManagementPage extends Component {
                                     order="asc"
                                     orderBy="timeFrom"
                                     onSelectionChange={data => {
-                                        console.log(data);
                                         this.setState({ upcomingSelected: data });
                                     }}
                                 />
@@ -441,11 +473,6 @@ class ScheduleManagementPage extends Component {
                                 {this.state.loading && <CircularProgress className={classes.progress} size={64} />}
                             </Box>
                         </Grid>
-                        {/* <Grid item xs={12} md={12}>
-                            <div className={classes.mapWrapper}>
-                                <TruckMap trucks={[]} selected={0}/>
-                            </div>
-                        </Grid> */}
                     </Grid>
                 </Container>
                 <DraggableDialog
@@ -454,7 +481,34 @@ class ScheduleManagementPage extends Component {
                     initialData={this.state.initialData}
                     onClose={() => this.setState({ open: false })}
                     onSave={this.handleSave}
-                />
+                />{' '}
+                <Snackbar
+                    open={this.state.errorOpen}
+                    autoHideDuration={5000}
+                    onClose={(_event, reason) => {
+                        if (reason === 'clickaway') {
+                            return;
+                        }
+
+                        this.setState({
+                            errorOpen: false,
+                        });
+                    }}
+                    onExited={() => this.setState({ errorSeverity: 'error' })}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                >
+                    <Alert
+                        variant="filled"
+                        severity={this.state.errorSeverity}
+                        onClose={() => {
+                            this.setState({
+                                errorOpen: false,
+                            });
+                        }}
+                    >
+                        {this.state.errorMsg}
+                    </Alert>
+                </Snackbar>
             </div>
         );
     }
