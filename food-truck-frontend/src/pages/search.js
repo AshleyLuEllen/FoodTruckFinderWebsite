@@ -15,6 +15,7 @@ import TruckCard from '../components/TruckCard';
 import LocationInput from '../components/LocationInput';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import GoogleMap, { Marker } from '../components/GoogleMap';
+import Head from "next/dist/next-server/lib/head";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -202,6 +203,9 @@ function SearchPage(props) {
 
     return (
         <ul>
+            <Head>
+                <title>Search</title>
+            </Head>
             <Container className={classes.root}>
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={5} style={{ position: 'relative' }}>

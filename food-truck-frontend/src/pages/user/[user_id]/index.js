@@ -12,6 +12,7 @@ import FriendAvatar from '../../../components/FriendAvatar';
 import FriendAvatarGroup from '../../../components/FriendAvatarGroup';
 import TruckCard from '../../../components/TruckCard';
 import ReviewCard from '../../../components/ReviewCard';
+import Head from "next/dist/next-server/lib/head";
 
 const styles = theme => ({
     root: {
@@ -135,6 +136,9 @@ class UserPage extends Component {
 
         return (
             <Container style={{ marginTop: '20px', textAlign: 'center' }}>
+                <Head>
+                    <title>{this.state.user?.firstName}'s Page</title>
+                </Head>
                 <Grid container>
                     <Grid item xs={12} md={6}>
                         <Avatar

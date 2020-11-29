@@ -5,6 +5,7 @@ import isEmail from 'validator/lib/isEmail';
 import { useRouter } from 'next/router';
 import { connect, useDispatch } from 'react-redux';
 import { logout as authLogout, authUpdate } from '../../redux/actions/auth';
+import Head from "next/dist/next-server/lib/head";
 
 import {
     TextField,
@@ -276,6 +277,9 @@ function ManageAccountPage(props) {
 
     return (
         <Container className={classes.root}>
+            <Head>
+                <title>Manage Account</title>
+            </Head>
             <Typography variant="h4" style={{ marginBottom: '10px' }}>
                 Manage Account
             </Typography>
