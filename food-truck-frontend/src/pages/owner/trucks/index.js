@@ -11,6 +11,7 @@ import { Add as AddIcon } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 
 import OwnerTruckCard from '../../../components/OwnerTruckCard';
+import Head from "next/dist/next-server/lib/head";
 
 const dashboardStyles = () => ({
     truckCard: {
@@ -80,6 +81,9 @@ class Dashboard extends Component {
         const { classes } = this.props;
         return (
             <div>
+                <Head>
+                    <title>My Trucks</title>
+                </Head>
                 <Typography variant={'h2'}>My Trucks</Typography>
                 <ol>
                     {this.state.truckData.map((tr, i) => (

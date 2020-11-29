@@ -5,6 +5,7 @@ import { logout } from '../redux/actions/auth';
 import axios from 'axios';
 
 import { makeStyles } from '@material-ui/core/styles';
+import Head from "next/dist/next-server/lib/head";
 
 // eslint-disable-next-line no-unused-vars
 const useStyles = makeStyles(theme => ({
@@ -38,6 +39,9 @@ export default function MaintenancePage() {
 
     return (
         <div className={classes.wrapper}>
+            <Head>
+                <title>Connecting...</title>
+            </Head>
             <h1>
                 Could not connect to <em>Food Truck Finder</em> server.
             </h1>

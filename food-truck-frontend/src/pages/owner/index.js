@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { connect } from 'react-redux';
 import axios from 'axios';
 import { logout as authLogout } from '../../redux/actions/auth';
+import Head from "next/dist/next-server/lib/head";
 
 function OwnerDash(props) {
     const router = useRouter();
@@ -39,10 +40,11 @@ function OwnerDash(props) {
     }, []);
 
     return (
-        <ul>
-            <h2>New Owner Dashboard</h2>
-            Want to create a truck? Click <Link href="/owner/trucks/create">here</Link>
-        </ul>
+        <div>
+            <Head>
+                <title>My Trucks</title>
+            </Head>
+        </div>
     );
 }
 

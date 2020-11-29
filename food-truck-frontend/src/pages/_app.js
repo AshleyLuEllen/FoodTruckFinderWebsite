@@ -29,7 +29,7 @@ const FoodTruckApp = ({ Component, pageProps }) => {
         <Provider store={store}>
             <PersistGate loading={null} persistor={persistor}>
                 <Head>
-                    <title>My page</title>
+                    <title>Food Truck Finder</title>
                     <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
                     <link
                         rel="stylesheet"

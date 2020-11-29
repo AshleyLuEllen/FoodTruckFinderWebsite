@@ -21,6 +21,7 @@ import axios from 'axios';
 import { logout as authLogout } from '../../redux/actions/auth';
 import { connect } from 'react-redux';
 import { CheckBox, CheckBoxOutlined, Flag, FlagOutlined } from '@material-ui/icons';
+import Head from "next/dist/next-server/lib/head";
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -64,6 +65,9 @@ function EnhancedTableHead(props) {
 
     return (
         <TableHead>
+            <Head>
+                <title>My Notifications</title>
+            </Head>
             <TableRow>
                 <TableCell padding="checkbox">
                     <Checkbox

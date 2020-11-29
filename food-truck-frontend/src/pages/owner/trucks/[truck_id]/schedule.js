@@ -27,6 +27,7 @@ import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Draggable from 'react-draggable';
 import EnhancedTable from '../../../../components/tables/EnhancedTable';
 import LocationInput from '../../../../components/LocationInput';
+import Head from "next/dist/next-server/lib/head";
 
 function PaperComponent(props) {
     return (
@@ -406,6 +407,9 @@ class ScheduleManagementPage extends Component {
 
         return (
             <div>
+                <Head>
+                    <title>{this.state.truck.name} Schedule</title>
+                </Head>
                 <Container className={classes.root}>
                     <Breadcrumbs aria-label="breadcrumb">
                         <Link href="/owner" passHref>

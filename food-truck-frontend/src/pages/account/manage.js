@@ -7,6 +7,7 @@ import { TextField, Container, Grid, Button } from '@material-ui/core';
 import { useRouter } from 'next/router';
 import { connect, useDispatch } from 'react-redux';
 import { logout as authLogout, authUpdate } from '../../redux/actions/auth';
+import Head from "next/dist/next-server/lib/head";
 
 function ManageAccountPage(props) {
     const router = useRouter();
@@ -147,6 +148,9 @@ function ManageAccountPage(props) {
 
     return (
         <Container>
+            <Head>
+                <title>Manage Account</title>
+            </Head>
             <h1>Manage Account</h1>
             <Grid container spacing={3} style={{ textAlign: 'center' }} justify="center">
                 <Grid item xs={12} sm={6} md={4}>

@@ -31,6 +31,7 @@ import { Rating } from '@material-ui/lab';
 import { MyLocation as MyLocationIcon, ScheduleRounded as ScheduleIconRounded } from '@material-ui/icons';
 
 import ReviewCard from '../../components/ReviewCard';
+import Head from "next/dist/next-server/lib/head";
 
 const truckPageStyles = theme => ({
     text: {
@@ -304,9 +305,14 @@ class TruckPage extends Component {
             <div>
                 {/**TRUCK NAME*/}
                 {this.state.truckFound && (
+                    <div>
+                    <Head>
+                        <title>{this.state.truck.name}</title>
+                    </Head>
                     <Typography variant="h2" align="center">
                         {this.state.truck.name}
                     </Typography>
+                    </div>
                 )}
 
                 {/**TAGS*/}

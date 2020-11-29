@@ -12,6 +12,7 @@ import { CardContent, Grid, TextField } from '@material-ui/core';
 import CardHeader from '@material-ui/core/CardHeader';
 
 import ChipSelector from '../../../../components/ChipSelector';
+import Head from "next/dist/next-server/lib/head";
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -220,6 +221,9 @@ class Information extends Component {
     render() {
         return (
             <div>
+                <Head>
+                    <title>Manage {this.state.truck.name}</title>
+                </Head>
                 <br />
                 <br />
                 {this.state.truckFound && (
