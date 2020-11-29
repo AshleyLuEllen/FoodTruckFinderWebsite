@@ -162,11 +162,10 @@ function Header(props) {
                 );
             })
             .then(res => {
-                console.log(res.data);
                 setNotificationCount(parseInt(res.data));
             })
             .catch(err => {
-                console.log(err);
+                console.error(err);
                 if (
                     // err.includes &&
                     // err.includes('Network Error') &&
