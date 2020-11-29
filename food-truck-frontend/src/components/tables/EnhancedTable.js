@@ -59,6 +59,7 @@ class EnhancedTable extends Component {
         this.handleChangeRowsPerPage = this.handleChangeRowsPerPage.bind(this);
         this.handleSelectAllClick = this.handleSelectAllClick.bind(this);
         this.isSelected = this.isSelected.bind(this);
+        this.handleRequestSort = this.handleRequestSort.bind(this);
     }
 
     componentDidMount() {
