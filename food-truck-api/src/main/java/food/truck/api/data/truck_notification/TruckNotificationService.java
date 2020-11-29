@@ -133,7 +133,7 @@ public class TruckNotificationService {
         TruckNotification notification1 = new TruckNotification();
         notification1.setType(NotificationType.FRIEND);
         notification1.setSubject("You have a new friend!");
-        notification1.setDescription("Your new friend is " + newFriend.getFirstName() + ' ' + newFriend.getLastName() + ".");
+        notification1.setDescription("Your new friend is **" + newFriend.getFirstName() + ' ' + newFriend.getLastName() + "**.");
         notification1.setMedia(null);
         notification1.setUser(user);
         notification1.setPublished(true);
@@ -149,7 +149,7 @@ public class TruckNotificationService {
         TruckNotification notification2 = new TruckNotification();
         notification2.setType(NotificationType.FRIEND);
         notification2.setSubject("You have a new friend following you.");
-        notification2.setDescription(user.getFirstName() + ' ' + user.getLastName() + " just started following you. If you are not friends with them already, you can follow them by clicking [here](/users/" + user.getId() + ").");
+        notification2.setDescription("**" + user.getFirstName() + ' ' + user.getLastName() + "** just started following you. If you are not friends with them already, you can follow them by clicking [here](/users/" + user.getId() + ").");
         notification2.setMedia(null);
         notification2.setUser(newFriend);
         notification2.setPublished(true);
@@ -168,7 +168,7 @@ public class TruckNotificationService {
 
         notification.setType(NotificationType.SUBSCRIPTION);
         notification.setSubject("You have subscribed to a new food truck!");
-        notification.setDescription("You recently subscribed to a new food truck called " + truck.getName() + ". You will now receive notifications from them. View its page [here](/trucks/" + truck.getId() + ").");
+        notification.setDescription("You just subscribed to a new food truck called **" + truck.getName() + "**. You will now receive notifications from them. View its page [here](/trucks/" + truck.getId() + ").");
         notification.setMedia(null);
         notification.setTruck(truck);
         notification.setUser(user);

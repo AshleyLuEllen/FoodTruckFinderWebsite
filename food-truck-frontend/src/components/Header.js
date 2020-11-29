@@ -163,7 +163,7 @@ function Header(props) {
             })
             .then(res => {
                 console.log(res.data);
-                setNotificationCount(res.data.length);
+                setNotificationCount(parseInt(res.data));
             })
             .catch(err => {
                 if (
@@ -245,29 +245,33 @@ function Header(props) {
                         </Tooltip>
                         {props.auth.isLoggedIn && (
                             <div className={classes.sectionDesktop}>
-                                <IconButton
-                                    aria-label={`show ${notificationCount} new notifications`}
-                                    color="inherit"
-                                    href="/account/notifications"
-                                >
-                                    {notificationCount > 0 ? (
-                                        <Badge badgeContent={notificationCount} color="secondary">
+                                <Tooltip title="Notifications">
+                                    <IconButton
+                                        aria-label={`show ${notificationCount} new notifications`}
+                                        color="inherit"
+                                        href="/account/notifications"
+                                    >
+                                        {notificationCount > 0 ? (
+                                            <Badge badgeContent={notificationCount} color="secondary">
+                                                <NotificationsIcon />
+                                            </Badge>
+                                        ) : (
                                             <NotificationsIcon />
-                                        </Badge>
-                                    ) : (
-                                        <NotificationsIcon />
-                                    )}
-                                </IconButton>
-                                <IconButton
-                                    edge="end"
-                                    aria-label="account of current user"
-                                    aria-controls={menuId}
-                                    aria-haspopup="true"
-                                    onClick={handleProfileMenuOpen}
-                                    color="inherit"
-                                >
-                                    <AccountCircle />
-                                </IconButton>
+                                        )}
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Account">
+                                    <IconButton
+                                        edge="end"
+                                        aria-label="account of current user"
+                                        aria-controls={menuId}
+                                        aria-haspopup="true"
+                                        onClick={handleProfileMenuOpen}
+                                        color="inherit"
+                                    >
+                                        <AccountCircle />
+                                    </IconButton>
+                                </Tooltip>
                             </div>
                         )}
                         {!props.auth.isLoggedIn && (

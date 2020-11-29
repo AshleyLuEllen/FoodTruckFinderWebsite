@@ -192,8 +192,8 @@ class Notifications extends Component {
         const rowActions = [{ references: 'id', color: 'primary', label: 'View', action: this.viewNotification }];
 
         const selectedActions = [
-            { title: 'Mark All as Read', icon: <ReadIcon />, action: () => console.log('mark all as read') },
-            { title: 'Mark All as Unread', icon: <UnreadIcon />, action: () => console.log('mark all as unread') },
+            { title: 'Mark all as read', icon: <ReadIcon />, action: this.markAllAsRead },
+            { title: 'Mark all as unread', icon: <UnreadIcon />, action: this.markAllAsUnread },
         ];
 
         const unselectedActions = [];

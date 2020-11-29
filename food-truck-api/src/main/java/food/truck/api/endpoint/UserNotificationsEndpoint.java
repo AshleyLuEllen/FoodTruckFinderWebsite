@@ -56,7 +56,7 @@ public class UserNotificationsEndpoint {
     }
 
     @GetMapping("/users/{userId}/notifications/unread")
-    List<TruckNotification> getUserNotificationsUnread(@PathVariable Long userId, Principal principal) {
+    long getUserNotificationsUnread(@PathVariable Long userId, Principal principal) {
         // check if the user exists
         Optional<User> userOpt = userService.findUser(userId);
         if (userOpt.isEmpty()) {
@@ -75,7 +75,7 @@ public class UserNotificationsEndpoint {
             throw new UnauthorizedException();
         }
 
-        return userNotificationService.findAllNotifications(userOpt.get()).stream().filter(TruckNotification::isUnread).collect(Collectors.toList());
+        return userNotificationService.findAllNotifications(userOpt.get()).stream().filter(TruckNotification::isUnread).count();
     }
 
     @PatchMapping("/users/{userId}/notifications/{notificationId}")
