@@ -6,7 +6,7 @@ import { login as authLogin, logout as authLogout } from '../../../redux/actions
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 
-import { Typography, Button, Box } from '@material-ui/core';
+import { Typography, Button, Box, Container, Grid } from '@material-ui/core';
 import { Add as AddIcon } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -14,8 +14,11 @@ import OwnerTruckCard from '../../../components/OwnerTruckCard';
 import Head from 'next/dist/next-server/lib/head';
 
 const dashboardStyles = () => ({
+    root: {
+        marginTop: '20px',
+    },
     truckCard: {
-        marginBottom: '5px',
+        margin: '10px',
     },
     links: {
         marginLeft: '35px',
@@ -75,36 +78,43 @@ class Dashboard extends Component {
     render() {
         const { classes } = this.props;
         return (
-            <div>
+            <Container className={classes.root}>
                 <Head>
                     <title>My Trucks</title>
                 </Head>
-                <Typography variant={'h2'}>My Trucks</Typography>
-                <ol>
+                <Typography variant="h4" style={{ marginBottom: '0px' }}>
+                    My Trucks
+                </Typography>
+                <Grid container>
                     {this.state.truckData.map((tr, i) => (
-                        <OwnerTruckCard
-                            key={i}
-                            className={classes.truckCard}
-                            truck={tr}
-                            tags={tr.tags.map(tag => tag.tag.name)}
-                            onClick={() => this.setState({ currentlySelected: i })}
-                            userId={this.state.userId}
-                        />
+                        <Grid item xs={12} md={6} key={i}>
+                            <OwnerTruckCard
+                                className={classes.truckCard}
+                                truck={tr}
+                                tags={tr.tags.map(tag => tag.tag.name)}
+                                onClick={() => this.setState({ currentlySelected: i })}
+                                userId={this.state.userId}
+                            />
+                        </Grid>
                     ))}
-                </ol>
-                {this.state.truckData.length > 0 && (
-                    <Box ml={5}>
-                        <Button variant={'contained'} href="/owner/trucks/create">
-                            <AddIcon />
+                    {this.state.truckData.length === 0 && (
+                        <Grid item xs={12}>
+                            <p>Click the button below to create a new truck.</p>
+                        </Grid>
+                    )}
+                    <Grid item xs={12}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            style={{ margin: '10px' }}
+                            href="/owner/trucks/create"
+                        >
+                            <AddIcon style={{ marginRight: '5px' }} />
+                            Create new truck
                         </Button>
-                    </Box>
-                )}
-                {this.state.truckData.length === 0 && (
-                    <Typography className={classes.links} variant={'button'}>
-                        Click <Link href="/owner/trucks/create">here</Link> to add your first Truck!
-                    </Typography>
-                )}
-            </div>
+                    </Grid>
+                </Grid>
+            </Container>
         );
     }
 }

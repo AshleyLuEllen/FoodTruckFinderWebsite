@@ -41,6 +41,7 @@ class Information extends Component {
         };
 
         this.saveInfo = this.saveInfo.bind(this);
+        this.removeTruck = this.removeTruck.bind(this);
     }
 
     fetchData() {
