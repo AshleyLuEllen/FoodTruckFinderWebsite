@@ -21,14 +21,15 @@ function ScheduleCard(props) {
 
     console.log(props.schedules);
     const columns = [
-        { field: 'location', headerName: 'Location', width: '200px'},
-        { field: 'timeFrom', headerName: 'Start Time', width: '350px'},
-        { field: 'timeTo', headerName: 'End Time', width: '350px'},
-    ];
-    const rows = props.schedules.map(s => ({id: s.id, location: s.location,
+        { field: 'location', headerName: 'Location', width: '200px', sortable:false},
+        { field: 'timeFrom', headerName: 'Start Time', type: 'dateTime', width: '350px', sortable: false},
+        { field: 'timeTo', headerName: 'End Time', type: 'dateTime', width: '350px', sortable:false}];
+    const tempRows = props.schedules.sort((a, b) => a.timeFrom > b.timeFrom ? 1 : -1);
+    const rows = tempRows.filter(s => new Date(s.timeFrom) >= Date.now()).map(s => ({id: s.id, location: s.location,
         timeFrom: format(new Date(s.timeFrom), "EEE MMM do, yyyy' at 'hh:mm a"),
         timeTo: format(new Date(s.timeTo), "EEE MMM do, yyyy' at 'hh:mm a")
     }));
+
 
     console.log(rows);
     return (
