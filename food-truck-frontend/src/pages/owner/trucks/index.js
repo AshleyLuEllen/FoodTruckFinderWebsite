@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Link from '@material-ui/core/Link';
 import requests from '../../../util/requests';
 import { login as authLogin, logout as authLogout } from '../../../redux/actions/auth';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 
-import { Typography, Button, Box, Container, Grid } from '@material-ui/core';
+import { Typography, Button, Container, Grid } from '@material-ui/core';
 import { Add as AddIcon } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 

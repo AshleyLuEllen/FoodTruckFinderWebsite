@@ -184,7 +184,6 @@ public class UserNotificationServiceTest {
         TruckNotification tn = this.userNotificationService.findAllNotifications(user).stream()
             .filter(n -> n.getId().equals(notification2.getId()))
             .findFirst().get();
-        assertTrue(tn.isSaved());
         assertFalse(tn.isUnread());
     }
 
@@ -199,7 +198,6 @@ public class UserNotificationServiceTest {
         userNotOpt = this.userNotificationService.findUserNotification(user, notification2);
         assertTrue(userNotOpt.isPresent());
         UserNotification un1 = userNotOpt.get();
-        assertTrue(un1.getSaved());
         assertFalse(un1.getUnread());
 
         patch.setSaved(null);
@@ -208,7 +206,6 @@ public class UserNotificationServiceTest {
         userNotOpt = this.userNotificationService.findUserNotification(user, notification2);
         assertTrue(userNotOpt.isPresent());
         un1 = userNotOpt.get();
-        assertTrue(un1.getSaved());
         assertTrue(un1.getUnread());
 
         patch.setSaved(false);
@@ -217,7 +214,6 @@ public class UserNotificationServiceTest {
         userNotOpt = this.userNotificationService.findUserNotification(user, notification2);
         assertTrue(userNotOpt.isPresent());
         un1 = userNotOpt.get();
-        assertFalse(un1.getSaved());
         assertTrue(un1.getUnread());
 
         patch.setSaved(false);
