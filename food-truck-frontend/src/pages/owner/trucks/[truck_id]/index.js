@@ -432,7 +432,7 @@ class Information extends Component {
                                             variant="contained"
                                             href={`/owner/trucks/${this.props.router.query.truck_id}/schedule`}
                                         >
-                                            <a>Manage Schedule</a>
+                                            Manage Schedule
                                         </Button>
                                     </Box>
                                 </CardContent>

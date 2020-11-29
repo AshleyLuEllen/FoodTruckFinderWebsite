@@ -186,14 +186,14 @@ class Notifications extends Component {
             {
                 id: 'truck_name',
                 align: 'left',
-                width: '250px',
+                width: '300px',
                 disablePadding: false,
                 label: 'Food Truck',
             },
             {
                 id: 'subject',
                 align: 'left',
-                width: '450px',
+                width: '600px',
                 disablePadding: false,
                 label: 'Subject',
             },

@@ -140,7 +140,7 @@ class UserPage extends Component {
         return (
             <Container style={{ marginTop: '20px', textAlign: 'center' }}>
                 <Head>
-                    <title>{this.state.user?.firstName}'s Page</title>
+                    <title>{this.state.user?.firstName}&apos;s Page</title>
                 </Head>
                 <Grid container>
                     <Grid item xs={12} md={6}>
