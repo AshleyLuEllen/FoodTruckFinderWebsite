@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'next/router';
-import axios from 'axios';
+import requests from '../../../util/requests';
 import { format } from 'date-fns';
 import { connect } from 'react-redux';
 
@@ -12,6 +12,7 @@ import FriendAvatar from '../../../components/FriendAvatar';
 import FriendAvatarGroup from '../../../components/FriendAvatarGroup';
 import TruckCard from '../../../components/TruckCard';
 import ReviewCard from '../../../components/ReviewCard';
+import Head from "next/dist/next-server/lib/head";
 
 const styles = theme => ({
     root: {
@@ -73,19 +74,14 @@ class UserPage extends Component {
     }
 
     fetchData() {
-        axios
+        requests
             .get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}`)
             .then(res => {
                 this.setState({
                     user: res.data,
                     found: true,
                 });
-                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
-                    auth: {
-                        username: this.props.auth.email,
-                        password: this.props.auth.password,
-                    },
-                });
+                return requests.getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, this.props.auth);
             })
             .then(res => {
                 console.log(res.data);
@@ -96,13 +92,13 @@ class UserPage extends Component {
                     });
                 }
 
-                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/subscriptions`);
+                return requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/subscriptions`);
             })
             .then(res => {
                 this.setState({
                     subscribedTrucks: res.data,
                 });
-                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/reviews`);
+                return requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/reviews`);
             })
             .then(res => {
                 this.setState({
@@ -140,12 +136,15 @@ class UserPage extends Component {
 
         return (
             <Container style={{ marginTop: '20px', textAlign: 'center' }}>
+                <Head>
+                    <title>{this.state.user?.firstName}'s Page</title>
+                </Head>
                 <Grid container>
                     <Grid item xs={12} md={6}>
                         <Avatar
                             className={classes.bigAvatar}
                             alt={`${this.state.user?.firstName} ${this.state.user?.lastName}`}
-                            src={this.state.user?.avatarURL}
+                            src={this.state.user?.avatar?.url}
                         />
                         <Typography variant="h3" style={{ marginTop: '10px' }}>
                             {this.state.user?.firstName} {this.state.user?.lastName}

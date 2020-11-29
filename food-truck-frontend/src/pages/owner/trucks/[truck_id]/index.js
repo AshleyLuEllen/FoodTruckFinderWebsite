@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import requests from '../../../../util/requests';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 import { format } from 'date-fns';
@@ -13,6 +13,7 @@ import CardHeader from '@material-ui/core/CardHeader';
 
 import ChipSelector from '../../../../components/ChipSelector';
 import ScheduleCard from '../../../../components/ScheduleCard';
+import Head from "next/dist/next-server/lib/head";
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -36,11 +37,15 @@ class Information extends Component {
             paymentTruckTags: [],
             paymentTags: [],
             truckFound: false,
+            loadingInfo: false,
+            menu: undefined,
         };
+
+        this.saveInfo = this.saveInfo.bind(this);
     }
 
     fetchData() {
-        axios
+        requests
             .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
             .then(res => {
                 this.setState({
@@ -51,7 +56,7 @@ class Information extends Component {
                     description: res.data.description,
                     licensePlate: res.data.licensePlate,
                 });
-                return axios.get(
+                return requests.get(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`
                 );
             })
@@ -59,7 +64,7 @@ class Information extends Component {
                 this.setState({
                     schedules: res3.data,
                 });
-                return axios.get(
+                return requests.get(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`
                 );
             })
@@ -67,14 +72,16 @@ class Information extends Component {
                 this.setState({
                     reviews: res4.data,
                 });
-                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/tags`);
+                return requests.get(`${process.env.FOOD_TRUCK_API_URL}/tags`);
             })
             .then(res5 => {
                 this.setState({
                     allTags: res5.data.filter(t => t.description !== 'payment'),
                     paymentTags: res5.data.filter(t => t.description === 'payment'),
                 });
-                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`);
+                return requests.get(
+                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`
+                );
             })
             .then(res6 => {
                 this.setState({
@@ -122,6 +129,8 @@ class Information extends Component {
      * Saves the edited information from the form
      */
     saveInfo() {
+        this.handleMenuUpload();
+
         if (this.state.licensePlate.length < 1) {
             alert('Missing Information: License Plate Number');
             return;
@@ -140,7 +149,7 @@ class Information extends Component {
         };
         console.log(truck);
 
-        axios
+        requests
             .put(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`, truck)
             .then(() => {
                 console.log('Truck Edited');
@@ -154,13 +163,11 @@ class Information extends Component {
      * Removes the truck that's currently being edited
      */
     removeTruck() {
-        axios
-            .delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password,
-                },
-            })
+        requests
+            .deleteWithAuth(
+                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`,
+                this.props.auth
+            )
             .then(res => {
                 console.log(res.statusText);
                 this.props.router.push('/owner/trucks').then();
@@ -180,14 +187,45 @@ class Information extends Component {
      * Continuously updates the truck information on the page
      */
     componentDidUpdate() {
-        if (!this.state.truckFound && this.props.router.query.truck_id !== undefined) {
+        if (!this.state.truckFound && this.props.router.query.truck_id !== undefined && !this.state.loadingInfo) {
+            this.setState({ loadingInfo: true });
             this.fetchData();
         }
+    }
+
+    handleMenuUpload() {
+        if (!this.state.menu) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', this.state.menu);
+
+        requests
+            .putWithAuth(
+                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/menu`,
+                formData,
+                this.props.auth,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            )
+            .then(() => {
+                console.log('Success');
+            })
+            .catch(err => {
+                console.log(err);
+            });
     }
 
     render() {
         return (
             <div>
+                <Head>
+                    <title>Manage {this.state.truck.name}</title>
+                </Head>
                 <br />
                 <br />
                 {this.state.truckFound && (
@@ -236,16 +274,11 @@ class Information extends Component {
                                 }}
                                 onSelectOption={t => {
                                     if (this.state.truckTags.length < 5) {
-                                        axios
-                                            .post(
+                                        requests
+                                            .postWithAuth(
                                                 `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
                                                 {},
-                                                {
-                                                    auth: {
-                                                        username: this.props.auth.email,
-                                                        password: this.props.auth.password,
-                                                    },
-                                                }
+                                                this.props.auth
                                             )
                                             .then()
                                             .catch(error => {
@@ -254,15 +287,10 @@ class Information extends Component {
                                     }
                                 }}
                                 onDeselectOption={t =>
-                                    axios
-                                        .delete(
+                                    requests
+                                        .deleteWithAuth(
                                             `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
-                                            {
-                                                auth: {
-                                                    username: this.props.auth.email,
-                                                    password: this.props.auth.password,
-                                                },
-                                            }
+                                            this.props.auth
                                         )
                                         .then()
                                         .catch(error => {
@@ -281,17 +309,12 @@ class Information extends Component {
                                     this.handlePaymentTagChange(value);
                                 }}
                                 onSelectOption={t => {
-                                    if (this.state.paymentTags.length < 2) {
-                                        axios
-                                            .post(
+                                    if (this.state.paymentTruckTags.length < 2) {
+                                        requests
+                                            .postWithAuth(
                                                 `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
                                                 {},
-                                                {
-                                                    auth: {
-                                                        username: this.props.auth.email,
-                                                        password: this.props.auth.password,
-                                                    },
-                                                }
+                                                this.props.auth
                                             )
                                             .then()
                                             .catch(error => {
@@ -300,15 +323,10 @@ class Information extends Component {
                                     }
                                 }}
                                 onDeselectOption={t =>
-                                    axios
-                                        .delete(
+                                    requests
+                                        .deleteWithAuth(
                                             `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
-                                            {
-                                                auth: {
-                                                    username: this.props.auth.email,
-                                                    password: this.props.auth.password,
-                                                },
-                                            }
+                                            this.props.auth
                                         )
                                         .then()
                                         .catch(error => {
@@ -316,11 +334,22 @@ class Information extends Component {
                                         })
                                 }
                             />
+                            <div>
+                                <Button variant="contained" component="label" style={{ width: 'auto', height: 'auto' }}>
+                                    Upload Menu
+                                    <input
+                                        type="file"
+                                        style={{ display: 'none' }}
+                                        ref={this.menuInputRef}
+                                        accept="image/jpeg,image/png,image/gif,application/pdf"
+                                        onChange={e => this.setState({ menu: e.target.files[0] })}
+                                    />
+                                </Button>
+                                {this.state.menu && `Selected file: ${this.state.menu.name}`}
+                            </div>
                             <Box mt={1} ml={1} mr={1} mb={1}>
                                 <Button variant="contained" pt={10} pl={10} onClick={this.saveInfo}>
-                                    <Typography variant="button" gutterBottom display="block">
-                                        Save
-                                    </Typography>
+                                    Save
                                 </Button>
                             </Box>
                         </Grid>
@@ -332,9 +361,7 @@ class Information extends Component {
                                     pl={10}
                                     href={`/owner/trucks/${this.props.router.query.truck_id}/notifications`}
                                 >
-                                    <Typography variant="button" gutterBottom display="block">
-                                        <a>Manage Notifications</a>
-                                    </Typography>
+                                    Manage Notifications
                                 </Button>
                             </Box>
                             <Box mt={1} ml={1} mr={1} mb={1}>
@@ -344,23 +371,17 @@ class Information extends Component {
                                     pl={10}
                                     href={`/trucks/${this.props.router.query.truck_id}`}
                                 >
-                                    <Typography variant="button" gutterBottom display="block">
-                                        View Live Page
-                                    </Typography>
+                                    View Live Page
                                 </Button>
                             </Box>
                             <Box mt={1} ml={1} mr={1} mb={1}>
                                 <Button variant="contained" pt={10} pl={10} href="/owner/trucks">
-                                    <Typography variant="button" gutterBottom display="block">
-                                        Back
-                                    </Typography>
+                                    Back
                                 </Button>
                             </Box>
                             <Box mt={1} ml={1} mr={1} mb={1}>
                                 <Button variant="contained" pt={10} pl={10} href="/">
-                                    <Typography variant="button" gutterBottom display="block">
-                                        Home
-                                    </Typography>
+                                    Home
                                 </Button>
                             </Box>
                             <br />
@@ -373,9 +394,7 @@ class Information extends Component {
                                     color="secondary"
                                     onClick={this.removeTruck}
                                 >
-                                    <Typography variant="button" gutterBottom display="block">
-                                        Delete
-                                    </Typography>
+                                    Delete
                                 </Button>
                             </Box>
                         </Grid>
@@ -388,11 +407,11 @@ class Information extends Component {
                                 </div>
                             )}
                             {/**SCHEDULE*/}
-                            {this.state.schedules.length > 0 && (
                                 <Card>
                                     <CardHeader title={'Schedule'} />
                                     <CardContent>
-                                        <ScheduleCard schedules={this.state.schedules}/>
+                                        {this.state.schedules.length > 0 && (
+                                        <ScheduleCard schedules={this.state.schedules}/>)}
                                         {/*<Table size="small">*/}
                                         {/*    <TableBody>*/}
                                         {/*        {this.state.schedules.map((s, i) => (*/}
@@ -421,7 +440,6 @@ class Information extends Component {
                                         </Box>
                                     </CardContent>
                                 </Card>
-                            )}
                         </Grid>
                     </Grid>
                 )}

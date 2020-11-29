@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import requests from '../../../util/requests';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 
 import { Button, Grid, TextField, Box, Container } from '@material-ui/core';
 import ChipSelector from '../../../components/ChipSelector';
+import Head from "next/dist/next-server/lib/head";
 
 class CreateNewTruck extends Component {
     constructor(props) {
@@ -59,7 +60,7 @@ class CreateNewTruck extends Component {
     }
 
     componentDidMount() {
-        axios
+        requests
             .get(`${process.env.FOOD_TRUCK_API_URL}/tags`)
             .then(r => {
                 this.setState({
@@ -89,25 +90,15 @@ class CreateNewTruck extends Component {
             name: this.state.name,
         };
 
-        axios
-            .post(process.env.FOOD_TRUCK_API_URL + '/trucks', truck, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password,
-                },
-            })
+        requests
+            .postWithAuth(process.env.FOOD_TRUCK_API_URL + '/trucks', truck, this.props.auth)
             .then(res => {
                 this.state.truckTags.forEach(t => {
-                    axios
-                        .post(
+                    requests
+                        .postWithAuth(
                             `${process.env.FOOD_TRUCK_API_URL}/trucks/${res.data.id}/tags/${t.id}`,
                             {},
-                            {
-                                auth: {
-                                    username: this.props.auth.email,
-                                    password: this.props.auth.password,
-                                },
-                            }
+                            this.props.auth
                         )
                         .then()
                         .catch(error => {
@@ -115,16 +106,11 @@ class CreateNewTruck extends Component {
                         });
                 });
                 this.state.paymentTruckTags.forEach(t => {
-                    axios
-                        .post(
+                    requests
+                        .postWithAuth(
                             `${process.env.FOOD_TRUCK_API_URL}/trucks/${res.data.id}/tags/${t.id}`,
                             {},
-                            {
-                                auth: {
-                                    username: this.props.auth.email,
-                                    password: this.props.auth.password,
-                                },
-                            }
+                            this.props.auth
                         )
                         .then()
                         .catch(error => {
@@ -145,6 +131,9 @@ class CreateNewTruck extends Component {
     render() {
         return (
             <div>
+                <Head>
+                    <title>Create Truck</title>
+                </Head>
                 <Container>
                     <Grid container spacing={4}>
                         <Grid item xs={12}>

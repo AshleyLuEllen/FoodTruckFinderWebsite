@@ -42,11 +42,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .csrf().disable()
             .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers("/user/**").authenticated()
+//                .antMatchers("/user/**").authenticated()
                 .anyRequest().permitAll()
             .and()
-            .httpBasic() // Authenticate users with HTTP basic authentication
-//            .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+//            .httpBasic() // Authenticate users with HTTP basic authentication
+            .addFilter(new JWTAuthenticationFilter(authenticationManager()))
+            .addFilter(new JWTAuthorizationFilter(authenticationManager()))
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and().cors()
         ;
     }
@@ -65,6 +67,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         // setAllowedHeaders is important! Without it, OPTIONS preflight request
         // will fail with 403 Invalid CORS request
         configuration.setAllowedHeaders(ImmutableList.of("Authorization", "Cache-Control", "Content-Type"));
+        configuration.setExposedHeaders(ImmutableList.of("Authorization"));
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

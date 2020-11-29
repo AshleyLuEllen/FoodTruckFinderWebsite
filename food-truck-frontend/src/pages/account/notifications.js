@@ -17,10 +17,11 @@ import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
-import axios from 'axios';
+import requests from '../../util/requests';
 import { logout as authLogout } from '../../redux/actions/auth';
 import { connect } from 'react-redux';
 import { CheckBox, CheckBoxOutlined, Flag, FlagOutlined } from '@material-ui/icons';
+import Head from "next/dist/next-server/lib/head";
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -64,6 +65,9 @@ function EnhancedTableHead(props) {
 
     return (
         <TableHead>
+            <Head>
+                <title>Notifications</title>
+            </Head>
             <TableRow>
                 <TableCell padding="checkbox">
                     <Checkbox
@@ -263,17 +267,12 @@ class Notifications extends Component {
             this.state.selected
                 .map(id => this.state.rows.find(row => row.id === id))
                 .map(not => {
-                    axios.patch(
+                    requests.patchWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${not.id}`,
                         {
                             unread: false,
                         },
-                        {
-                            auth: {
-                                username: this.props.auth.email,
-                                password: this.props.auth.password,
-                            },
-                        }
+                        this.props.auth
                     );
                 })
         )
@@ -286,17 +285,12 @@ class Notifications extends Component {
             this.state.selected
                 .map(id => this.state.rows.find(row => row.id === id))
                 .map(not => {
-                    axios.patch(
+                    requests.patchWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${not.id}`,
                         {
                             unread: true,
                         },
-                        {
-                            auth: {
-                                username: this.props.auth.email,
-                                password: this.props.auth.password,
-                            },
-                        }
+                        this.props.auth
                     );
                 })
         )
@@ -309,17 +303,12 @@ class Notifications extends Component {
             this.state.selected
                 .map(id => this.state.rows.find(row => row.id === id))
                 .map(not => {
-                    return axios.patch(
+                    return requests.patchWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${not.id}`,
                         {
                             saved: true,
                         },
-                        {
-                            auth: {
-                                username: this.props.auth.email,
-                                password: this.props.auth.password,
-                            },
-                        }
+                        this.props.auth
                     );
                 })
         )
@@ -332,17 +321,12 @@ class Notifications extends Component {
             this.state.selected
                 .map(id => this.state.rows.find(row => row.id === id))
                 .map(not => {
-                    axios.patch(
+                    requests.patchWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${not.id}`,
                         {
                             saved: false,
                         },
-                        {
-                            auth: {
-                                username: this.props.auth.email,
-                                password: this.props.auth.password,
-                            },
-                        }
+                        this.props.auth
                     );
                 })
         )
@@ -351,23 +335,16 @@ class Notifications extends Component {
     }
 
     fetchData() {
-        axios
-            .get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password,
-                },
-            })
+        requests
+            .getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, this.props.auth)
             .then(res => {
                 this.setState({
                     userId: res.data.id,
                 });
-                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/notifications`, {
-                    auth: {
-                        username: this.props.auth.email,
-                        password: this.props.auth.password,
-                    },
-                });
+                return requests.getWithAuth(
+                    `${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/notifications`,
+                    this.props.auth
+                );
             })
             .then(res => {
                 this.setState({
@@ -414,18 +391,13 @@ class Notifications extends Component {
 
     handleClick(id) {
         alert(this.state.rows.find(row => row.id === id)?.description);
-        axios
-            .patch(
+        requests
+            .patchWithAuth(
                 `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${id}`,
                 {
                     unread: false,
                 },
-                {
-                    auth: {
-                        username: this.props.auth.email,
-                        password: this.props.auth.password,
-                    },
-                }
+                this.props.auth
             )
             .then(() => {
                 const i = this.state.rows.findIndex(row => row.id === id);

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import requests from '../util/requests';
 import { useRouter } from 'next/router';
 import { connect } from 'react-redux';
 import { logout as authLogout } from '../redux/actions/auth';
@@ -18,6 +18,7 @@ import {
     Badge,
     Menu,
     MenuItem,
+    useScrollTrigger,
 } from '@material-ui/core';
 import { fade, makeStyles } from '@material-ui/core/styles';
 import {
@@ -26,6 +27,21 @@ import {
     Notifications as NotificationsIcon,
     Pageview as PageviewIcon,
 } from '@material-ui/icons';
+function ElevationScroll(props) {
+    const { children } = props;
+    const trigger = useScrollTrigger({
+        disableHysteresis: true,
+        threshold: 0,
+    });
+
+    return React.cloneElement(children, {
+        elevation: trigger ? 4 : 0,
+    });
+}
+
+ElevationScroll.propTypes = {
+    children: PropTypes.element.isRequired,
+};
 
 const useStyles = makeStyles(theme => ({
     grow: {
@@ -137,20 +153,13 @@ function Header(props) {
     };
 
     React.useEffect(() => {
-        axios
-            .get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
-                auth: {
-                    username: props.auth.email,
-                    password: props.auth.password,
-                },
-            })
+        requests
+            .getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, props.auth)
             .then(res => {
-                return axios.get(`${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/notifications/unread`, {
-                    auth: {
-                        username: props.auth.email,
-                        password: props.auth.password,
-                    },
-                });
+                return requests.getWithAuth(
+                    `${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/notifications/unread`,
+                    props.auth
+                );
             })
             .then(res => {
                 console.log(res.data);
@@ -164,7 +173,7 @@ function Header(props) {
                     !router.asPath.startsWith('/maintenance')
                 ) {
                     setTransferToMaintenancePage(true);
-                } else if (err.response.status == 401) {
+                } else if (err.response?.status == 401) {
                     props.authLogout();
                 }
             });
@@ -193,7 +202,7 @@ function Header(props) {
             onClose={handleMenuClose}
         >
             <MuiLink className={classes.link} href="/owner/trucks" color="inherit">
-                <MenuItem onClick={handleMenuClose}>Owner Dashboard</MenuItem>
+                <MenuItem onClick={handleMenuClose}>My Trucks</MenuItem>
             </MuiLink>
             <MuiLink className={classes.link} href="/account" color="inherit">
                 <MenuItem onClick={handleMenuClose}>My Profile</MenuItem>
@@ -205,70 +214,73 @@ function Header(props) {
     );
 
     return (
-        <div className={classes.grow}>
-            <AppBar position="static">
-                <Toolbar>
-                    <Link href="/" passHref>
-                        <Typography component="a" className={classes.title} variant="h6" noWrap color="inherit">
-                            Food Truck Finder
-                        </Typography>
-                    </Link>
-                    <div className={classes.grow} />
-                    <div className={classes.search}>
-                        <div className={classes.searchIcon}>
-                            <SearchIcon />
+        <React.Fragment>
+            <ElevationScroll {...props}>
+                <AppBar position="fixed">
+                    <Toolbar>
+                        <Link href="/" passHref>
+                            <Typography component="a" className={classes.title} variant="h6" noWrap color="inherit">
+                                Food Truck Finder
+                            </Typography>
+                        </Link>
+                        <div className={classes.grow} />
+                        <div className={classes.search}>
+                            <div className={classes.searchIcon}>
+                                <SearchIcon />
+                            </div>
+                            <InputBase
+                                placeholder="Search…"
+                                classes={{
+                                    root: classes.inputRoot,
+                                    input: classes.inputInput,
+                                }}
+                                onKeyDown={handleTrySearch}
+                                inputProps={{ 'aria-label': 'search' }}
+                            />
                         </div>
-                        <InputBase
-                            placeholder="Search…"
-                            classes={{
-                                root: classes.inputRoot,
-                                input: classes.inputInput,
-                            }}
-                            onKeyDown={handleTrySearch}
-                            inputProps={{ 'aria-label': 'search' }}
-                        />
-                    </div>
-                    <Tooltip title="Search">
-                        <IconButton style={{ color: 'white' }} onClick={() => router.push('/search')}>
-                            <PageviewIcon />
-                        </IconButton>
-                    </Tooltip>
-                    {props.auth.isLoggedIn && (
-                        <div className={classes.sectionDesktop}>
-                            <IconButton
-                                aria-label={`show ${notificationCount} new notifications`}
-                                color="inherit"
-                                href="/account/notifications"
-                            >
-                                {notificationCount > 0 ? (
-                                    <Badge badgeContent={notificationCount} color="secondary">
+                        <Tooltip title="Search">
+                            <IconButton style={{ color: 'white' }} onClick={() => router.push('/search')}>
+                                <PageviewIcon />
+                            </IconButton>
+                        </Tooltip>
+                        {props.auth.isLoggedIn && (
+                            <div className={classes.sectionDesktop}>
+                                <IconButton
+                                    aria-label={`show ${notificationCount} new notifications`}
+                                    color="inherit"
+                                    href="/account/notifications"
+                                >
+                                    {notificationCount > 0 ? (
+                                        <Badge badgeContent={notificationCount} color="secondary">
+                                            <NotificationsIcon />
+                                        </Badge>
+                                    ) : (
                                         <NotificationsIcon />
-                                    </Badge>
-                                ) : (
-                                    <NotificationsIcon />
-                                )}
-                            </IconButton>
-                            <IconButton
-                                edge="end"
-                                aria-label="account of current user"
-                                aria-controls={menuId}
-                                aria-haspopup="true"
-                                onClick={handleProfileMenuOpen}
-                                color="inherit"
-                            >
-                                <AccountCircle />
-                            </IconButton>
-                        </div>
-                    )}
-                    {!props.auth.isLoggedIn && (
-                        <Button href="/login" variant="contained" className={classes.loginButton}>
-                            Login
-                        </Button>
-                    )}
-                </Toolbar>
-            </AppBar>
+                                    )}
+                                </IconButton>
+                                <IconButton
+                                    edge="end"
+                                    aria-label="account of current user"
+                                    aria-controls={menuId}
+                                    aria-haspopup="true"
+                                    onClick={handleProfileMenuOpen}
+                                    color="inherit"
+                                >
+                                    <AccountCircle />
+                                </IconButton>
+                            </div>
+                        )}
+                        {!props.auth.isLoggedIn && (
+                            <Button href="/login" variant="contained" className={classes.loginButton}>
+                                Login
+                            </Button>
+                        )}
+                    </Toolbar>
+                </AppBar>
+            </ElevationScroll>
+            <Toolbar />
             {renderMenu}
-        </div>
+        </React.Fragment>
     );
 }
 Header.propTypes = {

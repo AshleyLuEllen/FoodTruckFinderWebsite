@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import requests from '../util/requests';
 import withRouter from 'next/dist/client/with-router';
 import isEmail from 'validator/lib/isEmail';
 
 import { Paper, withStyles, TextField, Button, Snackbar, Typography } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
+import Head from "next/dist/next-server/lib/head";
 
 const styles = theme => ({
     root: {
@@ -115,7 +116,7 @@ class CreateAccount extends Component {
             });
         } else if (this.state.password === this.state.passConf) {
             if (test) {
-                axios
+                requests
                     .post(process.env.FOOD_TRUCK_API_URL + '/users', user)
                     .then(() => {
                         this.props.router.push('/login');
@@ -146,6 +147,9 @@ class CreateAccount extends Component {
         const { classes } = this.props;
         return (
             <Paper className={classes.root} elevation={3} alignItems="center">
+                <Head>
+                    <title>Create Account</title>
+                </Head>
                 <Typography variant="h4" style={{ textAlign: 'center' }}>
                     Create Account
                 </Typography>

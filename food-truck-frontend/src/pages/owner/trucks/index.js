@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Link from '@material-ui/core/Link';
-import axios from 'axios';
+import requests from '../../../util/requests';
 import { login as authLogin, logout as authLogout } from '../../../redux/actions/auth';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
@@ -11,6 +11,7 @@ import { Add as AddIcon } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 
 import OwnerTruckCard from '../../../components/OwnerTruckCard';
+import Head from "next/dist/next-server/lib/head";
 
 const dashboardStyles = () => ({
     truckCard: {
@@ -25,18 +26,11 @@ class Dashboard extends Component {
     constructor(props) {
         super(props);
         this.state = { truckData: [] };
-        this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleChangeStatus = this.handleChangeStatus.bind(this);
     }
 
     componentDidMount() {
-        axios
-            .get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password,
-                },
-            })
+        requests
+            .getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, this.props.auth)
             .then(res => {
                 this.setState({
                     owner: res.data.id,
@@ -45,7 +39,7 @@ class Dashboard extends Component {
                 let userID = this.state.owner;
 
                 //let userID = 1;
-                axios
+                requests
                     .get(`${process.env.FOOD_TRUCK_API_URL}/users/${userID}/trucks`)
                     .then(res => {
                         this.setState({
@@ -65,7 +59,7 @@ class Dashboard extends Component {
 
     componentDidUpdate() {
         console.log(this.props.router.query);
-        axios
+        requests
             .get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.props.router.query.user_id}/trucks`)
             .then(res => {
                 this.setState({
@@ -82,6 +76,9 @@ class Dashboard extends Component {
         const { classes } = this.props;
         return (
             <div>
+                <Head>
+                    <title>My Trucks</title>
+                </Head>
                 <Typography variant={'h2'}>My Trucks</Typography>
                 <ol>
                     {this.state.truckData.map((tr, i) => (

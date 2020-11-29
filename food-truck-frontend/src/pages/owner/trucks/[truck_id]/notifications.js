@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import requests from '../../../../util/requests';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 import { format } from 'date-fns';
@@ -9,7 +9,6 @@ import {
     Card,
     CardHeader,
     TextField,
-    InputLabel,
     DialogActions,
     DialogContent,
     DialogContentText,
@@ -20,6 +19,7 @@ import {
     CardActions,
     Typography,
 } from '@material-ui/core';
+import Head from "next/dist/next-server/lib/head";
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -36,6 +36,7 @@ class NotificationPage extends Component {
             truckFound: false,
 
             openNotification: 1,
+            openNotObj: undefined,
             open: false,
             openCreate: false,
             subject: '',
@@ -54,30 +55,48 @@ class NotificationPage extends Component {
 
     handleClick(notification) {
         if (notification !== null) {
-            axios
-                .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.state.truckID}/notifications/${notification.id}`)
-                .then(res => {
-                    this.setState({
-                        openNotification: notification.id,
-                        open: true,
-                        subject: res.data.subject,
-                        description: res.data.description,
-                        published: res.data.published,
-                        postedTimestamp: res.data.postedTimestamp,
-                    });
-                    console.log(this.state);
-                    this.fetchData();
-                })
-                .catch(err => console.log(err.message));
+            this.setState({
+                openNotification: notification.id,
+                openNotObj: { ...notification },
+                open: true,
+                subject: notification.subject,
+                description: notification.description,
+                published: notification.published,
+                postedTimestamp: notification.postedTimestamp,
+            });
         } else {
             this.setState({
                 openNotification: undefined,
+                openNotObj: undefined,
                 openCreate: true,
                 subject: '',
                 description: '',
                 published: false,
             });
         }
+    }
+
+    handleMediaUpload(notId) {
+        if (!this.state.media) {
+            return new Promise();
+        }
+
+        const formData = new FormData();
+        formData.append('file', this.state.media);
+
+        return requests
+            .putWithAuth(`${process.env.FOOD_TRUCK_API_URL}/notifications/${notId}/media`, formData, this.props.auth, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            })
+            .then(() => {
+                console.log('Success');
+                this.setState({ media: undefined });
+            });
+        // .catch(err => {
+        //     console.log(err);
+        // });
     }
 
     handleClose(option) {
@@ -95,24 +114,27 @@ class NotificationPage extends Component {
                 postedTimestamp: this.state.postedTimestamp,
             };
 
-            axios
+            requests
                 .put(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
                     notification
                 )
-                .then(() => {
+                .then(res => {
                     console.log('Notification saved!');
+                    console.log(res);
+                    return this.handleMediaUpload(res.data.id);
+                })
+                .then(() => {
                     this.fetchData();
+                    this.setState({
+                        openNotification: undefined,
+                        open: false,
+                        openCreate: false,
+                        subject: '',
+                        description: '',
+                    });
                 })
                 .catch(err => console.log(err.message));
-
-            this.setState({
-                openNotification: undefined,
-                open: false,
-                openCreate: false,
-                subject: '',
-                description: '',
-            });
         } else if (this.state.openCreate) {
             console.log('Creating notification');
 
@@ -128,26 +150,29 @@ class NotificationPage extends Component {
                 postedTimestamp: this.state.postedTimestamp,
                 notificationType: null,
             };
-            console.log(this.notification);
 
-            axios
+            requests
                 .post(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`,
                     notification
                 )
+                .then(res => {
+                    console.log('Notification saved!');
+                    console.log(res);
+                    return this.handleMediaUpload(res.data.id);
+                })
                 .then(() => {
                     console.log('Notification saved!');
                     this.fetchData();
+                    this.setState({
+                        openNotification: undefined,
+                        open: false,
+                        openCreate: false,
+                        subject: '',
+                        description: '',
+                    });
                 })
                 .catch(err => console.log(err.message));
-
-            this.setState({
-                openNotification: undefined,
-                open: false,
-                openCreate: false,
-                subject: '',
-                description: '',
-            });
         }
     }
 
@@ -168,15 +193,10 @@ class NotificationPage extends Component {
     handleDelete() {
         console.log(this.props.auth);
         console.log(this.state.openNotification);
-        axios
-            .delete(
+        requests
+            .deleteWithAuth(
                 `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
-                {
-                    auth: {
-                        username: this.props.auth.email,
-                        password: this.props.auth.password,
-                    },
-                }
+                this.props.auth
             )
             .then(() => {
                 console.log('Notification deleted!');
@@ -194,7 +214,7 @@ class NotificationPage extends Component {
     }
 
     fetchData() {
-        axios
+        requests
             .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
             .then(res => {
                 console.log('Found the truck!');
@@ -203,7 +223,7 @@ class NotificationPage extends Component {
                     truckName: res.data.name,
                     truckID: res.data.id,
                 });
-                return axios.get(
+                return requests.get(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`
                 );
             })
@@ -233,6 +253,9 @@ class NotificationPage extends Component {
     render() {
         return (
             <div>
+                <Head>
+                    <title>{this.state.truck.name} Notifications</title>
+                </Head>
                 <h2>Notifications for {this.state.truckName} </h2>
                 {this.state.notifications.map(n => (
                     <Card key={n.id} variant="outlined">
@@ -241,12 +264,12 @@ class NotificationPage extends Component {
                             {n.published && (
                                 <CardHeader subheader={format(new Date(n.postedTimestamp), 'HH:mm, MM-dd-yyyy')} />
                             )}
-                            <Typography align="left" variant="body3" component="p">
+                            <Typography align="left" variant="body2" component="p">
                                 {n.description}
                             </Typography>
                         </CardContent>
                         <CardActions>
-                            <Button onClick={() => this.handleClick(n)} color="primary" variant="outlined">
+                            <Button onClick={() => this.handleClick(n)} color="primary" variant="contained">
                                 {' '}
                                 Manage{' '}
                             </Button>
@@ -256,57 +279,77 @@ class NotificationPage extends Component {
                 <Dialog open={this.state.open || this.state.openCreate} aria-labelledby="form-dialog-title">
                     <DialogTitle id="form-dialog-title">Manage Notification</DialogTitle>
                     <DialogContent>
-                        <DialogContentText>
-                            Click &quot;Publish&quot; to publish or &quot;Save&quot; to save and publish later. If
-                            already published, you may only &quot;Delete&quot;.
-                        </DialogContentText>
+                        {!this.state.published && (
+                            <DialogContentText>
+                                Click &quot;Publish&quot; to publish or &quot;Save&quot; to save and publish later. If
+                                already published, you may only &quot;Delete&quot;.
+                            </DialogContentText>
+                        )}
                         <TextField
                             autoFocus
                             margin="dense"
                             id="subject"
                             label="Subject"
-                            type="email"
+                            variant="outlined"
                             fullWidth={true}
+                            disabled={this.state.published}
                             defaultValue={this.state.subject}
                             onChange={e => this.handleInputChange(e, 'subject')}
                         />
-                        <InputLabel></InputLabel>
                         <TextField
                             id="description"
                             label="Description"
                             multiline
                             rows={4}
+                            variant="outlined"
                             fullWidth={true}
+                            disabled={this.state.published}
                             defaultValue={this.state.description}
                             onChange={e => this.handleInputChange(e, 'description')}
                         />
+                        {!this.state.published && (
+                            <div>
+                                <Button variant="contained" component="label" style={{ width: 'auto', height: 'auto' }}>
+                                    Upload Media
+                                    <input
+                                        type="file"
+                                        style={{ display: 'none' }}
+                                        ref={this.mediaInputRef}
+                                        accept="image/jpeg,image/png,image/gif"
+                                        onChange={e => this.setState({ media: e.target.files[0] })}
+                                    />
+                                </Button>
+                                {this.state.media && `Selected file: ${this.state.media.name}`}
+                            </div>
+                        )}
+                        {this.state.openNotObj?.media && <img src={this.state.openNotObj.media.url}></img>}
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.handleCancel} color="primary" variant="outlined">
+                        <Button onClick={this.handleCancel} color="primary" variant="contained">
                             Cancel
                         </Button>
                         {!this.state.published && (
-                            <Button onClick={() => this.handleClose(false)} color="primary" variant="outlined">
+                            <Button onClick={() => this.handleClose(false)} color="primary" variant="contained">
                                 Save
                             </Button>
                         )}
                         {!this.state.published && (
-                            <Button onClick={() => this.handleClose(true)} color="primary" variant="outlined">
+                            <Button onClick={() => this.handleClose(true)} color="primary" variant="contained">
                                 Publish
                             </Button>
                         )}
-                        {!this.state.published && (
-                            <Button onClick={this.handleDelete} color="primary" variant="outlined">
+                        {!this.state.published && !this.state.openCreate && (
+                            <Button onClick={this.handleDelete} color="secondary" variant="contained">
                                 Delete
                             </Button>
                         )}
                     </DialogActions>
                 </Dialog>
-                <Button onClick={() => this.handleClick(null)} variant="outlined">
+                <Button onClick={() => this.handleClick(null)} variant="contained">
                     {' '}
                     +{' '}
                 </Button>
-                <Button href={`/owner/trucks/${this.props.router.query.truck_id}`} variant="outlined">
+                <Button href={`/owner/trucks/${this.props.router.query.truck_id}`} variant="contained">
                     {' '}
                     Back{' '}
                 </Button>

@@ -2,6 +2,7 @@ package food.truck.api.data.truck;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import food.truck.api.data.media.Media;
 import food.truck.api.data.review.Review;
 import food.truck.api.data.schedule.Schedule;
 import food.truck.api.data.truck_tag.TruckTag;
@@ -50,6 +51,10 @@ public class Truck {
     @OneToMany(mappedBy = "truck")
     @JsonIgnoreProperties("truck")
     List<TruckTag> tags;
+
+    @JoinColumn(name = "truck_menu")
+    @OneToOne
+    Media menu;
 
     @Formula("(SELECT AVG(r.review_rating) FROM " + Review.TABLE_NAME + " r WHERE r.truck_id = truck_id)")
 //    @Formula("(SELECT 10)")
