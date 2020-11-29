@@ -1,7 +1,7 @@
 import React, { Component, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
-import axios from 'axios';
+import requests from '../../../../util/requests';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 import { format, parseISO } from 'date-fns';
@@ -215,7 +215,7 @@ class ScheduleManagementPage extends Component {
             return;
         }
 
-        axios
+        requests
             .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`)
             .then(res => {
                 const schedules = res.data.map(schedule => ({
@@ -254,13 +254,11 @@ class ScheduleManagementPage extends Component {
     }
 
     deleteScheduleById(id) {
-        axios
-            .delete(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${id}`, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password,
-                },
-            })
+        requests
+            .deleteWithAuth(
+                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${id}`,
+                this.props.auth
+            )
             .then(() => {
                 this.setSchedules([...this.state.upcoming, ...this.state.past].filter(s => s.id != id));
             })
@@ -289,14 +287,9 @@ class ScheduleManagementPage extends Component {
 
         Promise.all(
             toDelete.map(s => {
-                return axios.delete(
+                return requests.deleteWithAuth(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${s}`,
-                    {
-                        auth: {
-                            username: this.props.auth.email,
-                            password: this.props.auth.password,
-                        },
-                    }
+                    this.props.auth
                 );
             })
         )
@@ -322,16 +315,11 @@ class ScheduleManagementPage extends Component {
                 schedule.location = savedData.location;
             }
 
-            axios
-                .patch(
+            requests
+                .patchWithAuth(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${savedData.id}`,
                     schedule,
-                    {
-                        auth: {
-                            username: this.props.auth.email,
-                            password: this.props.auth.password,
-                        },
-                    }
+                    this.props.auth
                 )
                 .then(() => {
                     this.setState({
@@ -348,16 +336,11 @@ class ScheduleManagementPage extends Component {
                 location: savedData.location,
             };
 
-            axios
-                .post(
+            requests
+                .postWithAuth(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`,
                     schedule,
-                    {
-                        auth: {
-                            username: this.props.auth.email,
-                            password: this.props.auth.password,
-                        },
-                    }
+                    this.props.auth
                 )
                 .then(() => {
                     this.setState({

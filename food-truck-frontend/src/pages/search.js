@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import axios from 'axios';
+import requests from '../util/requests';
 import clsx from 'clsx';
 import { geolocated } from 'react-geolocated';
 import { useRouter } from 'next/router';
@@ -92,7 +92,7 @@ function SearchPage(props) {
     const [userId, setUserId] = useState(undefined);
 
     useEffect(() => {
-        axios
+        requests
             .get(`${process.env.FOOD_TRUCK_API_URL}/tags`)
             .then(res => {
                 setTagOptions(res.data);
@@ -103,13 +103,8 @@ function SearchPage(props) {
                 console.log(err);
             });
 
-        axios
-            .get(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
-                auth: {
-                    username: props.auth.email,
-                    password: props.auth.password,
-                },
-            })
+        requests
+            .getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, props.auth)
             .then(res => {
                 setUserId(res.data.id);
             })
@@ -140,13 +135,8 @@ function SearchPage(props) {
                 longitude: props?.coords?.longitude,
             };
 
-            axios
-                .put(`${process.env.FOOD_TRUCK_API_URL}/users/me/location`, position, {
-                    auth: {
-                        username: props.auth.email,
-                        password: props.auth.password,
-                    },
-                })
+            requests
+                .putWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me/location`, position, props.auth)
                 .then(() => {
                     console.log('position updated');
                 })
@@ -177,7 +167,7 @@ function SearchPage(props) {
                         },
                         preferredRating,
                     };
-                    axios
+                    requests
                         .post(`${process.env.FOOD_TRUCK_API_URL}/search`, queryObj)
                         .then(res => {
                             setTruckResults(res.data);
@@ -196,7 +186,7 @@ function SearchPage(props) {
                     placeId: location,
                     preferredRating,
                 };
-                axios
+                requests
                     .post(`${process.env.FOOD_TRUCK_API_URL}/search`, queryObj)
                     .then(res => {
                         setTruckResults(res.data);

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import requests from '../../../util/requests';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 
@@ -60,7 +60,7 @@ class CreateNewTruck extends Component {
     }
 
     componentDidMount() {
-        axios
+        requests
             .get(`${process.env.FOOD_TRUCK_API_URL}/tags`)
             .then(r => {
                 this.setState({
@@ -90,25 +90,15 @@ class CreateNewTruck extends Component {
             name: this.state.name,
         };
 
-        axios
-            .post(process.env.FOOD_TRUCK_API_URL + '/trucks', truck, {
-                auth: {
-                    username: this.props.auth.email,
-                    password: this.props.auth.password,
-                },
-            })
+        requests
+            .postWithAuth(process.env.FOOD_TRUCK_API_URL + '/trucks', truck, this.props.auth)
             .then(res => {
                 this.state.truckTags.forEach(t => {
-                    axios
-                        .post(
+                    requests
+                        .postWithAuth(
                             `${process.env.FOOD_TRUCK_API_URL}/trucks/${res.data.id}/tags/${t.id}`,
                             {},
-                            {
-                                auth: {
-                                    username: this.props.auth.email,
-                                    password: this.props.auth.password,
-                                },
-                            }
+                            this.props.auth
                         )
                         .then()
                         .catch(error => {
@@ -116,16 +106,11 @@ class CreateNewTruck extends Component {
                         });
                 });
                 this.state.paymentTruckTags.forEach(t => {
-                    axios
-                        .post(
+                    requests
+                        .postWithAuth(
                             `${process.env.FOOD_TRUCK_API_URL}/trucks/${res.data.id}/tags/${t.id}`,
                             {},
-                            {
-                                auth: {
-                                    username: this.props.auth.email,
-                                    password: this.props.auth.password,
-                                },
-                            }
+                            this.props.auth
                         )
                         .then()
                         .catch(error => {
