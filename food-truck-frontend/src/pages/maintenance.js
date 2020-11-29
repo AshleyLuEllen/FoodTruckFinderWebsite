@@ -5,7 +5,7 @@ import { logout } from '../redux/actions/auth';
 import requests from '../util/requests';
 
 import { makeStyles } from '@material-ui/core/styles';
-import Head from "next/dist/next-server/lib/head";
+import Head from 'next/dist/next-server/lib/head';
 
 // eslint-disable-next-line no-unused-vars
 const useStyles = makeStyles(theme => ({

@@ -11,7 +11,7 @@ import { Add as AddIcon } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 
 import OwnerTruckCard from '../../../components/OwnerTruckCard';
-import Head from "next/dist/next-server/lib/head";
+import Head from 'next/dist/next-server/lib/head';
 
 const dashboardStyles = () => ({
     truckCard: {

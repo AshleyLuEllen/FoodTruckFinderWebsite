@@ -19,7 +19,7 @@ import {
     CardActions,
     Typography,
 } from '@material-ui/core';
-import Head from "next/dist/next-server/lib/head";
+import Head from 'next/dist/next-server/lib/head';
 
 /**
  * Information page for the food trucks which includes an editing form if you're the

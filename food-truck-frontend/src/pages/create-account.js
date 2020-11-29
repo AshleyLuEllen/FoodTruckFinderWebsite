@@ -6,7 +6,7 @@ import isEmail from 'validator/lib/isEmail';
 
 import { Paper, withStyles, TextField, Button, Snackbar, Typography } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
-import Head from "next/dist/next-server/lib/head";
+import Head from 'next/dist/next-server/lib/head';
 
 const styles = theme => ({
     root: {

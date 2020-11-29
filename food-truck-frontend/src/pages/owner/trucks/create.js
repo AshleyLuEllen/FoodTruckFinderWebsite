@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 
 import { Button, Grid, TextField, Box, Container } from '@material-ui/core';
 import ChipSelector from '../../../components/ChipSelector';
-import Head from "next/dist/next-server/lib/head";
+import Head from 'next/dist/next-server/lib/head';
 
 class CreateNewTruck extends Component {
     constructor(props) {

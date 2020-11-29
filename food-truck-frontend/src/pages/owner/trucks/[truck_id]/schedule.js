@@ -27,7 +27,7 @@ import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Draggable from 'react-draggable';
 import EnhancedTable from '../../../../components/tables/EnhancedTable';
 import LocationInput from '../../../../components/LocationInput';
-import Head from "next/dist/next-server/lib/head";
+import Head from 'next/dist/next-server/lib/head';
 
 function PaperComponent(props) {
     return (

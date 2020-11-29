@@ -12,7 +12,7 @@ import FriendAvatar from '../../../components/FriendAvatar';
 import FriendAvatarGroup from '../../../components/FriendAvatarGroup';
 import TruckCard from '../../../components/TruckCard';
 import ReviewCard from '../../../components/ReviewCard';
-import Head from "next/dist/next-server/lib/head";
+import Head from 'next/dist/next-server/lib/head';
 
 const styles = theme => ({
     root: {

@@ -15,7 +15,7 @@ import TruckCard from '../components/TruckCard';
 import LocationInput from '../components/LocationInput';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import GoogleMap, { Marker } from '../components/GoogleMap';
-import Head from "next/dist/next-server/lib/head";
+import Head from 'next/dist/next-server/lib/head';
 
 const useStyles = makeStyles(theme => ({
     root: {

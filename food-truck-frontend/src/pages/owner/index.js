@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { connect } from 'react-redux';
 import requests from '../../util/requests';
 import { logout as authLogout } from '../../redux/actions/auth';
-import Head from "next/dist/next-server/lib/head";
+import Head from 'next/dist/next-server/lib/head';
 
 function OwnerDash(props) {
     const router = useRouter();
