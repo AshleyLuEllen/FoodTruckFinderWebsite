@@ -254,7 +254,7 @@ class NotificationPage extends Component {
         return (
             <div>
                 <Head>
-                    <title>{this.state.truck.name} Notifications</title>
+                    <title>{this.state.truckName} Notifications</title>
                 </Head>
                 <h2>Notifications for {this.state.truckName} </h2>
                 {this.state.notifications.map(n => (

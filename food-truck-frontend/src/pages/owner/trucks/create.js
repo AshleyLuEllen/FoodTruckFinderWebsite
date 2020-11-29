@@ -40,15 +40,11 @@ class CreateNewTruck extends Component {
     }
 
     handleTagChange(tag) {
-        if (tag.length < 6) {
-            this.setState({ truckTags: tag });
-        }
+        this.setState({ truckTags: tag });
     }
 
     handlePaymentTagChange(tag) {
-        if (tag.length < 3) {
-            this.setState({ paymentTruckTags: tag });
-        }
+        this.setState({ paymentTruckTags: tag });
     }
 
     handleSubmit(event) {
@@ -64,8 +60,8 @@ class CreateNewTruck extends Component {
             .get(`${process.env.FOOD_TRUCK_API_URL}/tags`)
             .then(r => {
                 this.setState({
-                    allTags: r.data.filter(t => t.description !== 'payment'),
-                    paymentTags: r.data.filter(t => t.description === 'payment'),
+                    allTags: r.data.filter(t => t.category !== 'payment'),
+                    paymentTags: r.data.filter(t => t.category === 'payment'),
                 });
             })
             .catch(error => {
@@ -181,8 +177,8 @@ class CreateNewTruck extends Component {
                             />
                             <br />
                             <ChipSelector
-                                maxCount={2}
-                                label="Payment Types (select at most 2)"
+                                maxCount={3}
+                                label="Payment Types (select at most 3)"
                                 options={this.state.paymentTags}
                                 selectedOptions={this.state.paymentTruckTags}
                                 onChange={(event, value) => {
