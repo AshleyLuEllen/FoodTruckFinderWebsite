@@ -166,9 +166,10 @@ function Header(props) {
                 setNotificationCount(parseInt(res.data));
             })
             .catch(err => {
+                console.log(err);
                 if (
-                    err.includes &&
-                    err.includes('Network Error') &&
+                    // err.includes &&
+                    // err.includes('Network Error') &&
                     !err.response?.status &&
                     !router.asPath.startsWith('/maintenance')
                 ) {
