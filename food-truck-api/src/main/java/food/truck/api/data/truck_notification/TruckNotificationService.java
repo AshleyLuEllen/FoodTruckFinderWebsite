@@ -137,6 +137,7 @@ public class TruckNotificationService {
         notification1.setMedia(null);
         notification1.setUser(user);
         notification1.setPublished(true);
+        notification1.setPostedTimestamp(ZonedDateTime.now());
 
         TruckNotification not1 = truckNotificationRepository.save(notification1);
         UserNotification userNot1 = new UserNotification();
@@ -148,10 +149,11 @@ public class TruckNotificationService {
         TruckNotification notification2 = new TruckNotification();
         notification2.setType(NotificationType.FRIEND);
         notification2.setSubject("You have a new friend following you.");
-        notification2.setDescription(user.getFirstName() + ' ' + user.getLastName() + " just started following you. If you are not friends with them already, you can follow them by clicking <a href=\"/users/" + user.getId() + "\">here</a>");
+        notification2.setDescription(user.getFirstName() + ' ' + user.getLastName() + " just started following you. If you are not friends with them already, you can follow them by clicking [here](/users/" + user.getId() + ").");
         notification2.setMedia(null);
         notification2.setUser(newFriend);
         notification2.setPublished(true);
+        notification2.setPostedTimestamp(ZonedDateTime.now());
 
         TruckNotification not2 = truckNotificationRepository.save(notification2);
         UserNotification userNot2 = new UserNotification();
@@ -166,12 +168,12 @@ public class TruckNotificationService {
 
         notification.setType(NotificationType.SUBSCRIPTION);
         notification.setSubject("You have subscribed to a new food truck!");
-        notification.setDescription("You recently subscribed to a new food truck called " + truck.getName() + ". You will now receive notifications from them.");
+        notification.setDescription("You recently subscribed to a new food truck called " + truck.getName() + ". You will now receive notifications from them. View its page [here](/trucks/" + truck.getId() + ").");
         notification.setMedia(null);
         notification.setTruck(truck);
         notification.setUser(user);
         notification.setPublished(true);
-
+        notification.setPostedTimestamp(ZonedDateTime.now());
 
         TruckNotification not = truckNotificationRepository.save(notification);
         UserNotification userNot = new UserNotification();

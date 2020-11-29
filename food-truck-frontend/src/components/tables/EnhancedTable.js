@@ -57,6 +57,8 @@ class EnhancedTable extends Component {
 
         this.handleChangePage = this.handleChangePage.bind(this);
         this.handleChangeRowsPerPage = this.handleChangeRowsPerPage.bind(this);
+        this.handleSelectAllClick = this.handleSelectAllClick.bind(this);
+        this.isSelected = this.isSelected.bind(this);
     }
 
     componentDidMount() {
@@ -100,14 +102,14 @@ class EnhancedTable extends Component {
             if (this.props.onSelectionChange) {
                 this.props.onSelectionChange(newSelecteds);
             }
-            return;
-        }
-        this.setState({
-            selected: [],
-        });
+        } else {
+            this.setState({
+                selected: [],
+            });
 
-        if (this.props.onSelectionChange) {
-            this.props.onSelectionChange([]);
+            if (this.props.onSelectionChange) {
+                this.props.onSelectionChange([]);
+            }
         }
     }
 
@@ -166,7 +168,7 @@ class EnhancedTable extends Component {
     }
 
     isSelected(id) {
-        this.state.selected.indexOf(id) !== -1;
+        return this.state.selected.indexOf(id) !== -1;
     }
 
     render() {
