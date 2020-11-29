@@ -161,7 +161,7 @@ DraggableDialog.propTypes = {
     }),
     editing: PropTypes.bool,
     onClose: PropTypes.func,
-    onSave: PropTypes.onSave,
+    onSave: PropTypes.func,
 };
 
 const scheduleStyles = () => ({
@@ -253,7 +253,7 @@ class ScheduleManagementPage extends Component {
         });
     }
 
-    deleteScheduleById(id) {
+    deleteScheduleById(event, id) {
         requests
             .deleteWithAuth(
                 `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${id}`,
@@ -273,7 +273,7 @@ class ScheduleManagementPage extends Component {
         });
     }
 
-    triggerEdit(id) {
+    triggerEdit(event, id) {
         this.setState({
             open: true,
             editing: true,
@@ -391,7 +391,7 @@ class ScheduleManagementPage extends Component {
         return (
             <div>
                 <Head>
-                    <title>{this.state.truck.name} Schedule</title>
+                    <title>{this.state?.truck?.name} Schedule</title>
                 </Head>
                 <Container className={classes.root}>
                     <Breadcrumbs aria-label="breadcrumb">
