@@ -19,6 +19,7 @@ import {
     CardActions,
     Typography,
 } from '@material-ui/core';
+import Head from "next/dist/next-server/lib/head";
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -252,6 +253,9 @@ class NotificationPage extends Component {
     render() {
         return (
             <div>
+                <Head>
+                    <title>{this.state.truck.name} Notifications</title>
+                </Head>
                 <h2>Notifications for {this.state.truckName} </h2>
                 {this.state.notifications.map(n => (
                     <Card key={n.id} variant="outlined">

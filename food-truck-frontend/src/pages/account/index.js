@@ -4,6 +4,7 @@ import requests from '../../util/requests';
 
 import { useRouter } from 'next/router';
 import { connect } from 'react-redux';
+import Head from "next/dist/next-server/lib/head";
 
 function ProfilePage(props) {
     const router = useRouter();
@@ -19,7 +20,12 @@ function ProfilePage(props) {
             });
     }, []);
 
-    return <div>Redirecting...</div>;
+    return <div>
+        <Head>
+            <title>Account</title>
+        </Head>
+        Redirecting...
+    </div>;
 }
 
 ProfilePage.propTypes = {

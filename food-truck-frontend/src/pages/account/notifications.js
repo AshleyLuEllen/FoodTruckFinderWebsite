@@ -5,6 +5,7 @@ import { format, parseISO } from 'date-fns';
 import requests from '../../util/requests';
 import { logout as authLogout } from '../../redux/actions/auth';
 import { connect } from 'react-redux';
+import Head from 'next/dist/next-server/lib/head';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Dialog, DialogActions, DialogTitle, DialogContent, Button, Snackbar } from '@material-ui/core';
@@ -225,6 +226,9 @@ class Notifications extends Component {
 
         return (
             <div className={classes.root}>
+                <Head>
+                    <title>Notifications</title>
+                </Head>
                 <EnhancedTable
                     columns={columns}
                     rowActions={rowActions}

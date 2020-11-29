@@ -7,6 +7,7 @@ import { login as authLogin, logout as authLogout } from '../redux/actions/auth'
 
 import { Paper, withStyles, TextField, Button, Snackbar, Typography } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
+import Head from "next/dist/next-server/lib/head";
 
 const styles = theme => ({
     root: {
@@ -83,6 +84,9 @@ class Login extends React.Component {
         const { classes } = this.props;
         return (
             <Paper className={classes.root} elevation={3}>
+                <Head>
+                    <title>Login</title>
+                </Head>
                 <Typography variant="h4" style={{ textAlign: 'center' }}>
                     Login
                 </Typography>
