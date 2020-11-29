@@ -32,6 +32,7 @@ import { MyLocation as MyLocationIcon, ScheduleRounded as ScheduleIconRounded } 
 
 import ReviewCard from '../../components/ReviewCard';
 import Head from "next/dist/next-server/lib/head";
+import ScheduleCard from "../../components/ScheduleCard";
 
 const truckPageStyles = theme => ({
     text: {
@@ -40,9 +41,12 @@ const truckPageStyles = theme => ({
     },
     truckTags: {
         display: 'flex',
-        alignContent: 'center',
         justifyContent: 'center',
         flexWrap: 'wrap',
+        '& > *': {
+            margin: theme.spacing(0.5),
+        },
+        paddingTop: '16px',
     },
     truckTag: {
         marginLeft: '5px',
@@ -303,7 +307,12 @@ class TruckPage extends Component {
                 {this.state.truckFound && this.state.tags.length > 0 && (
                     <div align="center" className={classes.truckTags}>
                         {this.state.tags.map((t, i) => (
-                            <Chip className={classes.truckTag} key={i} label={t.name} />
+                            <Chip onClick={() =>
+                                this.props.router.push({
+                                    pathname: '/search',
+                                    query: { tag: t },
+                                })
+                            } className={classes.truckTag} key={i} label={t.name} />
                         ))}
                     </div>
                 )}
@@ -370,35 +379,19 @@ class TruckPage extends Component {
                 )}
 
                 <br />
-                {/**CURRENT LOCATION*/}
-                {this.state.truckFound && this.state.truck.currentLocation && (
-                    <div className={classes.currentLocation}>
-                        <CardHeader title={'Current Location'} />
-                        <MyLocationIcon /> <strong>{this.state.truck.currentLocation?.location}</strong>
-                    </div>
-                )}
-
-                <br />
                 {/**SCHEDULE*/}
                 {this.state.truckFound && this.state.schedules.length > 0 && (
                     <Card>
                         <CardHeader title={'Schedule'} />
                         <CardContent>
-                            <Table size="small">
-                                <TableBody>
-                                    {this.state.schedules.map((s, i) => (
-                                        <TableRow key={i}>
-                                            <TableCell>
-                                                <Typography variant="body1">
-                                                    <ScheduleIconRounded /> {s.location}:{' '}
-                                                    {format(new Date(s.timeFrom), 'MM/dd/yyyy HH:mm')} to{' '}
-                                                    {format(new Date(s.timeTo), 'MM/dd/yyyy HH:mm')}
-                                                </Typography>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                            {this.state.truck.currentLocation && (
+                                <Typography variant={'contained'}>
+                                    Current Location: <strong>{this.state.truck.currentLocation?.location}</strong>
+                                </Typography>
+                            )}
+                            {this.state.schedules.length > 0 && (
+                                <ScheduleCard width={'900px'} schedules={this.state.schedules}/>)
+                            }
                         </CardContent>
                     </Card>
                 )}
