@@ -7,7 +7,8 @@ import { logout as authLogout } from '../../redux/actions/auth';
 import { connect } from 'react-redux';
 
 import { withStyles } from '@material-ui/core/styles';
-import { Dialog, DialogActions, DialogTitle, DialogContent, Button } from '@material-ui/core';
+import { Dialog, DialogActions, DialogTitle, DialogContent, Button, Snackbar } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 import { AttachFile as AttachmentIcon, Email as UnreadIcon, DraftsOutlined as ReadIcon } from '@material-ui/icons';
 import ReactMarkdown from 'react-markdown';
 import EnhancedTable from '../../components/tables/EnhancedTable';
@@ -27,6 +28,9 @@ class Notifications extends Component {
             selected: [],
             userId: undefined,
             open: false,
+            errorMsg: '',
+            errorOpen: false,
+            errorSeverity: 'error',
         };
 
         this.markAllAsUnread = this.markAllAsUnread.bind(this);
@@ -51,7 +55,13 @@ class Notifications extends Component {
                 })
         )
             .then(this.fetchData)
-            .catch(err => console.log(err));
+            .catch(err => {
+                console.error(err);
+                this.setState({
+                    errorMsg: 'Error: could not mark all as read! Check the console for more information.',
+                    errorOpen: true,
+                });
+            });
     }
 
     markAllAsUnread() {
@@ -70,7 +80,13 @@ class Notifications extends Component {
                 })
         )
             .then(this.fetchData)
-            .catch(err => console.log(err));
+            .catch(err => {
+                console.error(err);
+                this.setState({
+                    errorMsg: 'Error: could not mark all as unread! Check the console for more information.',
+                    errorOpen: true,
+                });
+            });
     }
 
     fetchData() {
@@ -86,22 +102,25 @@ class Notifications extends Component {
                 );
             })
             .then(res => {
-                this.setState(
-                    {
-                        rows: res.data.map(not => ({
-                            unread: not.unread,
-                            truck_name: not.truck?.name || '',
-                            subject: not.subject,
-                            date: parseISO(not.postedTimestamp),
-                            id: not.id,
-                            description: not.description,
-                            media: not.media,
-                        })),
-                    },
-                    () => console.table(this.state.rows)
-                );
+                this.setState({
+                    rows: res.data.map(not => ({
+                        unread: not.unread,
+                        truck_name: not.truck?.name || '',
+                        subject: not.subject,
+                        date: parseISO(not.postedTimestamp),
+                        id: not.id,
+                        description: not.description,
+                        media: not.media,
+                    })),
+                });
             })
-            .catch(err => console.log(err));
+            .catch(err => {
+                console.error(err);
+                this.setState({
+                    errorMsg: 'Error: could not fetch notifications! Check the console for more information.',
+                    errorOpen: true,
+                });
+            });
     }
 
     componentDidMount() {
@@ -142,7 +161,13 @@ class Notifications extends Component {
                     ],
                 });
             })
-            .catch(err => console.log(err));
+            .catch(err => {
+                console.error(err);
+                this.setState({
+                    errorMsg: 'Error: could not mark notification as read! Check the console for more information.',
+                    errorOpen: true,
+                });
+            });
     }
 
     render() {
@@ -210,7 +235,6 @@ class Notifications extends Component {
                     order="desc"
                     orderBy="date"
                     onSelectionChange={data => {
-                        console.log(data);
                         this.setState({ selected: data });
                     }}
                 />
@@ -239,6 +263,33 @@ class Notifications extends Component {
                         </Button>
                     </DialogActions>
                 </Dialog>
+                <Snackbar
+                    open={this.state.errorOpen}
+                    autoHideDuration={5000}
+                    onClose={(_event, reason) => {
+                        if (reason === 'clickaway') {
+                            return;
+                        }
+
+                        this.setState({
+                            errorOpen: false,
+                        });
+                    }}
+                    onExited={() => this.setState({ errorSeverity: 'error' })}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                >
+                    <Alert
+                        variant="filled"
+                        severity={this.state.errorSeverity}
+                        onClose={() => {
+                            this.setState({
+                                errorOpen: false,
+                            });
+                        }}
+                    >
+                        {this.state.errorMsg}
+                    </Alert>
+                </Snackbar>
             </div>
         );
     }
