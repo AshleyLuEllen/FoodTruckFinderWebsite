@@ -60,6 +60,7 @@ function OwnerTruckCard(props) {
                         <a>{props.truck.name}</a>
                     </Link>
                 }
+                // eslint-disable-next-line react/no-children-prop
                 subheader={<ReactMarkdown children={props.truck.description} renderers={{ paragraph: 'span' }} />}
             />
             <div className={classes.rating}>
