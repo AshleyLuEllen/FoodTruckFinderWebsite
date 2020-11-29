@@ -66,7 +66,7 @@ function EnhancedTableHead(props) {
     return (
         <TableHead>
             <Head>
-                <title>My Notifications</title>
+                <title>Notifications</title>
             </Head>
             <TableRow>
                 <TableCell padding="checkbox">
