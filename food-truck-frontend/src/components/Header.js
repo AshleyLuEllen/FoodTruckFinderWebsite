@@ -205,7 +205,7 @@ function Header(props) {
             <MuiLink className={classes.link} href="/owner/trucks" color="inherit">
                 <MenuItem onClick={handleMenuClose}>My Trucks</MenuItem>
             </MuiLink>
-            <MuiLink className={classes.link} href="/account" color="inherit">
+            <MuiLink className={classes.link} href={`/user/${props.auth.userId}`} color="inherit">
                 <MenuItem onClick={handleMenuClose}>My Profile</MenuItem>
             </MuiLink>
             <MuiLink className={classes.link} href="/logout" color="inherit">

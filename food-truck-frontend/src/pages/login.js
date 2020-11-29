@@ -59,12 +59,12 @@ class Login extends React.Component {
             })
             .then(res => {
                 jwt = res.headers.authorization;
-                requests.getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
+                return requests.getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
                     jwt,
                 });
             })
-            .then(() => {
-                this.props.authLogin(jwt);
+            .then(res => {
+                this.props.authLogin(jwt, res.data.id);
                 this.props.router.push('/');
             })
             .catch(err => {
