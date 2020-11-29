@@ -245,7 +245,7 @@ class ScheduleManagementPage extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (this.props.router?.query?.truck_id != prevProps.router?.query?.truck_id && !this.state.truckFound) {
+        if (this.props.router?.query?.truck_id !== prevProps.router?.query?.truck_id && !this.state.truckFound) {
             this.fetchData();
         }
     }
@@ -266,7 +266,7 @@ class ScheduleManagementPage extends Component {
                 this.props.auth
             )
             .then(() => {
-                this.setSchedules([...this.state.upcoming, ...this.state.past].filter(s => s.id != id));
+                this.setSchedules([...this.state.upcoming, ...this.state.past].filter(s => s.id !== id));
             })
             .catch(err => {
                 console.error(err);
@@ -290,8 +290,9 @@ class ScheduleManagementPage extends Component {
         this.setState({
             open: true,
             editing: true,
-            initialData: this.state.upcoming.find(s => s.id == id),
+            initialData: this.state.upcoming.find(s => s.id === id),
         });
+        console.log(this.state.initialData);
     }
 
     deleteAll(table) {
@@ -307,7 +308,7 @@ class ScheduleManagementPage extends Component {
         )
             .then(() => {
                 this.setSchedules(
-                    [...this.state.past, ...this.state.upcoming].filter(s => !toDelete.some(td => s.id == td))
+                    [...this.state.past, ...this.state.upcoming].filter(s => !toDelete.some(td => s.id === td))
                 );
             })
             .catch(err => {
@@ -422,9 +423,11 @@ class ScheduleManagementPage extends Component {
 
         return (
             <div>
-                <Head>
-                    <title>{this.state?.truck?.name} Schedule</title>
-                </Head>
+                {this.props.router?.query?.truck_id && (
+                    <Head>
+                        <title>Schedule</title>
+                    </Head>
+                )}
                 <Container className={classes.root}>
                     <Breadcrumbs aria-label="breadcrumb">
                         <Link href="/owner" passHref>

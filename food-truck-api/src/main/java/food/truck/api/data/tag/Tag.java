@@ -22,7 +22,7 @@ public class Tag {
     @Column(name = "tag_name")
     String name;
 
-    @Column(name = "tag_desc")
-    String description;
+    @Column(name = "tag_cat")
+    String category;
 }
 
