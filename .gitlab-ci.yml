@@ -10,24 +10,24 @@ variables:
     CACHE_IMAGE: registry.gitlab.com/fall20-group1/food-truck-finder-2
 
 stages:
-#    - test
+    - test
     - deploy
 
-#test-frontend:
-#    stage: test
-#    script:
-#        - "echo TODO: implement tests"
-#    only:
-#        - merge_requests
-#
-#test-backend:
-#    image: openjdk:14
-#    stage: test
-#    script:
-#        - cd ./food-truck-api
-#        - ./gradlew test
-#    only:
-#        - merge_requests
+test-frontend:
+    stage: test
+    script:
+        - "echo TODO: implement tests"
+    only:
+        - merge_requests
+
+test-backend:
+    image: openjdk:14
+    stage: test
+    script:
+        - cd ./food-truck-api
+        - ./gradlew test
+    only:
+        - merge_requests
 
 deploy-frontend:
     image: docker:latest
