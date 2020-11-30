@@ -11,10 +11,14 @@ import FriendAvatar from '../../../components/FriendAvatar';
 import Grid from "@material-ui/core/Grid";
 import {Search as SearchIcon} from "@material-ui/icons";
 import Button from "@material-ui/core/Button";
+import {connect} from "react-redux";
+import withRouter from "next/dist/client/with-router";
+import PropTypes from "prop-types";
 
 const useFriendCardStyles = makeStyles(theme => ({
     root: {
         background: 'white',
+        width: '100%',
     },
     avatar: {
         width: theme.spacing(16),
@@ -25,27 +29,57 @@ const useFriendCardStyles = makeStyles(theme => ({
         marginLeft: '0',
         marginRight: '0'
     },
+    text: {
+        marginLeft: 3,
+        marginRight: 3,
+        marginTop: 3,
+        marginBottom: 3,
+    },
 }));
 
 function FriendCard(props) {
+    const router = useRouter();
     const classes = useFriendCardStyles();
+
+    const makeFriend = () => {
+        requests.postWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/friends/${props.user.id}`, props.auth)
+            .then(console.log("New friend!"))
+            .catch(err => console.log(err.message));
+    };
+
+    const removeFriend = () => {
+        requests.deleteWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/friends/${props.user.id}`, props.auth)
+            .then(console.log("New friend!"))
+            .catch(err => console.log(err.message));
+    };
 
     return (
         <div className={classes.root}>
             <div style={{ display: 'flex', justifyContent: 'start'}}>
                 <FriendAvatar className={classes.avatar} user={props.user} />
-                <div style={{marginLeft: '0'}}>
-                <Typography variant={'h2'}>
-                    {props.user.firstName} {props.user.lastName}
-                </Typography>
-                <br/>
-                <Typography variant={'subtitle1'}>
-                    {props.user.description}
-                </Typography>
-                <br/>
-                <Typography variant={'subtitle1'}>
-                    {props.user.emailAddress}
-                </Typography>
+                <div className={classes.text}>
+                    <Typography className={classes.text} variant={'h3'}>
+                        {props.user.firstName} {props.user.lastName}
+                    </Typography>
+                    <Typography className={classes.text} variant={'subtitle1'}>
+                        <strong>Bio:</strong> {props.user.description}
+                    </Typography>
+                    <Typography className={classes.text} variant={'subtitle1'}>
+                        <strong>Email:</strong> {props.user.emailAddress}
+                    </Typography>
+                    {props.button &&
+                        <div>
+                            {requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userID}/friends/${props.user.id}`) &&
+                            <Button onClick={removeFriend}>
+                                Unfriend
+                            </Button> }
+                            {!requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userID}/friends/${props.user.id}`) &&
+                            <Button color='secondary' onClick={makeFriend}>
+                                Friend
+                            </Button> }
+                        </div>
+
+                    }
                 </div>
             </div>
         </div>
@@ -117,7 +151,7 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-function FriendsPage() {
+function FriendsPage(props) {
     const router = useRouter();
     const classes = useStyles();
 
@@ -192,63 +226,75 @@ function FriendsPage() {
                         ))}
                     </ul>
                 </Grid>
+                {router.query.user_id &&
                 <Grid item xs={12} md={6}>
-                    <Grid item xs={6}>
-                        <Paper styles={{width: '100%'}}>
-                            <div className={classes.search}>
-                                <InputBase
-                                    variant={'outlined'}
-                                    placeholder="Search (email)…"
-                                    classes={{
-                                        root: classes.inputRoot,
-                                        input: classes.inputInput,
-                                    }}
-                                    onChange={e => {setEmail(e.target.value); console.log(e.target.value);} }
-                                    inputProps={{ 'aria-label': 'search' }}
-                                />
-                                <InputBase
-                                    variant={'outlined'}
-                                    placeholder="Search (first name)…"
-                                    classes={{
-                                        root: classes.inputRoot,
-                                        input: classes.inputInput,
-                                    }}
-                                    onChange={e => {setFirstName(e.target.value); console.log(e.target.value);}}
-                                    inputProps={{ 'aria-label': 'search' }}
-                                />
-                                <InputBase
-                                    variant={'outlined'}
-                                    placeholder="Search (last name)…"
-                                    classes={{
-                                        root: classes.inputRoot,
-                                        input: classes.inputInput,
-                                    }}
-                                    onChange={e => {setLastName(e.target.value); console.log(e.target.value);}}
-                                    inputProps={{ 'aria-label': 'search' }}
-                                />
-                                <Button variant={'contained'} className={classes.searchButton} onClick={searchForFriend}>
-                                    Search
-                                </Button>
-                            </div>
+                    <Paper styles={{width: '100%'}}>
+                        <div className={classes.search}>
+                            <InputBase
+                                variant={'outlined'}
+                                placeholder="Search (email)…"
+                                classes={{
+                                    root: classes.inputRoot,
+                                    input: classes.inputInput,
+                                }}
+                                onChange={e => {setEmail(e.target.value);} }
+                                inputProps={{ 'aria-label': 'search' }}
+                            />
                             <br/>
-                            {searchResults &&
-                            <div>
-                                {searchResults.map((user, i) =>
-                                    <FriendCard key={i} user={user} a={2} b={3} />
-                                )}
-                            </div>}
-                            {searchResults.length === 0 &&
-                            <div>
-                                <Typography variant={'subtitle1'}>
-                                    No results
-                                </Typography>
-                            </div>}
-                        </Paper>
-                    </Grid>
-                </Grid>
+                            <InputBase
+                                variant={'outlined'}
+                                placeholder="Search (first name)…"
+                                classes={{
+                                    root: classes.inputRoot,
+                                    input: classes.inputInput,
+                                }}
+                                onChange={e => {setFirstName(e.target.value);}}
+                                inputProps={{ 'aria-label': 'search' }}
+                            />
+                            <br/>
+                            <InputBase
+                                variant={'outlined'}
+                                placeholder="Search (last name)…"
+                                classes={{
+                                    root: classes.inputRoot,
+                                    input: classes.inputInput,
+                                }}
+                                onChange={e => {setLastName(e.target.value);}}
+                                inputProps={{ 'aria-label': 'search' }}
+                            />
+                            <Button variant={'contained'} className={classes.searchButton} onClick={searchForFriend}>
+                                Search
+                            </Button>
+                        </div>
+                        <br/>
+                        <br/>
+                        {searchResults &&
+                        <div>
+                            {searchResults.map((user, i) =>
+                                <FriendCard userID={router.query.user_id} button={true} key={i} user={user} a={2} b={3} />
+                            )}
+                        </div>}
+                        {searchResults.length === 0 &&
+                        <div>
+                            <Typography variant={'subtitle1'}>
+                                No results
+                            </Typography>
+                        </div>}
+                    </Paper>
+                </Grid>}
             </Grid>
         </Container>
     );
 }
 
-export default FriendsPage;
+FriendsPage.propTypes = {
+    auth: PropTypes.any,
+};
+
+function mapStateToProps(state) {
+    const { auth } = state;
+    return { auth };
+}
+const mapDispatchToProps = {};
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(FriendsPage));
