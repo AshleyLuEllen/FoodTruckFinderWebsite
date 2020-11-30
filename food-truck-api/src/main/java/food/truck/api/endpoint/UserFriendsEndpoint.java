@@ -55,6 +55,7 @@ public class UserFriendsEndpoint {
     @PostMapping("/users/{userId}/friends/{friendId}")
     public void addFriendship(Principal principal, @PathVariable Long userId, @PathVariable Long friendId){
         if (principal == null) {
+            log.info("Principal is null");
             throw new UnauthorizedException();
         }
         // Check if user exists
@@ -62,6 +63,8 @@ public class UserFriendsEndpoint {
         User friend = userService.findUser(friendId).orElseThrow(ResourceNotFoundException::new);
         User pUser = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
 
+        log.info(user);
+        log.info(pUser);
         if (!pUser.equals(user)) {
             throw new UnauthorizedException();
         }

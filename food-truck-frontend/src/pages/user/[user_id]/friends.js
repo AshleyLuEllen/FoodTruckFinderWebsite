@@ -14,6 +14,7 @@ import Button from "@material-ui/core/Button";
 import {connect} from "react-redux";
 import withRouter from "next/dist/client/with-router";
 import PropTypes from "prop-types";
+import Divider from "@material-ui/core/Divider";
 
 const useFriendCardStyles = makeStyles(theme => ({
     root: {
@@ -41,15 +42,34 @@ function FriendCard(props) {
     const router = useRouter();
     const classes = useFriendCardStyles();
 
+    const [areFriends, setAreFriends] = useState(false);
+    if (props.button) {
+        requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${props.auth.userId}/friends/${props.user.id}`).then(res => setAreFriends(res.data)).catch(err => console.log(err.message));
+        console.log(areFriends);
+    }
+
+
     const makeFriend = () => {
-        requests.postWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/friends/${props.user.id}`, props.auth)
-            .then(console.log("New friend!"))
+        console.log(props.auth.userId);
+        console.log(props.user.id);
+        console.log(props.auth);
+        requests.postWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/${props.auth.userId}/friends/${props.user.id}`, props.auth, props.auth)
+            .then(() => {
+                console.log("New friend!");
+                setAreFriends(true);
+            })
             .catch(err => console.log(err.message));
     };
 
     const removeFriend = () => {
-        requests.deleteWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userId}/friends/${props.user.id}`, props.auth)
-            .then(console.log("New friend!"))
+        console.log(props.auth.userId);
+        console.log(props.user.id);
+        console.log(props.auth);
+        requests.deleteWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/${props.auth.userId}/friends/${props.user.id}`, props.auth, props.auth)
+            .then( () => {
+                console.log("Unfriend!");
+                setAreFriends(false)
+            })
             .catch(err => console.log(err.message));
     };
 
@@ -69,16 +89,14 @@ function FriendCard(props) {
                     </Typography>
                     {props.button &&
                         <div>
-                            {requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userID}/friends/${props.user.id}`) &&
-                            <Button onClick={removeFriend}>
+                            {areFriends ?
+                            <Button color='secondary' variant={'contained'} onClick={removeFriend}>
                                 Unfriend
-                            </Button> }
-                            {!requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${props.userID}/friends/${props.user.id}`) &&
-                            <Button color='secondary' onClick={makeFriend}>
+                            </Button> :
+                            <Button variant={'contained'} onClick={makeFriend}>
                                 Friend
-                            </Button> }
+                            </Button>}
                         </div>
-
                     }
                 </div>
             </div>
@@ -169,7 +187,6 @@ function FriendsPage(props) {
                 .get(`${process.env.FOOD_TRUCK_API_URL}/users/${router.query.user_id}`)
                 .then(res => {
                     setUser(res.data);
-
                     return requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${router.query.user_id}/friends`);
                 })
                 .then(res => {
@@ -180,14 +197,13 @@ function FriendsPage(props) {
                     console.log(error.message);
                     router.push('/');
                 });
+            console.log(props.auth.userId);
+            console.log(router.query.user_id);
         }
     }, [router.query?.user_id]);
 
     const searchForFriend = () => {
-        console.log("Searching...");
-        console.log(first);
-        console.log(last);
-        console.log(email);
+        console.log("Searching...");;
         const friendQuery = {
             firstName: first,
             lastName: last,
@@ -198,7 +214,7 @@ function FriendsPage(props) {
         requests.post(`${process.env.FOOD_TRUCK_API_URL}/users/search`, friendQuery)
             .then(res => {
                 console.log("Searched!");
-                setSearchResults(res.data);
+                setSearchResults(res.data.filter(f => f.id !== props.auth.userId));
                 console.log(res.data);
             }).catch(err => console.log(err.message));
     }
@@ -212,23 +228,26 @@ function FriendsPage(props) {
             <Head>
                 <title>Friends</title>
             </Head>
-            <Typography variant="h4" style={{ marginBottom: '10px', textAlign: 'center' }}>
+            <Typography variant="h4" style={{ marginBottom:'10px', textAlign: 'center' }}>
                 {user?.firstName}'s Friends
             </Typography>
             <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={Number(props.auth.userId) === Number(router.query.user_id) ? 6 : 12}>
                     <ul>
                         {friends.map((user, i) => (
                             <div>
-                            <FriendCard key={i} user={user} a={2} b={3} />
+                            <FriendCard auth={props.auth} button={props.auth.userId !== user.id} key={i} user={user} a={2} b={3} />
                             <br/>
                             </div>
                         ))}
                     </ul>
                 </Grid>
-                {router.query.user_id &&
+                {Number(props.auth.userId) === Number(router.query.user_id) &&
                 <Grid item xs={12} md={6}>
                     <Paper styles={{width: '100%'}}>
+                        <Typography variant="h6" style={{ marginBottom:'10px', textAlign: 'center' }}>
+                            Search for Friends
+                        </Typography>
                         <div className={classes.search}>
                             <InputBase
                                 variant={'outlined'}
@@ -237,7 +256,7 @@ function FriendsPage(props) {
                                     root: classes.inputRoot,
                                     input: classes.inputInput,
                                 }}
-                                onChange={e => {setEmail(e.target.value);} }
+                                onChange={e => {setEmail(e.target.value)} }
                                 inputProps={{ 'aria-label': 'search' }}
                             />
                             <br/>
@@ -248,7 +267,7 @@ function FriendsPage(props) {
                                     root: classes.inputRoot,
                                     input: classes.inputInput,
                                 }}
-                                onChange={e => {setFirstName(e.target.value);}}
+                                onChange={e => {setFirstName(e.target.value)}}
                                 inputProps={{ 'aria-label': 'search' }}
                             />
                             <br/>
@@ -259,7 +278,7 @@ function FriendsPage(props) {
                                     root: classes.inputRoot,
                                     input: classes.inputInput,
                                 }}
-                                onChange={e => {setLastName(e.target.value);}}
+                                onChange={e => {setLastName(e.target.value)}}
                                 inputProps={{ 'aria-label': 'search' }}
                             />
                             <Button variant={'contained'} className={classes.searchButton} onClick={searchForFriend}>
@@ -267,11 +286,12 @@ function FriendsPage(props) {
                             </Button>
                         </div>
                         <br/>
+                        <Divider />
                         <br/>
                         {searchResults &&
                         <div>
                             {searchResults.map((user, i) =>
-                                <FriendCard userID={router.query.user_id} button={true} key={i} user={user} a={2} b={3} />
+                                <FriendCard auth={props.auth} button={true} key={i} user={user} a={2} b={3} />
                             )}
                         </div>}
                         {searchResults.length === 0 &&
