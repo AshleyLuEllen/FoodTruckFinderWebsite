@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import requests from '../../../util/requests';
 import Head from 'next/dist/next-server/lib/head';
 
-import {Container, Typography, CircularProgress, Avatar, InputBase, TextField} from '@material-ui/core';
+import {Container, Typography, Paper, CircularProgress, Avatar, InputBase, TextField} from '@material-ui/core';
 import {fade, makeStyles} from '@material-ui/core/styles';
 
 import FriendAvatar from '../../../components/FriendAvatar';
@@ -116,8 +116,10 @@ function FriendsPage() {
     const [friends, setFriends] = useState([]);
     const [user, setUser] = useState(undefined);
     const [loading, setLoading] = useState(true);
-    const [searchResults, setSearchResults] = useState(undefined);
-    const [query, setQuery] = useState(undefined);
+    const [searchResults, setSearchResults] = useState([]);
+    const [email, setEmail] = useState(undefined);
+    const [first, setFirstName] = useState(undefined);
+    const [last, setLastName] = useState(undefined);
 
     useEffect(() => {
         if (router.query?.user_id) {
@@ -141,18 +143,21 @@ function FriendsPage() {
 
     const searchForFriend = () => {
         console.log("Searching...");
-        const body = { query: query };
-        requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/search`, body)
+        console.log(first);
+        console.log(last);
+        console.log(email);
+        const body = {
+            firstName: first,
+            lastName: last,
+            email: email,
+        };
+
+        requests.post(`${process.env.FOOD_TRUCK_API_URL}/users/search`, body)
             .then(res => {
                 console.log("Searched!");
                 setSearchResults(res.data);
                 console.log(res.data);
             }).catch(err => console.log(err.message));
-    }
-
-    const handleChange = (e) => {
-        console.log(e.target.value);
-        setQuery(e.target.value);
     }
 
     return loading ? (
@@ -161,6 +166,9 @@ function FriendsPage() {
         </div>
     ) : (
         <Container className={classes.root}>
+            <Head>
+                <title>Friends</title>
+            </Head>
             <Typography variant="h4" style={{ marginBottom: '10px', textAlign: 'center' }}>
                 {user?.firstName}'s Friends
             </Typography>
@@ -172,30 +180,56 @@ function FriendsPage() {
                     </div>
                 ))}
             </ul>
-            <div className={classes.search}>
-                <div className={classes.searchIcon}>
-                    <SearchIcon />
+            <Paper styles={{width: '100%'}}>
+                <div className={classes.search}>
+                    <InputBase
+                        variant={'outlined'}
+                        placeholder="Search (email)…"
+                        classes={{
+                            root: classes.inputRoot,
+                            input: classes.inputInput,
+                        }}
+                        onChange={e => {setEmail(e.target.value); console.log(e.target.value);} }
+                        inputProps={{ 'aria-label': 'search' }}
+                    />
+                    <InputBase
+                        variant={'outlined'}
+                        placeholder="Search (first name)…"
+                        classes={{
+                            root: classes.inputRoot,
+                            input: classes.inputInput,
+                        }}
+                        onChange={e => {setFirstName(e.target.value); console.log(e.target.value);}}
+                        inputProps={{ 'aria-label': 'search' }}
+                    />
+                    <InputBase
+                        variant={'outlined'}
+                        placeholder="Search (last name)…"
+                        classes={{
+                            root: classes.inputRoot,
+                            input: classes.inputInput,
+                        }}
+                        onChange={e => {setLastName(e.target.value); console.log(e.target.value);}}
+                        inputProps={{ 'aria-label': 'search' }}
+                    />
+                    <Button variant={'contained'} className={classes.searchButton} onClick={searchForFriend}>
+                        Search
+                    </Button>
                 </div>
-                <InputBase
-                    placeholder="Search…"
-                    classes={{
-                        root: classes.inputRoot,
-                        input: classes.inputInput,
-                    }}
-                    onChange={handleChange}
-                    onKeyDown={searchForFriend()}
-                    inputProps={{ 'aria-label': 'search' }}
-                />
-                <Button variant={'contained'} className={classes.searchButton}>
-                    Search
-                </Button>
-            </div>
-            {searchResults &&
-            <div>
-                {searchResults.map(f =>
-                    <FriendCard key={i} user={user} a={2} b={3} />
-                )}
-            </div>}
+                <br/>
+                {searchResults &&
+                <div>
+                    {searchResults.map(f =>
+                        <FriendCard key={i} user={user} a={2} b={3} />
+                    )}
+                </div>}
+                {searchResults.length === 0 &&
+                <div>
+                    <Typography variant={'subtitle'}>
+                        No results
+                    </Typography>
+                </div>}
+            </Paper>
         </Container>
     );
 }
