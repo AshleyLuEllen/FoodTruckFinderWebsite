@@ -77,7 +77,7 @@ class UserPage extends Component {
         if (!this.props.auth.isLoggedIn) {
             this.setState({
                 errorMsg:
-                    'To subscribe to a food truck, you need to be logged in. Click the log-in button in the top right to log in or create an account.',
+                    'To add a friend, you need to be logged in. Click the log-in button in the top right to log in or create an account.',
                 errorOpen: true,
             });
         } else {
@@ -154,7 +154,7 @@ class UserPage extends Component {
                     this.setState({
                         isMe: true,
                     });
-                } else if (this.props.auth.userId) {
+                } else if (this.props.auth.isLoggedIn) {
                     requests
                         .get(
                             `${process.env.FOOD_TRUCK_API_URL}/users/${this.props.auth.userId}/friends/${this.state.userID}`
@@ -236,20 +236,22 @@ class UserPage extends Component {
                                 Edit Profile
                             </Button>
                         ) : (
-                            <span style={{ position: 'relative' }}>
-                                <Button
-                                    className={classes.editButton}
-                                    variant="contained"
-                                    color={this.state.areFriends ? 'secondary' : 'primary'}
-                                    onClick={this.toggleFriendship}
-                                    disabled={this.state.loadingFriendship}
-                                >
-                                    {this.state.areFriends ? 'Remove friend' : 'Add friend'}
-                                </Button>
-                                {this.state.loadingFriendship && (
-                                    <CircularProgress size={24} className={classes.buttonProgress} />
-                                )}
-                            </span>
+                            this.props.auth.isLoggedIn && (
+                                <span style={{ position: 'relative' }}>
+                                    <Button
+                                        className={classes.editButton}
+                                        variant="contained"
+                                        color={this.state.areFriends ? 'secondary' : 'primary'}
+                                        onClick={this.toggleFriendship}
+                                        disabled={this.state.loadingFriendship}
+                                    >
+                                        {this.state.areFriends ? 'Remove friend' : 'Add friend'}
+                                    </Button>
+                                    {this.state.loadingFriendship && (
+                                        <CircularProgress size={24} className={classes.buttonProgress} />
+                                    )}
+                                </span>
+                            )
                         )}
                         <Link href={`./${this.state.userID}/friends`}>
                             <Typography
