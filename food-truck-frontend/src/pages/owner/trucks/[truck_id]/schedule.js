@@ -338,6 +338,7 @@ class ScheduleManagementPage extends Component {
             console.log(schedule.timeTo);
             let i;
             for (i = 0; i < this.state.upcoming.length; i++) {
+                /** End time overlap */
                 if (this.state.upcoming[i].id !== schedule.id &&
                     new Date(schedule.timeTo) > new Date(this.state.upcoming[i].timeFrom) &&
                     new Date(schedule.timeFrom) < new Date(this.state.upcoming[i].timeFrom)) {
@@ -346,12 +347,26 @@ class ScheduleManagementPage extends Component {
                         errorMsg: 'Schedule end date exceeds start date of another schedule beginning at ' + format(new Date(this.state.upcoming[i].timeFrom), "hh:mm a 'on' MM-dd-yyyy"),
                     });
                     return;
-                } else if (this.state.upcoming[i].id !== schedule.id &&
+
+                }
+                /** Start time overlap */
+                else if (this.state.upcoming[i].id !== schedule.id &&
                     new Date(this.state.upcoming[i].timeTo) > new Date(schedule.timeFrom) &&
                     new Date(this.state.upcoming[i].timeTo) < new Date(schedule.timeTo)) {
                     this.setState({
                         errorOpen: true,
                         errorMsg: 'Schedule start date is before the end of another schedule ending at ' + format(new Date(this.state.upcoming[i].timeTo), "MM-dd-yyyy 'at' hh:mm a"),
+                    });
+                    return;
+                }
+                /** Schedule within another schedule */
+                else if (this.state.upcoming[i].id !== schedule.id &&
+                    new Date(this.state.upcoming[i].timeFrom) < new Date(schedule.timeFrom) &&
+                    new Date(this.state.upcoming[i].timeTo) > new Date(schedule.timeTo)) {
+                    this.setState({
+                        errorOpen: true,
+                        errorMsg: 'Schedule start date is after the start of another schedule starting at ' + format(new Date(this.state.upcoming[i].timeFrom), "MM-dd-yyyy 'at' hh:mm a") + '\n'
+                        + 'Schedule end date is before the end of another schedule ending at ' + format(new Date(this.state.upcoming[i].timeTo),  "MM-dd-yyyy 'at' hh:mm a")
                     });
                     return;
                 }
