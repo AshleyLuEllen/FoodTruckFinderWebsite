@@ -338,9 +338,6 @@ class ScheduleManagementPage extends Component {
             console.log(schedule.timeTo);
             let i;
             for (i = 0; i < this.state.upcoming.length; i++) {
-                console.log(this.state.upcoming[i].timeFrom);
-                console.log(new Date(this.state.upcoming[i].timeFrom) < new Date(schedule.timeTo));
-                console.log(new Date(this.state.upcoming[i].timeTo) > new Date(schedule.timeFrom));
                 if (this.state.upcoming[i].id !== schedule.id &&
                     new Date(schedule.timeTo) > new Date(this.state.upcoming[i].timeFrom) &&
                     new Date(schedule.timeFrom) < new Date(this.state.upcoming[i].timeFrom)) {
