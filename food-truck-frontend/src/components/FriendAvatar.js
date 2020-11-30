@@ -21,7 +21,7 @@ function FriendAvatar(props) {
             <Avatar
                 className={classes.root + ` ${props.className || ''}`}
                 alt={props.name ? undefined : `${props.user.firstName} ${props.user.lastName}`}
-                src="/static/images/avatar/1.jpg"
+                src={props.user.avatar?.url}
             >
                 {props.name || `${props.user.firstName.charAt(0)}${props.user.lastName.charAt(0)}`}
             </Avatar>
@@ -33,6 +33,7 @@ FriendAvatar.propTypes = {
     url: PropTypes.string,
     user: PropTypes.any.isRequired,
     name: PropTypes.string,
+    className: PropTypes.any,
 };
 
 export default FriendAvatar;
