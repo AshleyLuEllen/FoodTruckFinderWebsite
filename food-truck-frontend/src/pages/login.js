@@ -100,6 +100,7 @@ class Login extends React.Component {
                         type="email"
                         autoFocus
                         required
+                        onBlur={() => this.setState({ email: this.state.email.trim() })}
                     />
                     <TextField
                         className={classes.text}
