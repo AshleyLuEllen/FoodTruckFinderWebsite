@@ -4,6 +4,7 @@ import food.truck.api.data.subscription.SubscriptionService;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckRepository;
 import food.truck.api.data.truck.TruckService;
+import food.truck.api.data.truck_notification.NotificationType;
 import food.truck.api.data.truck_notification.TruckNotification;
 import food.truck.api.data.truck_notification.TruckNotificationRepository;
 import food.truck.api.data.truck_notification.TruckNotificationService;
@@ -144,41 +145,13 @@ public class UserNotificationServiceTest {
     }
 
     @Test
-    void findAllSavedNotifications() {
-        notification.setPublished(true);
-        UnreadSavedPatch patch = new UnreadSavedPatch();
-        patch.setSaved(true);
-        patch.setUnread(false);
-        userNotificationService.updateUserNotification(user, notification, patch);
-        assertArrayEquals(new TruckNotification[] {notification}, this.userNotificationService.findAllSavedNotifications(user).toArray());
-    }
-
-    @Test
-    void deleteUserSavedNotification() {
-        UnreadSavedPatch patch = new UnreadSavedPatch();
-        patch.setSaved(true);
-        patch.setUnread(false);
-        userNotificationService.updateUserNotification(user, notification, patch);
-        assertTrue(this.userNotificationService.findUserNotification(user, notification).isPresent());
-
-        patch.setSaved(false);
-        patch.setUnread(null);
-        userNotificationService.updateUserNotification(user, notification, patch);
-        assertTrue(this.userNotificationService.findUserNotification(user, notification).isEmpty());
-    }
-
-    @Test
     void findAllNotifications() {
-        UnreadSavedPatch patch = new UnreadSavedPatch();
-        patch.setSaved(true);
-        patch.setUnread(false);
-        userNotificationService.updateUserNotification(user, notification2, patch);
-        assertTrue(this.userNotificationService.findUserNotification(user, notification2).isPresent());
-
-        assertTrue(this.userNotificationService.findAllNotifications(user).isEmpty());
+        assertEquals(1, this.userNotificationService.findAllNotifications(user).size()); // check that there is only one of type subscription
+        assertEquals(NotificationType.SUBSCRIPTION, this.userNotificationService.findAllNotifications(user).get(0).getType());
+        TruckNotification subscription = this.userNotificationService.findAllNotifications(user).get(0);
         notification.setPublished(true);
         notification2.setPublished(true);
-        assertArrayEquals(List.of(notification, notification2).stream().mapToLong(TruckNotification::getId).sorted().toArray(),
+        assertArrayEquals(List.of(subscription, notification, notification2).stream().mapToLong(TruckNotification::getId).sorted().toArray(),
             this.userNotificationService.findAllNotifications(user).stream().mapToLong(TruckNotification::getId).sorted().toArray());
 
         TruckNotification tn = this.userNotificationService.findAllNotifications(user).stream()
@@ -215,11 +188,5 @@ public class UserNotificationServiceTest {
         assertTrue(userNotOpt.isPresent());
         un1 = userNotOpt.get();
         assertTrue(un1.getUnread());
-
-        patch.setSaved(false);
-        patch.setUnread(false);
-        userNotificationService.updateUserNotification(user, notification2, patch);
-        userNotOpt = this.userNotificationService.findUserNotification(user, notification2);
-        assertTrue(userNotOpt.isEmpty());
     }
 }
