@@ -19,6 +19,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findAllUsersNearLocation(double latitude, double longitude, double maxDistance);
 
-    @Query(value = "SELECT * FROM " + User.TABLE_NAME + " u0 WHERE concat(u0.first_name,' ',u0.last_name)=?1", nativeQuery=true)
-    List<User> findUsersByName(String query);
+    List<User> findAllByFirstNameAndLastName(String firstName, String lastName);
+
+    List<User> findAllByFirstName(String firstName);
+
+    List<User> findAllByLastName(String lastName);
 }

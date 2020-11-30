@@ -22,7 +22,7 @@ function ScheduleCard(props) {
         }));
 
     return (
-        <div style={{ height: 500, width: props.width ? props.width : '100%', flexGrow: 1 }}>
+        <div style={{ height: 400, width: props.width ? props.width : '100%', flexGrow: 1 }}>
             <DataGrid rows={rows} columns={columns} pageSize={7} />
         </div>
     );

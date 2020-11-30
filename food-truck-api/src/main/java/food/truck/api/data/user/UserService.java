@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -156,7 +157,26 @@ public class UserService {
         return userRepository.findAllUsersNearLocation(location.getLatitude(), location.getLongitude(), 20.0);
     }
 
-    public List<User> findUsersByName(String query) {
-        return userRepository.findUsersByName(query);
+    public List<User> findUsersByName(String firstName, String lastName) {
+        List<User> temp = new ArrayList<>();
+
+        if (firstName != null && lastName != null) {
+            temp = userRepository.findAllByFirstNameAndLastName(firstName, lastName);
+
+            List<User> first = userRepository.findAllByFirstName(firstName);
+            first.removeIf(temp::contains);
+            temp.addAll(first);
+
+            List<User> last = userRepository.findAllByLastName(lastName);
+            last.removeIf(temp::contains);
+            temp.addAll(last);
+        }
+        else if(firstName != null && lastName == null) {
+            return userRepository.findAllByFirstName(firstName);
+        }
+        else if(firstName == null && lastName != null) {
+            return userRepository.findAllByLastName(lastName);
+        }
+        return temp;
     }
 }

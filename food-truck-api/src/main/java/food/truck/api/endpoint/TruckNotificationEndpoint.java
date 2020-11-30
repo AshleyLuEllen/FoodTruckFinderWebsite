@@ -41,7 +41,7 @@ public class TruckNotificationEndpoint {
         return notOpt.get();
     }
 
-    @PutMapping("/trucks/{truckId}/notifications/{notificationId}")
+    @PatchMapping("/trucks/{truckId}/notifications/{notificationId}")
     public TruckNotification saveTruckNotification(Principal principal, @PathVariable Long notificationId, @RequestBody TruckNotification notification, @PathVariable Long truckId) {
         if (principal == null) {
             throw new UnauthorizedException();
@@ -54,14 +54,12 @@ public class TruckNotificationEndpoint {
             throw new UnauthorizedException();
         }
 
-        if (!notification.getId().equals(notificationId)) {
-            throw new BadRequestException("IDs don't match");
-        }
-        if(!notification.getTruck().getId().equals(truckId)) {
-            throw new ResourceNotFoundException();
-        }
+        TruckNotification dbNotification = truckNotificationService.findTruckNotification(notificationId).orElseThrow(ResourceNotFoundException::new);
+        dbNotification.setSubject(notification.getSubject());
+        dbNotification.setDescription(notification.getDescription());
+        dbNotification.setPublished(notification.getPublished());
 
-        return truckNotificationService.saveTruckNotification(notification);
+        return truckNotificationService.saveTruckNotification(dbNotification);
     }
 
     @PostMapping("/trucks/{truckId}/notifications")

@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import requests from '../../util/requests';
@@ -7,28 +8,32 @@ import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 
 import {
-    CardContent,
     Chip,
-    InputLabel,
     TextField,
     Typography,
     Button,
-    Card,
-    CardHeader,
+    Container,
     Divider,
+    Paper,
     DialogTitle,
     DialogContent,
     DialogActions,
     Dialog,
-    Box,
+    Grid,
+    Snackbar,
+    CircularProgress,
 } from '@material-ui/core';
-import { Rating } from '@material-ui/lab';
+import { Rating, Alert } from '@material-ui/lab';
+import ReactMarkdown from 'react-markdown';
 
 import ReviewCard from '../../components/ReviewCard';
 import Head from 'next/dist/next-server/lib/head';
 import ScheduleCard from '../../components/ScheduleCard';
 
 const truckPageStyles = theme => ({
+    root: {
+        marginTop: '20px',
+    },
     text: {
         marginLeft: theme.spacing(2),
         margin: theme.spacing(1),
@@ -40,7 +45,6 @@ const truckPageStyles = theme => ({
         '& > *': {
             margin: theme.spacing(0.5),
         },
-        paddingTop: '16px',
     },
     truckTag: {
         marginLeft: '5px',
@@ -61,11 +65,17 @@ const truckPageStyles = theme => ({
         margin: theme.spacing(1),
     },
     reviewCard: {
-        marginBottom: '20px',
-        marginRight: '20px',
+        marginBottom: '10px',
     },
     reviewDialog: {
         maxWidth: '500px',
+    },
+    buttonProgress: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        marginTop: -12,
+        marginLeft: -12,
     },
 });
 
@@ -91,6 +101,12 @@ class TruckPage extends Component {
 
             truckFound: false,
             loadingInfo: false,
+            loadingSubscription: false,
+            loadingReview: false,
+
+            errorMsg: '',
+            errorOpen: false,
+            errorSeverity: 'error',
         };
 
         this.toggleSubscribe = this.toggleSubscribe.bind(this);
@@ -101,99 +117,88 @@ class TruckPage extends Component {
     }
 
     fetchData() {
+        this.setState({ userId: this.props.auth?.userId });
         Promise.all([
+            requests.get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`).then(res =>
+                this.setState({
+                    truck: res.data,
+                })
+            ),
             requests
-                .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
+                .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`)
+                .then(res =>
+                    this.setState({
+                        tags: res.data,
+                    })
+                ),
+            requests
+                .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`)
+                .then(res =>
+                    this.setState({
+                        schedules: res.data,
+                    })
+                ),
+            requests
+                .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`)
                 .then(res => {
                     this.setState({
-                        truck: res.data,
-                    });
-                    return requests.get(
-                        `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`
-                    );
-                })
-                .then(res2 => {
-                    this.setState({
-                        tags: res2.data,
-                    });
-                    return requests.get(
-                        `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`
-                    );
-                })
-                .then(res3 => {
-                    this.setState({
-                        schedules: res3.data,
-                    });
-                    return requests.get(
-                        `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`
-                    );
-                })
-                .then(res4 => {
-                    this.setState({
-                        reviews: res4.data,
-                        // truckFound: true,
-                    });
-                    console.log('Got all information!');
-                })
-                .catch(() => {
-                    this.setState({
-                        truck: '',
-                        tags: [],
+                        reviews: res.data,
                     });
                 }),
-
-            requests
-                .getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, this.props.auth)
-                .then(res => {
-                    this.setState({
-                        userId: res.data.id,
-                    });
-                    requests
-                        .get(
-                            `${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/subscriptions/${this.props.router.query.truck_id}`
-                        )
-                        .then(() => {
-                            this.setState({
-                                subscribed: true,
-                            });
-                        })
-                        .catch(() => {
-                            this.setState({
-                                subscribed: false,
-                            });
-                        });
-                })
-                .catch(() => {
-                    this.setState({
-                        userId: undefined,
-                    });
-                }),
-        ]).then(() => {
-            this.setState({ truckFound: true, loadingInfo: false });
-        });
+            this.props.auth.userId
+                ? requests
+                      .get(
+                          `${process.env.FOOD_TRUCK_API_URL}/users/${this.props.auth.userId}/subscriptions/${this.props.router.query.truck_id}`
+                      )
+                      .then(() => {
+                          this.setState({
+                              subscribed: true,
+                          });
+                      })
+                      .catch(() => {
+                          this.setState({
+                              subscribed: false,
+                          });
+                      })
+                : Promise.resolve(0),
+        ])
+            .then(() => {
+                this.setState({ truckFound: true, loadingInfo: false });
+            })
+            .catch(err => {
+                console.error(err);
+                this.setState({
+                    errorMsg:
+                        'Error: could not fetch truck info! Check the console for more information. Please try again later.',
+                    errorOpen: true,
+                });
+            });
     }
 
     writeReview() {
         this.setState({
             openReview: true,
+            rating: 0,
+            comment: '',
         });
     }
 
     handleCancel() {
         this.setState({
             openReview: false,
-            rating: 0,
-            comment: '',
         });
     }
 
     createReview() {
+        this.setState({
+            loadingReview: true,
+        });
+
         const review = {
             comment: this.state.reviewComment,
             rating: this.state.rating,
         };
-        console.log(this.state.reviewComment);
-        console.log(review.comment);
+
         requests
             .postWithAuth(
                 `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/reviews`,
@@ -201,16 +206,23 @@ class TruckPage extends Component {
                 this.props.auth
             )
             .then(() => {
-                console.log('created review!');
+                this.setState({
+                    errorMsg: 'Posted review.',
+                    errorOpen: true,
+                    errorSeverity: 'success',
+                    openReview: false,
+                    loadingReview: false,
+                });
+                this.fetchData();
             })
-            .catch(err => console.log(err.message));
-
-        this.setState({
-            openReview: false,
-            truckFound: false,
-            rating: 0,
-            comment: '',
-        });
+            .catch(err => {
+                console.error(err);
+                this.setState({
+                    errorMsg: 'Error: could not post review! Check the console for more information. Try again later.',
+                    errorOpen: true,
+                    loadingReview: false,
+                });
+            });
     }
 
     handleInputChange(e, value) {
@@ -230,7 +242,7 @@ class TruckPage extends Component {
      * used in the URL
      */
     componentDidMount() {
-        // this.fetchData();
+        if (this.props.router?.query?.truck_id) this.fetchData();
     }
 
     /**
@@ -245,10 +257,15 @@ class TruckPage extends Component {
 
     toggleSubscribe() {
         if (!this.props.auth.isLoggedIn) {
-            alert(
-                'To subscribe to a food truck, you need to be logged in. Click the log-in button in the top right to log in or create an account.'
-            );
+            this.setState({
+                errorMsg:
+                    'To subscribe to a food truck, you need to be logged in. Click the log-in button in the top right to log in or create an account.',
+                errorOpen: true,
+            });
         } else {
+            this.setState({
+                loadingSubscription: true,
+            });
             if (!this.state.subscribed) {
                 requests
                     .postWithAuth(
@@ -258,10 +275,22 @@ class TruckPage extends Component {
                     )
                     .then(() => {
                         this.setState({
+                            errorMsg: 'Subscribed to food truck successfully.',
+                            errorOpen: true,
+                            errorSeverity: 'success',
                             subscribed: true,
+                            loadingSubscription: false,
                         });
                     })
-                    .catch(err => console.log(err));
+                    .catch(err => {
+                        console.error(err);
+                        this.setState({
+                            errorMsg:
+                                'Error: could not subscribe to food truck! Check the console for more information.',
+                            errorOpen: true,
+                            loadingSubscription: false,
+                        });
+                    });
             } else {
                 requests
                     .deleteWithAuth(
@@ -270,10 +299,22 @@ class TruckPage extends Component {
                     )
                     .then(() => {
                         this.setState({
+                            errorMsg: 'Unsubscribed to food truck successfully.',
+                            errorOpen: true,
+                            errorSeverity: 'success',
                             subscribed: false,
+                            loadingSubscription: false,
                         });
                     })
-                    .catch(err => console.log(err));
+                    .catch(err => {
+                        console.error(err);
+                        this.setState({
+                            errorMsg:
+                                'Error: could not unsubscribe from food truck! Check the console for more information.',
+                            errorOpen: true,
+                            loadingSubscription: false,
+                        });
+                    });
             }
         }
     }
@@ -284,155 +325,164 @@ class TruckPage extends Component {
          * display the information
          */
         return (
-            <div>
-                {/**TRUCK NAME*/}
+            <Container className={classes.root}>
                 {this.state.truckFound && (
                     <div>
+                        {/**TRUCK NAME*/}
                         <Head>
                             <title>{this.state.truck.name}</title>
                         </Head>
                         <Typography variant="h2" align="center">
                             {this.state.truck.name}
                         </Typography>
-                    </div>
-                )}
 
-                {/**TAGS*/}
-                {this.state.truckFound && this.state.tags.length > 0 && (
-                    <div align="center" className={classes.truckTags}>
-                        {this.state.tags.map((t, i) => (
-                            <Chip
-                                onClick={() =>
-                                    this.props.router.push({
-                                        pathname: '/search',
-                                        query: { tag: t },
-                                    })
-                                }
-                                className={classes.truckTag}
-                                key={i}
-                                label={t.name}
-                            />
-                        ))}
-                    </div>
-                )}
+                        {/**TAGS*/}
+                        {this.state.tags.length > 0 && (
+                            <div align="center" className={classes.truckTags}>
+                                {this.state.tags.map((t, i) => (
+                                    <Chip
+                                        onClick={() =>
+                                            this.props.router.push({
+                                                pathname: '/search',
+                                                query: { tag: t },
+                                            })
+                                        }
+                                        className={classes.truckTag}
+                                        key={i}
+                                        label={t.name}
+                                    />
+                                ))}
+                            </div>
+                        )}
 
-                {/**RATING*/}
-                {this.state.truckFound && this.state.truck.rating !== null && (
-                    <div align="center">
-                        <Rating name="rating" precision={0.5} value={this.state.truck.rating} size="medium" readOnly />
-                    </div>
-                )}
-
-                {/**SUBSCRIBE BUTTON*/}
-                {this.state.truckFound && this.state.userId && (
-                    <div align="center">
-                        <Box mt={1}>
-                            <Button
-                                color={this.state.subscribed ? 'secondary' : 'primary'}
-                                variant="contained"
-                                onClick={this.toggleSubscribe}
+                        {/**SUBSCRIBE BUTTON*/}
+                        {this.props.auth.isLoggedIn && (
+                            <div
+                                style={{
+                                    marginTop: '10px',
+                                    position: 'relative',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
                             >
-                                {this.state.subscribed ? 'Unsubscribe' : 'Subscribe'}
-                            </Button>
-                        </Box>
+                                {this.state.truck.rating !== null && (
+                                    <Rating
+                                        style={{ marginRight: '25px' }}
+                                        name="rating"
+                                        precision={0.5}
+                                        value={this.state.truck.rating}
+                                        size="medium"
+                                        readOnly
+                                    />
+                                )}
+                                <span style={{ position: 'relative' }}>
+                                    <Button
+                                        color={this.state.subscribed ? 'secondary' : 'primary'}
+                                        variant="contained"
+                                        onClick={this.toggleSubscribe}
+                                        disabled={this.state.loadingSubscription}
+                                    >
+                                        {this.state.subscribed ? 'Unsubscribe' : 'Subscribe'}
+                                    </Button>
+                                    {this.state.loadingSubscription && (
+                                        <CircularProgress size={24} className={classes.buttonProgress} />
+                                    )}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 )}
 
-                {/**DESCRIPTION*/}
                 {this.state.truckFound && (
-                    <React.Fragment>
-                        <Typography variant="h4" component="h2">
-                            Description
-                        </Typography>
-                        <Typography variant="body1" component="p" className={classes.text}>
-                            {this.state.truck.description}
-                        </Typography>
-                        <Divider />
-                    </React.Fragment>
-                )}
-
-                {/**LICENSE*/}
-                {this.state.truckFound && (
-                    <React.Fragment>
-                        <Typography variant="h4" component="h2">
-                            License Plate
-                        </Typography>
-                        <Typography variant="body1" component="p" className={classes.text}>
-                            {this.state.truck.licensePlate}
-                        </Typography>
-                        <Divider />
-                    </React.Fragment>
-                )}
-
-                {/**OWNER*/}
-                {this.state.truckFound && (
-                    <React.Fragment>
-                        <Typography variant="h4" component="h2">
-                            Owner
-                        </Typography>
-                        <Typography variant="body1" component="p" className={classes.text}>
-                            {this.state.truck.owner.firstName} {this.state.truck.owner.lastName}
-                        </Typography>
-                        <Divider />
-                    </React.Fragment>
-                )}
-
-                <br />
-                {/**SCHEDULE*/}
-                {this.state.truckFound && this.state.schedules.length > 0 && (
-                    <Card>
-                        <CardHeader title={'Schedule'} />
-                        <CardContent>
-                            {this.state.truck.currentLocation && (
-                                <Typography variant={'contained'}>
-                                    Current Location: <strong>{this.state.truck.currentLocation?.location}</strong>
-                                </Typography>
-                            )}
-                            {this.state.schedules.length > 0 && (
-                                <ScheduleCard width={'900px'} schedules={this.state.schedules} />
-                            )}
-                        </CardContent>
-                    </Card>
-                )}
-                <br />
-
-                {/**REVIEWS*/}
-                <Divider />
-                {this.state.truckFound && this.state.reviews.length > 0 && (
-                    <Card>
-                        <CardHeader title={'Reviews'} />
-                        <CardContent>
-                            {this.state.reviews.map((r, i) => (
-                                <ReviewCard className={truckPageStyles.reviewCard} key={i} r={r} user={false} />
-                            ))}
-                        </CardContent>
-                    </Card>
-                )}
-
-                {this.state.truckFound && this.state.reviews.length === 0 && (
-                    <Card>
-                        <CardHeader title={'Reviews'} />
-                        <CardContent>
-                            <Typography variant="body1" component="p" className={classes.text}>
-                                No reviews for <strong>{this.state.truck.name}</strong>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} md={6}>
+                            <div style={{ marginTop: '20px', fontSize: '20px' }}>
+                                <ReactMarkdown>{this.state.truck?.description}</ReactMarkdown>
+                            </div>
+                            <Divider />
+                            <Typography variant="h5" style={{ marginBottom: '10px', marginTop: '10px' }}>
+                                Menu
                             </Typography>
-                        </CardContent>
-                    </Card>
+                            <div style={{ width: '100%' }}>
+                                {this.state.truck?.menu ? (
+                                    this.state.truck.menu.dataType === 'MENU_PDF' ? (
+                                        <object
+                                            data={this.state.truck.menu.url}
+                                            type="application/pdf"
+                                            width="100%"
+                                            height="650px"
+                                        >
+                                            <embed
+                                                src={this.state.truck.menu.url}
+                                                type="application/pdf"
+                                                width="100%"
+                                                height="100%"
+                                            />
+                                        </object>
+                                    ) : (
+                                        <img src={this.state.truck.menu.url} style={{ width: '100%' }} />
+                                    )
+                                ) : (
+                                    <Paper elevation={2} style={{ textAlign: 'center', padding: '20px' }}>
+                                        <em>This truck has not posted a menu.</em>
+                                    </Paper>
+                                )}
+                            </div>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <Typography variant="h5" style={{ marginTop: '20px', marginBottom: '10px' }}>
+                                Schedule
+                            </Typography>
+                            {this.state.truck.currentLocation && (
+                                <p>
+                                    Current Location: <strong>{this.state.truck.currentLocation?.location}</strong>
+                                </p>
+                            )}
+                            {this.state.schedules.length > 0 && <ScheduleCard schedules={this.state.schedules} />}
+                            <Typography
+                                variant="h5"
+                                style={{
+                                    marginTop: '20px',
+                                    marginBottom: '10px',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                }}
+                            >
+                                <span>Reviews</span>
+                                {this.props.auth.isLoggedIn && (
+                                    <Button variant="contained" color="primary" onClick={this.writeReview}>
+                                        Write Review
+                                    </Button>
+                                )}
+                            </Typography>
+                            {this.state.reviews.length > 0 ? (
+                                <div style={{ height: '400px', overflow: 'auto' }}>
+                                    {this.state.reviews.map((r, i) => (
+                                        <ReviewCard className={classes.reviewCard} key={i} r={r} user={false} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <Paper elevation={2} style={{ textAlign: 'center', padding: '20px' }}>
+                                    <em>This truck has not been reviewed yet. You can be the first!</em>
+                                </Paper>
+                            )}
+                        </Grid>
+                    </Grid>
                 )}
 
-                {this.state.truckFound && this.props.auth.isLoggedIn && (
-                    <Button variant="contained" onClick={this.writeReview}>
-                        <Typography variant="button" display="block" color={'primary'}>
-                            Write Review
-                        </Typography>
-                    </Button>
-                )}
-
-                <Dialog fullWidth maxWidth="md" open={this.state.openReview} aria-labelledby="form-dialog-title">
-                    <DialogTitle id="form-dialog-title">Review for {this.state.truck.name}</DialogTitle>
+                <Dialog fullWidth maxWidth="sm" open={this.state.openReview} aria-labelledby="form-dialog-title">
+                    <DialogTitle id="form-dialog-title">Rate and review {this.state.truck.name}</DialogTitle>
                     <DialogContent>
-                        <InputLabel>Rating</InputLabel>
-                        <Box align={'left'} mt={1} ml={1}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'start',
+                                marginBottom: '20px',
+                            }}
+                        >
+                            <span style={{ fontSize: '16px', marginRight: '10px' }}>Rating</span>
                             <Rating
                                 align="left"
                                 name="preferredRating"
@@ -443,7 +493,7 @@ class TruckPage extends Component {
                                 }}
                                 size="medium"
                             />
-                        </Box>
+                        </div>
                         <TextField
                             variant="outlined"
                             id="reviewComment"
@@ -453,46 +503,56 @@ class TruckPage extends Component {
                             fullWidth={true}
                             value={this.state.reviewComment}
                             onChange={e => this.handleInputChange(e, null)}
+                            onBlur={() => this.setState({ reviewComment: this.state.reviewComment.trim() })}
                         />
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.handleCancel} color="primary" variant="contained">
+                        <Button onClick={this.handleCancel} color="secondary" variant="contained">
                             Cancel
                         </Button>
-                        <Button onClick={this.createReview} color="primary" variant="contained">
-                            Save
-                        </Button>
+                        <span style={{ position: 'relative' }}>
+                            <Button
+                                onClick={this.createReview}
+                                color="primary"
+                                disabled={this.state.loadingReview}
+                                variant="contained"
+                            >
+                                Submit
+                            </Button>
+                            {this.state.loadingReview && (
+                                <CircularProgress size={24} className={classes.buttonProgress} />
+                            )}
+                        </span>
                     </DialogActions>
                 </Dialog>
+                <Snackbar
+                    open={this.state.errorOpen}
+                    autoHideDuration={5000}
+                    onClose={(_event, reason) => {
+                        if (reason === 'clickaway') {
+                            return;
+                        }
 
-                {/**BACK*/}
-                <br />
-                <Button variant="contained" href="/">
-                    Back
-                </Button>
-
-                <div>
-                    {this.state.truckFound &&
-                        this.state.truck?.menu &&
-                        (this.state.truck.menu.dataType === 'MENU_PDF' ? (
-                            <object
-                                data={this.state.truck.menu.url}
-                                type="application/pdf"
-                                width="750px"
-                                height="750px"
-                            >
-                                <embed
-                                    src={this.state.truck.menu.url}
-                                    type="application/pdf"
-                                    width="100%"
-                                    height="100%"
-                                />
-                            </object>
-                        ) : (
-                            <img src={this.state.truck.menu.url} />
-                        ))}
-                </div>
-            </div>
+                        this.setState({
+                            errorOpen: false,
+                        });
+                    }}
+                    onExited={() => this.setState({ errorSeverity: 'error' })}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                >
+                    <Alert
+                        variant="filled"
+                        severity={this.state.errorSeverity}
+                        onClose={() => {
+                            this.setState({
+                                errorOpen: false,
+                            });
+                        }}
+                    >
+                        {this.state.errorMsg}
+                    </Alert>
+                </Snackbar>
+            </Container>
         );
     }
 }
