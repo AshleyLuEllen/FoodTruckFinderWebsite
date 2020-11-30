@@ -1,47 +1,47 @@
-package food.truck.api.endpoint;
-
-import food.truck.api.data.schedule.Schedule;
-import food.truck.api.data.schedule.ScheduleRepository;
-import food.truck.api.data.schedule.ScheduleService;
-import food.truck.api.data.truck.Truck;
-import food.truck.api.data.truck.TruckRepository;
-import food.truck.api.data.truck.TruckService;
-import food.truck.api.data.user.User;
-import food.truck.api.data.user.UserService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-import java.security.Principal;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.*;
-
-@SpringBootTest
-@AutoConfigureTestDatabase
-@Transactional
-class ScheduleEndpointTest {
-    @Autowired
-    private ScheduleEndpoint scheduleEndpoint;
-
-    @Autowired
-    private ScheduleService scheduleService;
-
-    @Autowired
-    private TruckService truckService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private AuthEndpoint authEndpoint;
-
-    private Truck truck;
-    private Schedule schedule;
-    private User user1;
+//package food.truck.api.endpoint;
+//
+//import food.truck.api.data.schedule.Schedule;
+//import food.truck.api.data.schedule.ScheduleRepository;
+//import food.truck.api.data.schedule.ScheduleService;
+//import food.truck.api.data.truck.Truck;
+//import food.truck.api.data.truck.TruckRepository;
+//import food.truck.api.data.truck.TruckService;
+//import food.truck.api.data.user.User;
+//import food.truck.api.data.user.UserService;
+//import org.junit.jupiter.api.BeforeEach;
+//import org.junit.jupiter.api.Test;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+//import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.transaction.annotation.Transactional;
+//import java.security.Principal;
+//import java.time.ZoneId;
+//import java.time.ZonedDateTime;
+//import java.util.Optional;
+//import static org.junit.jupiter.api.Assertions.*;
+//
+//@SpringBootTest
+//@AutoConfigureTestDatabase
+//@Transactional
+//class ScheduleEndpointTest {
+//    @Autowired
+//    private ScheduleEndpoint scheduleEndpoint;
+//
+//    @Autowired
+//    private ScheduleService scheduleService;
+//
+//    @Autowired
+//    private TruckService truckService;
+//
+//    @Autowired
+//    private UserService userService;
+//
+//    @Autowired
+//    private AuthEndpoint authEndpoint;
+//
+//    private Truck truck;
+//    private Schedule schedule;
+//    private User user1;
 
 //    @BeforeEach
 //    void setup(){
@@ -117,4 +117,4 @@ class ScheduleEndpointTest {
 //        scheduleEndpoint.deleteScheduleById(truck.getId(), schedule.getId());
 //        assertTrue(scheduleService.findSchedule(schedule.getId()).isEmpty());
 //    }
-}
+//}
