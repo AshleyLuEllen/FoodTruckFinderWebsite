@@ -182,6 +182,7 @@ class EnhancedTable extends Component {
             <div className={classes.root}>
                 <Paper className={classes.paper}>
                     <EnhancedTableToolbar
+                        disableSelection={this.props.disableSelection}
                         numSelected={this.state.selected.length}
                         title={this.props.title}
                         selectedActions={this.props.selectedActions}
@@ -195,12 +196,13 @@ class EnhancedTable extends Component {
                             aria-label={this.props.title}
                         >
                             <colgroup>
-                                <col style={{ width: '50px' }} />
+                                {!this.props.disableSelection && <col style={{ width: '50px' }} />}
                                 {this.props.columns.map((column, i) => (
                                     <col key={i} style={{ width: column.width }} />
                                 ))}
                             </colgroup>
                             <EnhancedTableHead
+                                disableSelection={this.props.disableSelection}
                                 classes={classes}
                                 numSelected={this.state.selected.length}
                                 order={this.state.order}
@@ -231,14 +233,18 @@ class EnhancedTable extends Component {
                                                 key={row.id}
                                                 selected={isItemSelected}
                                             >
-                                                <TableCell padding="checkbox">
-                                                    <Checkbox
-                                                        checked={isItemSelected}
-                                                        inputProps={{ 'aria-labelledby': labelId }}
-                                                        onChange={event => this.handleSelectionChange(event, row.id)}
-                                                        onClick={event => this.handleSelectClick(event, row.id)}
-                                                    />
-                                                </TableCell>
+                                                {!this.props.disableSelection && (
+                                                    <TableCell padding="checkbox">
+                                                        <Checkbox
+                                                            checked={isItemSelected}
+                                                            inputProps={{ 'aria-labelledby': labelId }}
+                                                            onChange={event =>
+                                                                this.handleSelectionChange(event, row.id)
+                                                            }
+                                                            onClick={event => this.handleSelectClick(event, row.id)}
+                                                        />
+                                                    </TableCell>
+                                                )}
                                                 {this.props.columns.map((column, i) => (
                                                     <TableCell key={i} align={column.align}>
                                                         {column.renderer
@@ -299,6 +305,7 @@ class EnhancedTable extends Component {
 }
 
 EnhancedTable.propTypes = {
+    disableSelection: PropTypes.bool,
     order: PropTypes.oneOf(['asc', 'desc']).isRequired,
     orderBy: PropTypes.string.isRequired,
     rows: PropTypes.array.isRequired,

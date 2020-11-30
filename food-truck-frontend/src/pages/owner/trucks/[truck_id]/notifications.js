@@ -4,6 +4,7 @@ import requests from '../../../../util/requests';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 import { format } from 'date-fns';
+import Link from 'next/link';
 
 import {
     Card,
@@ -18,8 +19,19 @@ import {
     CardContent,
     CardActions,
     Typography,
+    Container,
+    Link as MuiLink,
+    Breadcrumbs,
 } from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
 import Head from 'next/dist/next-server/lib/head';
+
+// eslint-disable-next-line no-unused-vars
+const pageStyles = theme => ({
+    root: {
+        marginTop: '20px',
+    },
+});
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -251,12 +263,30 @@ class NotificationPage extends Component {
     }
 
     render() {
+        const { classes } = this.props;
+
         return (
-            <div>
+            <Container className={classes.root}>
+                <Breadcrumbs aria-label="breadcrumb">
+                    <Link href="/owner" passHref>
+                        <MuiLink color="inherit">My Trucks</MuiLink>
+                    </Link>
+                    {this.props.router?.query?.truck_id ? (
+                        <Link href={`/owner/trucks/${this.props.router.query.truck_id}`} passHref>
+                            <MuiLink color="inherit">Manage Truck</MuiLink>
+                        </Link>
+                    ) : (
+                        <Typography color="textPrimary">Truck</Typography>
+                    )}
+                    <Typography color="textPrimary">Notifications</Typography>
+                </Breadcrumbs>
                 <Head>
                     <title>{this.state.truckName} Notifications</title>
                 </Head>
-                <h2>Notifications for {this.state.truckName} </h2>
+                <Typography variant="h4" style={{ marginBottom: '10px' }}>
+                    Notifications
+                    {/* Notifications {this.state.loading && <CircularProgress size={30} />} */}
+                </Typography>
                 {this.state.notifications.map(n => (
                     <Card key={n.id} variant="outlined">
                         <CardContent>
@@ -353,7 +383,7 @@ class NotificationPage extends Component {
                     {' '}
                     Back{' '}
                 </Button>
-            </div>
+            </Container>
         );
     }
 }
@@ -361,6 +391,7 @@ class NotificationPage extends Component {
 NotificationPage.propTypes = {
     router: PropTypes.any,
     auth: PropTypes.any,
+    classes: PropTypes.any,
 };
 
 const mapStateToProps = state => {
@@ -370,4 +401,6 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = {};
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(NotificationPage));
+export default withStyles(pageStyles, { withTheme: true })(
+    withRouter(connect(mapStateToProps, mapDispatchToProps)(NotificationPage))
+);
