@@ -398,7 +398,7 @@ class Information extends Component {
                                         </Typography>
                                     )}
                                     {this.state.schedules.length > 0 && (
-                                        <ScheduleCard width={'900px'} schedules={this.state.schedules} />
+                                        <ScheduleCard schedules={this.state.schedules} />
                                     )}
                                     <br />
                                     <Box mt={1} ml={1} mr={1} mb={1}>
@@ -412,7 +412,6 @@ class Information extends Component {
                                 </CardContent>
                             </Card>
                         </Grid>
-                        <Grid item xs={3}></Grid>
                     </Grid>
                 )}
             </div>
