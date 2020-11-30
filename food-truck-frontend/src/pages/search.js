@@ -216,6 +216,7 @@ function SearchPage(props) {
                             variant="outlined"
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
+                            onBlur={() => this.setState({ reviewComment: this.state.reviewComment.trim() })}
                         />
                         <div className={classes.queryField}>
                             <ChipSelector

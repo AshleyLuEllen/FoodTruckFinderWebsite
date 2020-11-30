@@ -189,6 +189,7 @@ class CreateNewTruck extends Component {
                     value={this.state.name}
                     fullWidth
                     onChange={e => this.handleInputChange(e, 'name')}
+                    onBlur={() => this.setState({ name: this.state.name.trim() })}
                 />
                 <TextField
                     className={classes.textField}
@@ -198,6 +199,7 @@ class CreateNewTruck extends Component {
                     value={this.state.licensePlate}
                     fullWidth
                     onChange={e => this.handleInputChange(e, 'licensePlate')}
+                    onBlur={() => this.setState({ licensePlate: this.state.licensePlate.trim() })}
                 />
                 <TextField
                     // className={classes.textField}
@@ -209,6 +211,7 @@ class CreateNewTruck extends Component {
                     fullWidth
                     value={this.state.description}
                     onChange={e => this.handleInputChange(e, 'description')}
+                    onBlur={() => this.setState({ description: this.state.description.trim() })}
                 />
                 <ReactMarkdown>
                     The truck description supports **Markdown**! Learn more about it

@@ -1,55 +1,56 @@
-import React from "react";
+import React from 'react';
 import MuiLink from '@material-ui/core/Link';
+import PropTypes from 'prop-types';
 
 import { Card } from '@material-ui/core';
-import Typography from "@material-ui/core/Typography";
-import Rating from "@material-ui/lab/Rating";
-import Divider from "@material-ui/core/Divider";
-import {format} from "date-fns";
-import {makeStyles} from "@material-ui/core/styles";
-import CardContent from "@material-ui/core/CardContent";
+import Rating from '@material-ui/lab/Rating';
+import { format, parseISO } from 'date-fns';
+import { makeStyles } from '@material-ui/core/styles';
+import CardContent from '@material-ui/core/CardContent';
 
-const useStyles = makeStyles((theme) => ({
+// eslint-disable-next-line no-unused-vars
+const useStyles = makeStyles(() => ({
     root: {
-        '&:hover': {
-            cursor: "pointer"
-        },
-        margin: theme.spacing(3)
+        spacing: '10px',
+        textAlign: 'left',
     },
-    rating: {
-        textAlign: "left",
-        marginTop: "-10px",
-        marginLeft: "15px"
-    }
 }));
 
 function ReviewCard(props) {
+    const classes = useStyles();
 
     return (
         <Card className={props.className}>
-            <CardContent>
-                <Typography className={useStyles.root} variant="h8" component="h3" gutterBottom>
-                    {format(new Date(props.r.reviewTimestamp), "MM-dd-yyyy, HH:mm")}
-                </Typography>
-                {props.user === false &&
-                <MuiLink href={`/user/${props.r.user.id}`} className={useStyles.root}>
-                    <Typography className={useStyles.root} variant="subtitle 1" component="h5" className={useStyles.root} gutterBottom>
-                        By: {props.r.user.firstName} {props.r.user.lastName}
-                    </Typography>
-                </MuiLink>}
+            <CardContent className={classes.root}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Rating className={classes.rating} precision={0.5} value={props.r.rating} size="large" readOnly />
+                    <strong>{format(parseISO(props.r.reviewTimestamp), 'Pp')}</strong>
+                </div>
+                {props.user === false && (
+                    <div style={{ textAlign: 'right' }}>
+                        <MuiLink href={`/user/${props.r.user.id}`}>
+                            {props.r.user.firstName} {props.r.user.lastName}
+                        </MuiLink>
+                    </div>
+                )}
 
-                {props.user === true &&
-                <MuiLink href={`/trucks/${props.r.truck.id}`}>
-                    <Typography className={useStyles.root} variant="subtitle 1" component="h5" className={useStyles.root} gutterBottom>
-                        {props.r.truck.name}
-                    </Typography>
-                </MuiLink>}
+                {props.user === true && (
+                    <div style={{ textAlign: 'right' }}>
+                        <MuiLink href={`/trucks/${props.r.truck.id}`}>{props.r.truck.name}</MuiLink>
+                    </div>
+                )}
 
-                <Rating className={useStyles.rating} precision={0.5} value={props.r.rating} size="small" readOnly/>
-                {props.r.comment?.split('\n').map(line => <p>{line}</p>)}
+                {props.r.comment.trim().length > 0 &&
+                    props.r.comment?.split('\n').map((line, i) => <p key={i}>{line}</p>)}
             </CardContent>
         </Card>
     );
 }
+
+ReviewCard.propTypes = {
+    r: PropTypes.object.isRequired,
+    className: PropTypes.string,
+    user: PropTypes.any,
+};
 
 export default ReviewCard;

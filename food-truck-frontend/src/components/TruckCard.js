@@ -60,8 +60,6 @@ function TruckCard(props) {
                     setSubscribed(true);
                 })
                 .catch(() => {});
-
-        console.log(props.truck);
     }, []);
 
     const toggleSubscribe = () => {

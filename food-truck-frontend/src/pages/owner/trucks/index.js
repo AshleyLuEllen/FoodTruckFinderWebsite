@@ -48,6 +48,7 @@ class Dashboard extends Component {
                 this.setState({
                     errorMsg: 'Error: could not load your trucks! Check the console for more information.',
                     errorOpen: true,
+                    loading: false,
                 });
             });
     }

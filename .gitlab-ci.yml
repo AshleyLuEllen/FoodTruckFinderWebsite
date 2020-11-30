@@ -8,26 +8,29 @@ variables:
     HEROKU_REGISTRY_IMAGE_BACKEND: registry.heroku.com/${HEROKU_APP_NAME_BACKEND}/web 
     # CACHE_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE/${CI_PROJECT_NAME}
     CACHE_IMAGE: registry.gitlab.com/fall20-group1/food-truck-finder-2
+    AMAZON_S3_ACCESS_KEY: AKIASMPQTUATZZVNUIH2
+    AMAZON_S3_SECRET_KEY: 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
+    GOOGLE_API_KEY: AIzaSyDSDFlqV9UDWh6V0D6STb7JU0-niCSb91U
 
 stages:
-#    - test
+    - test
     - deploy
 
-#test-frontend:
-#    stage: test
-#    script:
-#        - "echo TODO: implement tests"
-#    only:
-#        - merge_requests
-#
-#test-backend:
-#    image: openjdk:14
-#    stage: test
-#    script:
-#        - cd ./food-truck-api
-#        - ./gradlew test
-#    only:
-#        - merge_requests
+test-frontend:
+    stage: test
+    script:
+        - "echo TODO: implement tests"
+    only:
+        - merge_requests
+
+test-backend:
+    image: openjdk:14
+    stage: test
+    script:
+        - cd ./food-truck-api
+        - ./gradlew test
+    only:
+        - merge_requests
 
 deploy-frontend:
     image: docker:latest

@@ -296,6 +296,7 @@ function ManageAccountPage(props) {
                         variant="outlined"
                         value={firstName}
                         onChange={e => setFirstName(e.target.value)}
+                        onBlur={() => setConfEmail(firstName.trim())}
                     />
                     <TextField
                         className={classes.textField}
@@ -305,6 +306,7 @@ function ManageAccountPage(props) {
                         variant="outlined"
                         value={lastName}
                         onChange={e => setLastName(e.target.value)}
+                        onBlur={() => setConfEmail(lastName.trim())}
                     />
                     <br />
                     <TextField
@@ -317,6 +319,7 @@ function ManageAccountPage(props) {
                         variant="outlined"
                         value={bio}
                         onChange={e => setBio(e.target.value)}
+                        onBlur={() => setConfEmail(bio.trim())}
                     />
                     <input
                         id="file-input"
@@ -394,6 +397,7 @@ function ManageAccountPage(props) {
                         value={email}
                         onChange={e => setEmail(e.target.value)}
                         autoComplete="off"
+                        onBlur={() => setConfEmail(email.trim())}
                     />
                     <TextField
                         className={classes.textField}
@@ -404,6 +408,7 @@ function ManageAccountPage(props) {
                         value={confEmail}
                         onChange={e => setConfEmail(e.target.value)}
                         autoComplete="off"
+                        onBlur={() => setConfEmail(confEmail.trim())}
                     />
                     <div className={classes.buttonWrapper}>
                         <Button

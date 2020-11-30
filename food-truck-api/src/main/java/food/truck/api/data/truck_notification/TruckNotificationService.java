@@ -61,28 +61,32 @@ public class TruckNotificationService {
 
         if (notifySubscribers) {
             userNotificationRepository.saveAll(
-                subscriptionRepository.findAllByTruck(truckNotification.getTruck()).stream()
+                subscriptionRepository.findAllByTruck(tn.getTruck()).stream()
                     .map(sub -> {
                         var un = new UserNotification();
-                        un.setNotification(truckNotification);
+                        un.setNotification(tn);
                         un.setUser(sub.getUser());
                         un.setUnread(true);
                         return un;
                     }).collect(Collectors.toList())
             );
-            Truck truck = truckService.findTruck(truckNotification.getTruck().getId()).orElseThrow(ResourceNotFoundException::new);
+            Truck truck = truckService.findTruck(tn.getTruck().getId()).orElseThrow(ResourceNotFoundException::new);
             Schedule currentLocation = truck.getCurrentLocation();
-            if (currentLocation != null)
+//            log.info("boop");
+            if (currentLocation != null) {
+//                log.info("here");
+//                log.info(userService.findUsersNearLocation(new Location(currentLocation.getLatitude(), currentLocation.getLongitude())).size());
                 userNotificationRepository.saveAll(
                     userService.findUsersNearLocation(new Location(currentLocation.getLatitude(), currentLocation.getLongitude())).stream()
                         .map(user -> {
                             var un = new UserNotification();
-                            un.setNotification(truckNotification);
+                            un.setNotification(tn);
                             un.setUser(user);
                             un.setUnread(true);
                             return un;
                         }).collect(Collectors.toList())
                 );
+            }
         }
 
         return tn;
@@ -188,7 +192,7 @@ public class TruckNotificationService {
         truckNotificationRepository.deleteById(truckNotificationId);
     }
 
-    public List<TruckNotification> getNotsOwnedByTruck(Truck truck) {
+    public List<TruckNotification> getNotificationsOwnedByTruck(Truck truck) {
         return truckNotificationRepository.findAllByTruckAndType(truck, NotificationType.TRUCK);
     }
 

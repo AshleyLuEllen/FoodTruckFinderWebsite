@@ -10,4 +10,6 @@ import java.util.Optional;
 @Repository
 public interface TruckTagRepository extends JpaRepository<TruckTag, TruckTagId> {
     List<TruckTag> findByTruck(Truck truck);
+
+    void deleteAllByTruck(Truck truck);
 }

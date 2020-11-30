@@ -41,6 +41,12 @@ class Login extends React.Component {
         this.createAccount = this.createAccount.bind(this);
     }
 
+    componentDidMount() {
+        if (this.props.auth.isLoggedIn) {
+            this.props.router.push('/');
+        }
+    }
+
     handleInputChange(event, name_of_attribute) {
         this.setState({
             [name_of_attribute]: event.target.value,
@@ -100,6 +106,7 @@ class Login extends React.Component {
                         type="email"
                         autoFocus
                         required
+                        onBlur={() => this.setState({ email: this.state.email.trim() })}
                     />
                     <TextField
                         className={classes.text}
@@ -121,7 +128,7 @@ class Login extends React.Component {
                 {this.state.loginFailed && (
                     <Snackbar
                         open={true}
-                        autoHideDuration={6000}
+                        autoHideDuration={5000}
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                     >
                         <Alert variant="filled" severity="error">

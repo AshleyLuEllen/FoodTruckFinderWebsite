@@ -146,7 +146,7 @@ class CreateAccount extends Component {
     render() {
         const { classes } = this.props;
         return (
-            <Paper className={classes.root} elevation={3} alignItems="center">
+            <Paper className={classes.root} elevation={3}>
                 <Head>
                     <title>Create Account</title>
                 </Head>
@@ -168,6 +168,7 @@ class CreateAccount extends Component {
                         autoFocus
                         required
                         error={this.state.triedCreate && this.state.email.length === 0}
+                        onBlur={() => this.setState({ email: this.state.email.trim() })}
                     />
                     <TextField
                         className={classes.text}
@@ -183,6 +184,7 @@ class CreateAccount extends Component {
                         }
                         required
                         error={this.state.triedCreate && this.state.firstName.length === 0}
+                        onBlur={() => this.setState({ firstName: this.state.firstName.trim() })}
                     />
                     <TextField
                         className={classes.text}
@@ -196,6 +198,7 @@ class CreateAccount extends Component {
                         }
                         required
                         error={this.state.triedCreate && this.state.lastName.length === 0}
+                        onBlur={() => this.setState({ lastName: this.state.lastName.trim() })}
                     />
                     <TextField
                         className={classes.text}

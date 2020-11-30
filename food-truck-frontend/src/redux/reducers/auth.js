@@ -21,6 +21,7 @@ export function reducer(state = initialState, action) {
                 ...state,
                 jwt: null,
                 isLoggedIn: false,
+                userId: null,
             };
         default:
             return state;
