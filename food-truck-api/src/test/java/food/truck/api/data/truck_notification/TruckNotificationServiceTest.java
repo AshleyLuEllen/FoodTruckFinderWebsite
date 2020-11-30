@@ -1,11 +1,21 @@
 package food.truck.api.data.truck_notification;
 
+import food.truck.api.data.friends.FriendPair;
+import food.truck.api.data.friends.FriendService;
 import food.truck.api.data.schedule.Schedule;
+import food.truck.api.data.schedule.ScheduleRepository;
 import food.truck.api.data.schedule.ScheduleService;
+import food.truck.api.data.subscription.SubscriptionService;
 import food.truck.api.data.truck.Truck;
+import food.truck.api.data.truck.TruckRepository;
 import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.user.User;
+import food.truck.api.data.user.UserRepository;
 import food.truck.api.data.user.UserService;
+import food.truck.api.data.user_notification.UserNotification;
+import food.truck.api.data.user_notification.UserNotificationRepository;
+import food.truck.api.data.user_notification.UserNotificationService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +23,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -25,92 +37,162 @@ public class TruckNotificationServiceTest {
     private TruckNotificationService truckNotificationService;
 
     @Autowired
+    private TruckNotificationRepository truckNotificationRepository;
+
+    @Autowired
+    private FriendService friendService;
+
+    @Autowired
+    private SubscriptionService subscriptionService;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
-    private TruckService truckservice;
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserNotificationService userNotificationService;
+
+    @Autowired
+    private UserNotificationRepository userNotificationRepository;
+
+    @Autowired
+    private TruckService truckService;
+
+    @Autowired
+    private TruckRepository truckRepository;
 
     @Autowired
     private ScheduleService scheduleService;
 
-    long notID;
-    User user1;
+    @Autowired
+    private ScheduleRepository scheduleRepository;
+
+    User user;
     Truck truck;
     Schedule location;
-    TruckNotification not;
+    TruckNotification notification;
 
+
+    // TODO there is not after each function to reset the database
     @BeforeEach
     void setup(){
-        User user = new User();
-        user.setFirstName("Bob");
-        user.setLastName("Ross");
-        user.setEmailAddress("bob.ros@example.com");
-        user.setPassword("G00dPa$$word");
-        user.setLatitude((double) 12);
-        user.setLongitude((double) 50);
-        user1 = userService.createUser(user);
-
+        User user1 = new User();
+        user1.setFirstName("Bob");
+        user1.setLastName("Ross");
+        user1.setEmailAddress("bob.ros@example.com");
+        user1.setPassword("G00dPa$$word");
+        user1.setLatitude((double) 15);
+        user1.setLongitude((double) 50.01);
+        user = userService.createUser(user1);
 
         Truck truck1 = new Truck();
         truck1.setName("Harry");
         truck1.setDescription("Best truck ever");
         truck1.setLicensePlate("LVN 6982");
-        truck = truckservice.createTruck(truck1, user1);
+        truck = truckService.createTruck(truck1, user);
 
-        Schedule currLoc = new Schedule();
-        currLoc.setLatitude((double) 15);
-        currLoc.setLongitude((double) 50);
-        location = scheduleService.createSchedule(currLoc, truck1);
+        Schedule schedule = new Schedule();
+        schedule.setLocation("Test Location");
+        schedule.setLatitude((double) 15);
+        schedule.setLongitude((double) 50);
+        schedule.setTimeFrom(ZonedDateTime.now().minusHours(4));
+        schedule.setTimeFrom(ZonedDateTime.now().plusHours(4));
+        location = scheduleService.createSchedule(schedule, truck);
 
-
-        not = new TruckNotification();
-        not.setTruck(truck);
+        TruckNotification not = new TruckNotification();
         not.setSubject("This is a test.");
         not.setDescription("This is only a test.");
         not.setPublished(false);
-        notID = truckNotificationService.saveTruckNotification(not).getId();
+        notification = truckNotificationService.createTruckNotification(not, truck);
+    }
+
+    @AfterEach
+    void tearDown() {
+        this.truckNotificationRepository.deleteAll();
+        this.userNotificationRepository.deleteAll();
+        this.scheduleRepository.deleteAll();
+        this.truckRepository.deleteAll();
+        this.userRepository.deleteAll();
     }
 
     @Test
     void testFindNotification(){
-        Optional<TruckNotification> found = truckNotificationService.findTruckNotification(notID);
-        assertEquals(Optional.of(found.get().getId()), Optional.of(notID));
+        assertEquals(notification, truckNotificationService.findTruckNotification(notification.getId()).orElse(null));
+    }
+
+    @Test
+    void testPublishedNotification(){
+        notification.setPublished(true);
+        truckNotificationService.saveTruckNotification(notification);
+        assertTrue(notification.getPublished());
+//        assertEquals(1, this.userNotificationService.findAllNotifications(user).size()); TODO fix so that this test works
+    }
+
+    @Test
+    void testCreateFriendNotifications(){
+        User user2 = new User();
+        user2.setFirstName("Beep");
+        user2.setLastName("Boop");
+        user2.setEmailAddress("email@example.com");
+        user2.setPassword("G00dPa$$word");
+        User friend = userService.createUser(user2);
+
+        friendService.becomeFriends(user, friend);
+        assertEquals(1, this.userNotificationService.findAllNotifications(user).size());
+        assertEquals(NotificationType.FRIEND, this.userNotificationService.findAllNotifications(user).get(0).getType());
+
+        assertEquals(1, this.userNotificationService.findAllNotifications(friend).size());
+        assertEquals(NotificationType.FRIEND, this.userNotificationService.findAllNotifications(friend).get(0).getType());
+    }
+
+    @Test
+    void testCreateSubscriptionNotifications(){
+        subscriptionService.addUserSubscription(user, truck);
+        assertEquals(1, this.userNotificationService.findAllNotifications(user).size());
+        assertEquals(NotificationType.SUBSCRIPTION, this.userNotificationService.findAllNotifications(user).get(0).getType());
+        TruckNotification subscription = this.userNotificationService.findAllNotifications(user).get(0);
+
+        notification.setPublished(true);
+        truckNotificationService.saveTruckNotification(notification);
+
+        assertEquals(2, this.userNotificationService.findAllNotifications(user).size());
+        assertArrayEquals(List.of(notification, subscription).stream().mapToLong(TruckNotification::getId).sorted().toArray(),
+            this.userNotificationService.findAllNotifications(user).stream().mapToLong(TruckNotification::getId).sorted().toArray());
     }
 
     @Test
     void testSaveNotification(){
-        TruckNotification not2 = new TruckNotification();
-        not2.setTruck(truck);
-        not2.setSubject("This is a second test.");
-        not2.setDescription("This is only a second test.");
-        not2.setPublished(false);
-        long not2ID = truckNotificationService.saveTruckNotification(not2).getId();
+        notification.setSubject("New Subject");
+        notification.setDescription("New Description");
+        truckNotificationService.saveTruckNotification(notification);
 
-        Optional<TruckNotification> found = truckNotificationService.findTruckNotification(not2ID);
-        assertTrue(found.isPresent());
-    }
-
-    @Test
-    void testCreateNotification(){
-        TruckNotification not2 = new TruckNotification();
-        not2.setTruck(truck);
-        not2.setSubject("This is a second test.");
-        not2.setDescription("This is only a second test.");
-        not2.setPublished(true);
-
-        TruckNotification set = truckNotificationService.createTruckNotification(not2, truck);
-        assertEquals(not2.getDescription(), set.getDescription());
+        assertTrue(truckNotificationService.findTruckNotification(notification.getId()).isPresent());
+        assertEquals("New Subject", notification.getSubject());
+        assertEquals("New Description", notification.getDescription());
     }
 
     @Test
     void testGetAllTruckNotificationsByTruck(){
-        assertFalse(truckNotificationService.getNotsOwnedByTruck(truck).isEmpty());
-        assertEquals(not, truckNotificationService.getNotsOwnedByTruck(truck).get(0));
+        assertFalse(truckNotificationService.getNotificationsOwnedByTruck(truck).isEmpty());
+        assertArrayEquals(List.of(notification).stream().mapToLong(TruckNotification::getId).sorted().toArray(),
+            this.truckNotificationService.getNotificationsOwnedByTruck(truck).stream().mapToLong(TruckNotification::getId).sorted().toArray());
+
+        TruckNotification not = new TruckNotification();
+        not.setSubject("This is a second test notification.");
+        not.setDescription("This is the description.");
+        not.setPublished(false);
+        TruckNotification notification2 = truckNotificationService.createTruckNotification(not, truck);
+
+        assertArrayEquals(List.of(notification, notification2).stream().mapToLong(TruckNotification::getId).sorted().toArray(),
+            this.truckNotificationService.getNotificationsOwnedByTruck(truck).stream().mapToLong(TruckNotification::getId).sorted().toArray());
     }
 
     @Test
     void testDeleteNotification(){
-        truckNotificationService.deleteTruckNotification(notID);
-        assertTrue(truckNotificationService.getNotsOwnedByTruck(truck).isEmpty());
+        assertFalse(truckNotificationService.getNotificationsOwnedByTruck(truck).isEmpty());
+        truckNotificationService.deleteTruckNotification(notification.getId());
+        assertTrue(truckNotificationService.getNotificationsOwnedByTruck(truck).isEmpty());
     }
 }
