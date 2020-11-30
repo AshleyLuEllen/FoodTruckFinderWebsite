@@ -155,4 +155,8 @@ public class UserService {
     public List<User> findUsersNearLocation(Location location) {
         return userRepository.findAllUsersNearLocation(location.getLatitude(), location.getLongitude(), 20.0);
     }
+
+    public List<User> findUsersByName(String query) {
+        return userRepository.findUsersByName(query);
+    }
 }
