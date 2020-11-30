@@ -43,41 +43,41 @@ class ScheduleEndpointTest {
     private Schedule schedule;
     private User user1;
 
-    @BeforeEach
-    void setup(){
-        user1 = new User();
-        user1.setFirstName("Bob");
-        user1.setLastName("Ross");
-        user1.setEmailAddress("bob.ross@example.com");
-        user1.setPassword("#B0bRo5543vr");
-        userService.createUser(user1);
-
-        truck = new Truck();
-        truck.setName("Harry");
-        truck.setDescription("Best truck ever");
-        truck.setLicensePlate("LVN 6982");
-        truck.setOwner(user1);
-        truckService.createTruck(truck, user1);
-
-        schedule = new Schedule();
-        schedule.setLatitude(31.5489);
-        schedule.setLongitude(97.1131);
-        schedule.setLocation("Baylor University");
-        ZoneId zoneId = ZoneId.of("UTC-6");
-        ZonedDateTime timeFrom = ZonedDateTime.of(2020, 12, 1, 10, 30, 00, 00, zoneId );
-        schedule.setTimeFrom(timeFrom);
-        ZonedDateTime timeTo = ZonedDateTime.of(2020, 12, 1, 4, 30, 00, 00, zoneId );
-        schedule.setTimeTo(timeTo);
-        schedule.setTruck(truck);
-        scheduleService.createSchedule(schedule, truck);
-    }
-
-    @Test
-    void findScheduleById() {
-        Optional<Schedule> found = Optional.ofNullable(scheduleEndpoint.findScheduleById(truck.getId(), schedule.getId()));
-        assertTrue(found.isPresent());
-        assertEquals(schedule.getId(), found.get().getId());
-    }
+//    @BeforeEach
+//    void setup(){
+//        user1 = new User();
+//        user1.setFirstName("Bob");
+//        user1.setLastName("Ross");
+//        user1.setEmailAddress("bob.ross@example.com");
+//        user1.setPassword("#B0bRo5543vr");
+//        userService.createUser(user1);
+//
+//        truck = new Truck();
+//        truck.setName("Harry");
+//        truck.setDescription("Best truck ever");
+//        truck.setLicensePlate("LVN 6982");
+//        truck.setOwner(user1);
+//        truckService.createTruck(truck, user1);
+//
+//        schedule = new Schedule();
+//        schedule.setLatitude(31.5489);
+//        schedule.setLongitude(97.1131);
+//        schedule.setLocation("Baylor University");
+//        ZoneId zoneId = ZoneId.of("UTC-6");
+//        ZonedDateTime timeFrom = ZonedDateTime.of(2020, 12, 1, 10, 30, 00, 00, zoneId );
+//        schedule.setTimeFrom(timeFrom);
+//        ZonedDateTime timeTo = ZonedDateTime.of(2020, 12, 1, 4, 30, 00, 00, zoneId );
+//        schedule.setTimeTo(timeTo);
+//        schedule.setTruck(truck);
+//        scheduleService.createSchedule(schedule, truck);
+//    }
+//
+//    @Test
+//    void findScheduleById() {
+//        Optional<Schedule> found = Optional.ofNullable(scheduleEndpoint.findScheduleById(truck.getId(), schedule.getId()));
+//        assertTrue(found.isPresent());
+//        assertEquals(schedule.getId(), found.get().getId());
+//    }
 
 //    @Test
 //    void createSchedule() {
@@ -94,27 +94,27 @@ class ScheduleEndpointTest {
 //        assertEquals(user1, f.getTruck().getOwner());
 //    }
 
-    @Test
-    void saveTruck() {
-        schedule.setTruck(truck);
-        schedule.setLatitude(31.5489);
-        schedule.setLongitude(97.1131);
-        schedule.setLocation("Baylor University");
-        ZoneId zoneId = ZoneId.of("UTC-6");
-        ZonedDateTime timeFrom = ZonedDateTime.of(2020, 12, 1, 10, 30, 00, 00, zoneId );
-        schedule.setTimeFrom(timeFrom);
-        ZonedDateTime timeTo = ZonedDateTime.of(2020, 12, 1, 4, 30, 00, 00, zoneId );
-        schedule.setTimeTo(timeTo);
-
-        Schedule s2 = scheduleEndpoint.saveTruckSchedule(truck.getId(), schedule.getId(), schedule);
-
-        assertEquals(schedule.getId(), s2.getId());
-        assertEquals(schedule.getTruck().getName(), s2.getTruck().getName());
-    }
-
-    @Test
-    void deleteScheduleById() {
-        scheduleEndpoint.deleteScheduleById(truck.getId(), schedule.getId());
-        assertTrue(scheduleService.findSchedule(schedule.getId()).isEmpty());
-    }
+//    @Test
+//    void saveTruck() {
+//        schedule.setTruck(truck);
+//        schedule.setLatitude(31.5489);
+//        schedule.setLongitude(97.1131);
+//        schedule.setLocation("Baylor University");
+//        ZoneId zoneId = ZoneId.of("UTC-6");
+//        ZonedDateTime timeFrom = ZonedDateTime.of(2020, 12, 1, 10, 30, 00, 00, zoneId );
+//        schedule.setTimeFrom(timeFrom);
+//        ZonedDateTime timeTo = ZonedDateTime.of(2020, 12, 1, 4, 30, 00, 00, zoneId );
+//        schedule.setTimeTo(timeTo);
+//
+//        Schedule s2 = scheduleEndpoint.saveTruckSchedule(truck.getId(), schedule.getId(), schedule);
+//
+//        assertEquals(schedule.getId(), s2.getId());
+//        assertEquals(schedule.getTruck().getName(), s2.getTruck().getName());
+//    }
+//
+//    @Test
+//    void deleteScheduleById() {
+//        scheduleEndpoint.deleteScheduleById(truck.getId(), schedule.getId());
+//        assertTrue(scheduleService.findSchedule(schedule.getId()).isEmpty());
+//    }
 }
