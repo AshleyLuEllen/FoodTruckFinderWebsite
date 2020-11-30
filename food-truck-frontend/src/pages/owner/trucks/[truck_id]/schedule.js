@@ -334,6 +334,32 @@ class ScheduleManagementPage extends Component {
                 schedule.location = savedData.location;
             }
 
+            console.log(this.state);
+            console.log(schedule.timeTo);
+            let i;
+            for (i = 0; i < this.state.upcoming.length; i++) {
+                console.log(this.state.upcoming[i].timeFrom);
+                console.log(new Date(this.state.upcoming[i].timeFrom) < new Date(schedule.timeTo));
+                console.log(new Date(this.state.upcoming[i].timeTo) > new Date(schedule.timeFrom));
+                if (this.state.upcoming[i].id !== schedule.id &&
+                    new Date(schedule.timeTo) > new Date(this.state.upcoming[i].timeFrom) &&
+                    new Date(schedule.timeFrom) < new Date(this.state.upcoming[i].timeFrom)) {
+                    this.setState({
+                        errorOpen: true,
+                        errorMsg: 'Schedule end date exceeds start date of another schedule beginning at ' + format(new Date(this.state.upcoming[i].timeFrom), "hh:mm a 'on' MM-dd-yyyy"),
+                    });
+                    return;
+                } else if (this.state.upcoming[i].id !== schedule.id &&
+                    new Date(this.state.upcoming[i].timeTo) > new Date(schedule.timeFrom) &&
+                    new Date(this.state.upcoming[i].timeTo) < new Date(schedule.timeTo)) {
+                    this.setState({
+                        errorOpen: true,
+                        errorMsg: 'Schedule start date is before the end of another schedule ending at ' + format(new Date(this.state.upcoming[i].timeTo), "MM-dd-yyyy 'at' hh:mm a"),
+                    });
+                    return;
+                }
+            }
+
             requests
                 .patchWithAuth(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules/${savedData.id}`,
