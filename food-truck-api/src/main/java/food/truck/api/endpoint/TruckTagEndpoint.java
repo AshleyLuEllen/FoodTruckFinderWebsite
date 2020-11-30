@@ -36,76 +36,51 @@ public class TruckTagEndpoint {
     UserService userService;
 
     @GetMapping("/trucks/{truckId}/tags")
-    List<Tag> getTruckTags(@PathVariable Long truckId){
+    public List<Tag> getTruckTags(@PathVariable Long truckId){
         // Check if truck exists
-        Optional<Truck> truckOpt = truckService.findTruck(truckId);
-        if (truckOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        return truckTagService.findTruckTags(truckOpt.get());
+        Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
+        return truckTagService.findTruckTags(truck);
     }
 
     @PostMapping("/trucks/{truckId}/tags/{tagId}")
-    Tag addTruckTag(@PathVariable Long truckId, @PathVariable Long tagId, Principal principal){
+    public Tag addTruckTag(Principal principal, @PathVariable Long truckId, @PathVariable Long tagId){
         // Check if truck exists
-        Optional<Truck> truckOpt = truckService.findTruck(truckId);
-        if (truckOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
+        Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
 
         // Check if tag exists
-        Optional<Tag> tagOpt = tagService.findTag(tagId);
-        if (tagOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
+        Tag tag = tagService.findTag(tagId).orElseThrow(ResourceNotFoundException::new);
 
         // Check if user is owner
         if (principal == null) {
             throw new UnauthorizedException();
         }
-        Optional<User> userOpt = userService.findUserByEmailAddress(principal.getName());
-        if (userOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-        if (!truckOpt.get().getOwner().equals(userOpt.get())) {
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+        if (!truck.getOwner().equals(user)) {
             throw new UnauthorizedException();
         }
 
-        return truckTagService.addTruckTag(truckOpt.get(), tagOpt.get());
+        return truckTagService.addTruckTag(truck, tag);
     }
 
     @DeleteMapping("/trucks/{truckId}/tags/{tagId}")
-    void deleteTruckTag(@PathVariable Long truckId, @PathVariable Long tagId, Principal principal){
-        // Check if truck exists
-        Optional<Truck> truckOpt = truckService.findTruck(truckId);
-        if (truckOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        // Check if tag exists
-        Optional<Tag> tagOpt = tagService.findTag(tagId);
-        if (tagOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        // Check if user is owner
+    public void deleteTruckTag(Principal principal, @PathVariable Long truckId, @PathVariable Long tagId){
         if (principal == null) {
             throw new UnauthorizedException();
         }
-        Optional<User> userOpt = userService.findUserByEmailAddress(principal.getName());
-        if (userOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-        if (!truckOpt.get().getOwner().equals(userOpt.get())) {
+
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+        Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
+        Tag tag = tagService.findTag(tagId).orElseThrow(ResourceNotFoundException::new);
+
+        if (!truck.getOwner().equals(user)) {
             throw new UnauthorizedException();
         }
 
         // Check if truck tag association exists
-        if (truckTagService.findTruckTag(truckOpt.get(), tagOpt.get()).isEmpty()) {
+        if (truckTagService.findTruckTag(truck, tag).isEmpty()) {
             throw new ResourceNotFoundException();
         }
 
-        truckTagService.deleteTruckTag(truckOpt.get(), tagOpt.get());
+        truckTagService.deleteTruckTag(truck, tag);
     }
 }

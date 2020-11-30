@@ -68,8 +68,6 @@ public class TruckEndpoint {
             throw new UnauthorizedException();
         }
 
-
-
         if (!meUser.get().getId().equals(thisTruck.get().getOwner().getId())) {
             throw new UnauthorizedException();
         }
@@ -158,12 +156,9 @@ public class TruckEndpoint {
 
     @GetMapping("/users/{userID}/trucks")
     public List<Truck> findUserOwnedTrucks(@PathVariable Long userID) {
-        Optional<User> user = userService.findUser(userID);
+        User user = userService.findUser(userID).orElseThrow(ResourceNotFoundException::new);
 
-        if (user.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
 
-        return truckService.getTrucksOwnedByUser(user.get());
+        return truckService.getTrucksOwnedByUser(user);
     }
 }

@@ -42,6 +42,9 @@ public class UserEndpoint {
 
     @PatchMapping("/users/me")
     public User updateMeUser(Principal principal, @RequestBody User user) {
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
         return userService.updateUser(principal.getName(), user);
     }
 
@@ -55,6 +58,9 @@ public class UserEndpoint {
 
     @GetMapping
     public Location findMyLocation(Principal principal) {
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
         return userService.findUserLocationByEmail(principal.getName());
     }
 

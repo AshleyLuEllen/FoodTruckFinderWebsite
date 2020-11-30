@@ -38,33 +38,22 @@ public class ScheduleEndpoint {
 
     @GetMapping("/trucks/{id}/schedules")
     public List<Schedule> getAllSchedules(@PathVariable Long id) {
-        Optional<Truck> truck = truckService.findTruck(id);
-
-        if (truck.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        return scheduleService.findSchedulesOfTruck(truck.get());
+        Truck truck = truckService.findTruck(id).orElseThrow(ResourceNotFoundException::new);
+        return scheduleService.findSchedulesOfTruck(truck);
     }
 
     @PostMapping("/trucks/{id}/schedules")
-    public Schedule createSchedule(@PathVariable Long id, @RequestBody Schedule schedule) {
-//        // Get the owner email
-//        if (principal == null) {
-//            throw new UnauthorizedException();
-//        }
+    public Schedule createSchedule(Principal principal, @PathVariable Long id, @RequestBody Schedule schedule) {
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
 
-//        // Get me user
-//        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
-//        if (meUser.isEmpty()) {
-//            throw new UnauthorizedException();
-//        }
-//        Optional<Truck> meTruck = truckService.findTruck(meUser.get().getId());
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(UnauthorizedException::new);
 
-        Optional<Truck> truck = truckService.findTruck(id);
+        Truck truck = truckService.findTruck(id).orElseThrow(ResourceNotFoundException::new);
 
-        if (truck.isEmpty()) {
-            throw new ResourceNotFoundException();
+        if (!truck.getOwner().equals(user)){
+            throw new UnauthorizedException();
         }
 
         Location location = googleApiService.getLocationFromPlaceId(schedule.getPlaceId());
@@ -72,25 +61,43 @@ public class ScheduleEndpoint {
         schedule.setLatitude(location.getLatitude());
         schedule.setLongitude(location.getLongitude());
 
-        return scheduleService.createSchedule(schedule, truck.get());
+        return scheduleService.createSchedule(schedule, truck);
     }
 
     @GetMapping("/trucks/{truckId}/schedules/{scheduleId}")
     public Schedule findScheduleById(@PathVariable Long truckId, @PathVariable Long scheduleId) {
-        return scheduleService.findSchedule(scheduleId).orElseThrow(ResourceNotFoundException::new);
+        Schedule schedule = scheduleService.findSchedule(scheduleId).orElseThrow(ResourceNotFoundException::new);
+        Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
+
+        if (!truck.equals(schedule.getTruck())){
+            throw new BadRequestException("Trucks do not match");
+        }
+
+        return schedule;
     }
 
     @PatchMapping("/trucks/{truckId}/schedules/{scheduleId}")
-    public Schedule saveTruckSchedule(@PathVariable Long truckId, @PathVariable Long scheduleId, @RequestBody Schedule newSchedule) {
+    public Schedule saveTruckSchedule(Principal principal, @PathVariable Long truckId, @PathVariable Long scheduleId, @RequestBody Schedule newSchedule){
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
+
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(UnauthorizedException::new);
+        Schedule schedule = scheduleService.findSchedule(scheduleId).orElseThrow(ResourceNotFoundException::new);
+        Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
+
+        if (!truck.getOwner().equals(user)){
+            throw new UnauthorizedException();
+        }
+
+        if (!truck.equals(schedule.getTruck())){
+            throw new BadRequestException("Trucks do not match");
+        }
+
         if (!newSchedule.getId().equals(scheduleId)) {
             throw new BadRequestException("IDs do not match");
         }
 
-        Optional<Schedule> scheduleOpt = scheduleService.findSchedule(scheduleId);
-        if (scheduleOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-        Schedule schedule = scheduleOpt.get();
         schedule.setTimeTo(newSchedule.getTimeTo());
         schedule.setTimeFrom(newSchedule.getTimeFrom());
         if (newSchedule.getPlaceId() != null) {
@@ -104,7 +111,23 @@ public class ScheduleEndpoint {
     }
 
     @DeleteMapping("/trucks/{truckId}/schedules/{scheduleId}")
-    public void deleteScheduleById(@PathVariable Long truckId, @PathVariable Long scheduleId) {
+    public void deleteScheduleById(Principal principal, @PathVariable Long truckId, @PathVariable Long scheduleId) {
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
+
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(UnauthorizedException::new);
+        Schedule schedule = scheduleService.findSchedule(scheduleId).orElseThrow(ResourceNotFoundException::new);
+        Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
+
+        if (!truck.getOwner().equals(user)){
+            throw new UnauthorizedException();
+        }
+
+        if (!truck.equals(schedule.getTruck())){
+            throw new BadRequestException("Trucks do not match");
+        }
+
         scheduleService.deleteSchedule(scheduleId);
     }
 }

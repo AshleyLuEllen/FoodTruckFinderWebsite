@@ -154,9 +154,10 @@ class NotificationPage extends Component {
                 }
 
                 await requests
-                    .patch(
+                    .patchWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
-                        notification
+                        notification,
+                        this.props.auth
                     )
                     .then(() => this.setState({ errorMsg: 'Notification saved successfully.' }));
             } else if (this.state.openCreate) {
@@ -169,9 +170,10 @@ class NotificationPage extends Component {
                 let notId;
 
                 await requests
-                    .post(
+                    .postWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`,
-                        notification
+                        notification,
+                        this.props.auth
                     )
                     .then(res => {
                         notId = res.data.id;
@@ -252,15 +254,19 @@ class NotificationPage extends Component {
 
     fetchData() {
         requests
-            .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
+            .getWithAuth(
+                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`,
+                this.props.auth
+            )
             .then(res => {
                 this.setState({
                     truck: res.data,
                     truckName: res.data.name,
                     truckID: res.data.id,
                 });
-                return requests.get(
-                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`
+                return requests.getWithAuth(
+                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`,
+                    this.props.auth
                 );
             })
             .then(res2 => {

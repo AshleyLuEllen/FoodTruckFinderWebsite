@@ -1,5 +1,6 @@
 package food.truck.api.endpoint;
 
+import food.truck.api.data.schedule.Schedule;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.truck_notification.TruckNotification;
@@ -41,7 +42,18 @@ public class TruckNotificationEndpoint {
     }
 
     @PatchMapping("/trucks/{truckId}/notifications/{notificationId}")
-    public TruckNotification saveTruckNotification(@PathVariable Long notificationId, @RequestBody TruckNotification notification, @PathVariable Long truckId) {
+    public TruckNotification saveTruckNotification(Principal principal, @PathVariable Long notificationId, @RequestBody TruckNotification notification, @PathVariable Long truckId) {
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
+
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(UnauthorizedException::new);
+        Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
+
+        if (!truck.getOwner().equals(user)){
+            throw new UnauthorizedException();
+        }
+
         TruckNotification dbNotification = truckNotificationService.findTruckNotification(notificationId).orElseThrow(ResourceNotFoundException::new);
         dbNotification.setSubject(notification.getSubject());
         dbNotification.setDescription(notification.getDescription());
@@ -51,44 +63,40 @@ public class TruckNotificationEndpoint {
     }
 
     @PostMapping("/trucks/{truckId}/notifications")
-    public TruckNotification createTruckNotification(@PathVariable Long truckId, @RequestBody TruckNotification truckNotification) {
-        if (truckId == null) {
-            throw new UnauthorizedException();
-        }
-
-        Optional<Truck> meTruck = truckService.findTruck(truckId);
-        if (meTruck.isEmpty()) {
-            throw new UnauthorizedException();
-        }
-
-        return truckNotificationService.createTruckNotification(truckNotification, meTruck.get());
-    }
-
-    @DeleteMapping("/trucks/{truckId}/notifications/{notificationId}")
-    public ResponseEntity<String> deleteTruckNotification(Principal principal, @PathVariable long notificationId, @PathVariable String truckId) {
+    public TruckNotification createTruckNotification(Principal principal, @PathVariable Long truckId, @RequestBody TruckNotification truckNotification) {
         if (principal == null) {
             throw new UnauthorizedException();
         }
 
-        // Get me user
-        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
-        if (meUser.isEmpty()) {
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(UnauthorizedException::new);
+        Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
+
+        if (!truck.getOwner().equals(user)){
             throw new UnauthorizedException();
         }
 
-        Optional<TruckNotification> thisNot = truckNotificationService.findTruckNotification(notificationId);
-        if (thisNot.isEmpty()) {
+        if (!truckNotification.getTruck().getOwner().equals(user)){
+            throw new BadRequestException("Owners do not match");
+        }
+
+        return truckNotificationService.createTruckNotification(truckNotification, truck);
+    }
+
+    @DeleteMapping("/trucks/{truckId}/notifications/{notificationId}")
+    public ResponseEntity<String> deleteTruckNotification(Principal principal, @PathVariable long notificationId, @PathVariable long truckId) {
+        if (principal == null) {
             throw new UnauthorizedException();
         }
 
-        if (!meUser.get().getId().equals(thisNot.get().getTruck().getOwner().getId())) {
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(UnauthorizedException::new);
+        TruckNotification notification = truckNotificationService.findTruckNotification(notificationId).orElseThrow(UnauthorizedException::new);
+
+        if (!user.getId().equals(notification.getTruck().getOwner().getId())) {
             throw new UnauthorizedException();
         }
-
-        truckNotificationService.findTruckNotification(notificationId).orElseThrow(ResourceNotFoundException::new);
 
         try {
-            truckNotificationService.deleteTruckNotification(notificationId);
+            truckNotificationService.deleteTruckNotification(notification.getId());
         } catch (Exception e) {
             return new ResponseEntity<>("Fail to delete!", HttpStatus.EXPECTATION_FAILED);
         }
@@ -97,14 +105,19 @@ public class TruckNotificationEndpoint {
     }
 
     @GetMapping("/trucks/{truckId}/notifications")
-    public List<TruckNotification> findTruckOwnedNotifications(@PathVariable Long truckId) {
-        Optional<Truck> truckt = truckService.findTruck(truckId);
-
-        if (truckt.isEmpty()) {
-            throw new ResourceNotFoundException();
+    public List<TruckNotification> findTruckOwnedNotifications(Principal principal, @PathVariable Long truckId) {
+        if (principal == null) {
+            throw new UnauthorizedException();
         }
 
-        return truckNotificationService.getNotificationsOwnedByTruck(truckt.get());
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(UnauthorizedException::new);
+        Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
+
+        if (!truck.getOwner().equals(user)){
+            throw new UnauthorizedException();
+        }
+
+        return truckNotificationService.getNotificationsOwnedByTruck(truck);
     }
 
 
