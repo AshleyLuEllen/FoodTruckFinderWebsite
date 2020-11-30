@@ -75,10 +75,6 @@ public class TruckNotificationEndpoint {
             throw new UnauthorizedException();
         }
 
-        if (!truckNotification.getTruck().getOwner().equals(user)){
-            throw new BadRequestException("Owners do not match");
-        }
-
         return truckNotificationService.createTruckNotification(truckNotification, truck);
     }
 
