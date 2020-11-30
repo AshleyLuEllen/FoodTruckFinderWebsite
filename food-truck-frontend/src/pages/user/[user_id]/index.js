@@ -141,7 +141,7 @@ class UserPage extends Component {
                 <Head>
                     <title>{this.state.user?.firstName}&apos;s Page</title>
                 </Head>
-                <Grid container>
+                <Grid container spacing={3}>
                     <Grid item xs={12} md={6}>
                         <Avatar
                             className={classes.bigAvatar}
