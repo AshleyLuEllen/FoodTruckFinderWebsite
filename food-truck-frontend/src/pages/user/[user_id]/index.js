@@ -178,6 +178,10 @@ class UserPage extends Component {
             }),
         ]).catch(err => {
             console.error(err);
+            this.setState({
+                errorMsg: 'Error: could not fetch user data! Try again later',
+                errorOpen: true,
+            });
             this.props.router.push('/404');
         });
     }
