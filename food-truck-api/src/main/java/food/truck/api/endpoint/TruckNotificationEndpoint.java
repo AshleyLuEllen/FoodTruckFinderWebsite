@@ -106,7 +106,7 @@ public class TruckNotificationEndpoint {
             throw new ResourceNotFoundException();
         }
 
-        return truckNotificationService.getNotsOwnedByTruck(truckt.get());
+        return truckNotificationService.getNotificationsOwnedByTruck(truckt.get());
     }
 
 

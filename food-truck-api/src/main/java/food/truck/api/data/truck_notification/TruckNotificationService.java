@@ -72,7 +72,10 @@ public class TruckNotificationService {
             );
             Truck truck = truckService.findTruck(truckNotification.getTruck().getId()).orElseThrow(ResourceNotFoundException::new);
             Schedule currentLocation = truck.getCurrentLocation();
-            if (currentLocation != null)
+//            log.info("boop");
+            if (currentLocation != null) {
+//                log.info("here");
+//                log.info(userService.findUsersNearLocation(new Location(currentLocation.getLatitude(), currentLocation.getLongitude())).size());
                 userNotificationRepository.saveAll(
                     userService.findUsersNearLocation(new Location(currentLocation.getLatitude(), currentLocation.getLongitude())).stream()
                         .map(user -> {
@@ -83,6 +86,7 @@ public class TruckNotificationService {
                             return un;
                         }).collect(Collectors.toList())
                 );
+            }
         }
 
         return tn;
@@ -188,7 +192,7 @@ public class TruckNotificationService {
         truckNotificationRepository.deleteById(truckNotificationId);
     }
 
-    public List<TruckNotification> getNotsOwnedByTruck(Truck truck) {
+    public List<TruckNotification> getNotificationsOwnedByTruck(Truck truck) {
         return truckNotificationRepository.findAllByTruckAndType(truck, NotificationType.TRUCK);
     }
 

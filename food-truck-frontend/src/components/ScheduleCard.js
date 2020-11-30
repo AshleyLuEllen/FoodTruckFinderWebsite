@@ -1,53 +1,15 @@
+/* eslint-disable quotes */
 import React from 'react';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
-import { makeStyles } from '@material-ui/core/styles';
 import { format } from 'date-fns';
 import { DataGrid } from '@material-ui/data-grid';
-
-const useStyles = makeStyles(() => ({
-    root: {
-        '&:hover': {
-            cursor: 'pointer',
-        },
-    },
-}));
-
 function ScheduleCard(props) {
-    const classes = useStyles();
-
-    console.log(props.schedules);
     const columns = [
-        {
-            field: 'id',
-            hide: true,
-        },
-        {
-            field: 'location',
-            headerName: 'Location',
-            // type: 'string',
-            flex: 1,
-            // width: '200px',
-            // sortable: false,
-        },
-        {
-            field: 'timeFrom',
-            headerName: 'Start Time',
-            // type: 'string',
-            // type: 'dateTime',
-            // flex: 1,
-            width: '300px',
-            // sortable: false,
-        },
-        {
-            field: 'timeTo',
-            headerName: 'End Time',
-            // type: 'string',
-            // type: 'dateTime',
-            flex: 1,
-            // width: '300px',
-            // sortable: false,
-        },
+        { field: 'location', headerName: 'Location', width: 200, sortable: false },
+        { field: 'timeFrom', headerName: 'Start Time', type: 'dateTime', width: 350, sortable: false },
+        { field: 'timeTo', headerName: 'End Time', type: 'dateTime', width: 350, sortable: false },
     ];
     const tempRows = props.schedules.sort((a, b) => (a.timeFrom > b.timeFrom ? 1 : -1));
     const rows = tempRows
@@ -59,13 +21,18 @@ function ScheduleCard(props) {
             timeTo: format(new Date(s.timeTo), "EEE MMM do, yyyy' at 'hh:mm a"),
         }));
 
-    console.log(rows);
     return (
-        <div style={{ height: 250, width: '100%' }}>
+        <div style={{ height: 500, width: props.width ? props.width : '100%', flexGrow: 1 }}>
             <DataGrid rows={rows} columns={columns} pageSize={7} />
         </div>
     );
 }
+
+ScheduleCard.propTypes = {
+    className: PropTypes.any,
+    schedules: PropTypes.array,
+    width: PropTypes.any,
+};
 
 function mapStateToProps(state) {
     const { auth } = state;
