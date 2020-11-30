@@ -7,7 +7,7 @@ import { login as authLogin, logout as authLogout } from '../redux/actions/auth'
 
 import { Paper, withStyles, TextField, Button, Snackbar, Typography } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
-import Head from "next/dist/next-server/lib/head";
+import Head from 'next/dist/next-server/lib/head';
 
 const styles = theme => ({
     root: {
@@ -38,6 +38,13 @@ class Login extends React.Component {
         this.state = { email: '', password: '', loginFailed: false };
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.createAccount = this.createAccount.bind(this);
+    }
+
+    componentDidMount() {
+        if (this.props.auth.isLoggedIn) {
+            this.props.router.push('/');
+        }
     }
 
     handleInputChange(event, name_of_attribute) {
@@ -58,12 +65,12 @@ class Login extends React.Component {
             })
             .then(res => {
                 jwt = res.headers.authorization;
-                requests.getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
+                return requests.getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, {
                     jwt,
                 });
             })
-            .then(() => {
-                this.props.authLogin(jwt);
+            .then(res => {
+                this.props.authLogin(jwt, res.data.id);
                 this.props.router.push('/');
             })
             .catch(err => {
@@ -99,6 +106,7 @@ class Login extends React.Component {
                         type="email"
                         autoFocus
                         required
+                        onBlur={() => this.setState({ email: this.state.email.trim() })}
                     />
                     <TextField
                         className={classes.text}
@@ -120,7 +128,7 @@ class Login extends React.Component {
                 {this.state.loginFailed && (
                     <Snackbar
                         open={true}
-                        autoHideDuration={6000}
+                        autoHideDuration={5000}
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                     >
                         <Alert variant="filled" severity="error">

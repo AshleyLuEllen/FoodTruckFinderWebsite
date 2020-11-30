@@ -1,5 +1,6 @@
 package food.truck.api.data.user;
 
+import food.truck.api.data.friends.FriendService;
 import food.truck.api.endpoint.error.ResourceConflictException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
@@ -14,6 +15,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -22,6 +25,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserServiceTest {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private FriendService friendService;
 
     @Autowired
     private UserRepository userRepository;
@@ -62,5 +68,28 @@ class UserServiceTest {
 
         assertTrue(userService.findUserByEmailAddress("bob.ross@example.com").isPresent());
         assertTrue(userService.findUserByEmailAddress("me@mattrm.dev").isEmpty());
+    }
+
+    @Test
+    void testSearchForFriends() {
+        // Create test user 1
+        User user1 = new User();
+        user1.setFirstName("Bob");
+        user1.setLastName("Ross");
+        user1.setEmailAddress("my.email@example.com");
+        user1.setPassword("B0bRo$$43vr");
+
+        // Create test user 2 (same email as user 1)
+        User user2 = new User();
+        user2.setFirstName("Robert");
+        user2.setLastName("Ross");
+        user2.setEmailAddress("email.address@example.com");
+        user2.setPassword("B0bRo$$43vr2");
+
+        user1 = userService.createUser(user1);
+        user2 = userService.createUser(user2);
+
+        List<User> temp = userService.findUsersByName("Robert", "Ross");
+        System.out.println(temp.get(0).toString());
     }
 }

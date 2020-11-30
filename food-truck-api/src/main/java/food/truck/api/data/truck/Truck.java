@@ -65,7 +65,7 @@ public class Truck {
     @JoinColumnsOrFormulas({
         @JoinColumnOrFormula(formula=@JoinFormula(value="(SELECT s0.schedule_id FROM " + Schedule.TABLE_NAME + " s0 WHERE s0.truck_id = truck_id AND s0.time_from <= CURRENT_TIMESTAMP() AND s0.time_from >= ALL(SELECT s1.time_from FROM " + Schedule.TABLE_NAME + " s1 WHERE s1.truck_id = truck_id AND s1.time_from <= CURRENT_TIMESTAMP()) LIMIT 1)", referencedColumnName = "schedule_id"))
     })
-    @Where(clause = "")
+//    @Where(clause = "")
     @JsonIgnoreProperties("truck")
     private Schedule currentLocation;
 

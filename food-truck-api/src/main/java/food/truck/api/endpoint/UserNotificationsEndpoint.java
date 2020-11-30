@@ -33,99 +33,60 @@ public class UserNotificationsEndpoint {
     TruckNotificationService notificationService;
 
     @GetMapping("/users/{userId}/notifications")
-    List<TruckNotification> getUserNotifications(@PathVariable Long userId, Principal principal) {
+    public List<TruckNotification> getUserNotifications(Principal principal, @PathVariable Long userId) {
         // check if the user exists
-        Optional<User> userOpt = userService.findUser(userId);
-        if (userOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
+        User user = userService.findUser(userId).orElseThrow(ResourceNotFoundException::new);
 
         // Check if user has same id
         if (principal == null) {
             throw new UnauthorizedException();
         }
-        Optional<User> userPOpt = userService.findUserByEmailAddress(principal.getName());
-        if (userPOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-        if (!userOpt.get().equals(userPOpt.get())) {
+        User pUser = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+
+        if (!pUser.equals(user)) {
             throw new UnauthorizedException();
         }
 
-        return userNotificationService.findAllNotifications(userOpt.get());
+        return userNotificationService.findAllNotifications(user);
     }
 
     @GetMapping("/users/{userId}/notifications/unread")
-    List<TruckNotification> getUserNotificationsUnread(@PathVariable Long userId, Principal principal) {
+    public long getUserNotificationsUnread(Principal principal, @PathVariable Long userId) {
         // check if the user exists
-        Optional<User> userOpt = userService.findUser(userId);
-        if (userOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
+        User user = userService.findUser(userId).orElseThrow(ResourceNotFoundException::new);
 
         // Check if user has same id
         if (principal == null) {
             throw new UnauthorizedException();
         }
-        Optional<User> userPOpt = userService.findUserByEmailAddress(principal.getName());
-        if (userPOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-        if (!userOpt.get().equals(userPOpt.get())) {
+        User pUser = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+
+        if (!pUser.equals(user)) {
             throw new UnauthorizedException();
         }
 
-        return userNotificationService.findAllNotifications(userOpt.get()).stream().filter(TruckNotification::isUnread).collect(Collectors.toList());
+        return userNotificationService.findAllNotifications(user).stream().filter(TruckNotification::isUnread).count();
     }
 
     @PatchMapping("/users/{userId}/notifications/{notificationId}")
-    UserNotification updateUserNotification(@PathVariable Long userId, @PathVariable Long notificationId, @RequestBody UnreadSavedPatch patch, Principal principal) {
+    public UserNotification updateUserNotification(Principal principal, @PathVariable Long userId, @PathVariable Long notificationId, @RequestBody UnreadSavedPatch patch) {
         log.info(userId);
         log.info(notificationId);
         // check if the user exists
-        Optional<User> userOpt = userService.findUser(userId);
-        if (userOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
+        User user = userService.findUser(userId).orElseThrow(ResourceNotFoundException::new);
 
         // Check if user has same id
         if (principal == null) {
             throw new UnauthorizedException();
         }
-        Optional<User> userPOpt = userService.findUserByEmailAddress(principal.getName());
-        if (userPOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-        if (!userOpt.get().equals(userPOpt.get())) {
+        User pUser = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+        if (!pUser.equals(user)) {
             throw new UnauthorizedException();
         }
 
         // Check if notification exists
         TruckNotification notification = notificationService.findTruckNotification(notificationId).orElseThrow(ResourceNotFoundException::new);
 
-        return userNotificationService.updateUserNotification(userOpt.get(), notification, patch);
-    }
-
-    @GetMapping("/users/{userId}/notifications/saved")
-    List<TruckNotification> getUserSavedNotifications(@PathVariable Long userId, Principal principal){
-        // check if the user exists
-        Optional<User> userOpt = userService.findUser(userId);
-        if (userOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        // Check if user has same id
-        if (principal == null) {
-            throw new UnauthorizedException();
-        }
-        Optional<User> userPOpt = userService.findUserByEmailAddress(principal.getName());
-        if (userPOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-        if (!userOpt.get().equals(userPOpt.get())) {
-            throw new UnauthorizedException();
-        }
-
-        return userNotificationService.findAllSavedNotifications(userOpt.get());
+        return userNotificationService.updateUserNotification(user, notification, patch);
     }
 }

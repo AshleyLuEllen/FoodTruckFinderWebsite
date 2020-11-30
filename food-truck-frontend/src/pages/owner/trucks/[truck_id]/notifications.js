@@ -3,11 +3,10 @@ import PropTypes from 'prop-types';
 import requests from '../../../../util/requests';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
+import Link from 'next/link';
 
 import {
-    Card,
-    CardHeader,
     TextField,
     DialogActions,
     DialogContent,
@@ -15,11 +14,29 @@ import {
     DialogTitle,
     Dialog,
     Button,
-    CardContent,
-    CardActions,
+    CircularProgress,
     Typography,
+    Container,
+    Snackbar,
+    Link as MuiLink,
+    Breadcrumbs,
 } from '@material-ui/core';
-import Head from "next/dist/next-server/lib/head";
+import { Alert } from '@material-ui/lab';
+import { withStyles } from '@material-ui/core/styles';
+import Head from 'next/dist/next-server/lib/head';
+import EnhancedTable from '../../../../components/tables/EnhancedTable';
+import { AttachFile as AttachmentIcon, Add as AddIcon } from '@material-ui/icons';
+import ReactMarkdown from 'react-markdown';
+
+// eslint-disable-next-line no-unused-vars
+const pageStyles = () => ({
+    root: {
+        marginTop: '20px',
+    },
+    textField: {
+        marginBottom: '20px',
+    },
+});
 
 /**
  * Information page for the food trucks which includes an editing form if you're the
@@ -34,6 +51,7 @@ class NotificationPage extends Component {
             truckID: 1,
             notifications: [],
             truckFound: false,
+            isLoading: false,
 
             openNotification: 1,
             openNotObj: undefined,
@@ -43,17 +61,21 @@ class NotificationPage extends Component {
             description: '',
             published: false,
             postedTimestamp: null,
+
+            errorMsg: '',
+            errorOpen: false,
+            errorSeverity: 'error',
         };
 
         this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleClick = this.handleClick.bind(this);
+        this.handleClick = this.editNotification.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.handleCancel = this.handleCancel.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
         this.fetchData = this.fetchData.bind(this);
     }
 
-    handleClick(notification) {
+    editNotification(notification) {
         if (notification !== null) {
             this.setState({
                 openNotification: notification.id,
@@ -63,6 +85,7 @@ class NotificationPage extends Component {
                 description: notification.description,
                 published: notification.published,
                 postedTimestamp: notification.postedTimestamp,
+                media: undefined,
             });
         } else {
             this.setState({
@@ -72,108 +95,125 @@ class NotificationPage extends Component {
                 subject: '',
                 description: '',
                 published: false,
+                media: undefined,
             });
         }
     }
 
     handleMediaUpload(notId) {
         if (!this.state.media) {
-            return new Promise();
+            return Promise.resolve(0);
         }
 
         const formData = new FormData();
         formData.append('file', this.state.media);
 
-        return requests
-            .putWithAuth(`${process.env.FOOD_TRUCK_API_URL}/notifications/${notId}/media`, formData, this.props.auth, {
+        return requests.putWithAuth(
+            `${process.env.FOOD_TRUCK_API_URL}/notifications/${notId}/media`,
+            formData,
+            this.props.auth,
+            {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
-            })
-            .then(() => {
-                console.log('Success');
-                this.setState({ media: undefined });
-            });
-        // .catch(err => {
-        //     console.log(err);
-        // });
+            }
+        );
     }
 
-    handleClose(option) {
-        if (this.state.open) {
-            console.log('Saving notification');
+    async handleClose(option) {
+        this.setState({
+            subject: this.state.subject.trim(),
+            description: this.state.description.trim(),
+        });
 
-            const notification = {
-                id: this.state.openNotification,
-                truck: this.state.truck,
-                media: null,
-                subject: this.state.subject,
-                description: this.state.description,
-                type: null,
-                published: option,
-                postedTimestamp: this.state.postedTimestamp,
-            };
+        try {
+            if (this.state.open) {
+                const notification = {
+                    subject: this.state.subject,
+                    description: this.state.description,
+                    published: option,
+                };
 
-            requests
-                .put(
-                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
-                    notification
-                )
-                .then(res => {
-                    console.log('Notification saved!');
-                    console.log(res);
-                    return this.handleMediaUpload(res.data.id);
-                })
-                .then(() => {
-                    this.fetchData();
-                    this.setState({
-                        openNotification: undefined,
-                        open: false,
-                        openCreate: false,
-                        subject: '',
-                        description: '',
+                try {
+                    await this.handleMediaUpload(this.state.openNotification).then(() => {
+                        this.setState({
+                            errorMsg: 'Notification media uploaded.',
+                            errorOpen: true,
+                            errorSeverity: 'info',
+                            media: undefined,
+                        });
                     });
-                })
-                .catch(err => console.log(err.message));
-        } else if (this.state.openCreate) {
-            console.log('Creating notification');
-
-            console.log(this.state);
-            const notification = {
-                id: this.state.openNotification,
-                truck: this.state.truck,
-                media: null,
-                subject: this.state.subject,
-                description: this.state.description,
-                type: null,
-                published: option,
-                postedTimestamp: this.state.postedTimestamp,
-                notificationType: null,
-            };
-
-            requests
-                .post(
-                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`,
-                    notification
-                )
-                .then(res => {
-                    console.log('Notification saved!');
-                    console.log(res);
-                    return this.handleMediaUpload(res.data.id);
-                })
-                .then(() => {
-                    console.log('Notification saved!');
-                    this.fetchData();
+                } catch (err) {
+                    console.error(err);
                     this.setState({
-                        openNotification: undefined,
-                        open: false,
-                        openCreate: false,
-                        subject: '',
-                        description: '',
+                        errorMsg: 'Error: could not upload the media! Check the console for more information.',
+                        errorOpen: true,
+                        updating: false,
                     });
-                })
-                .catch(err => console.log(err.message));
+                    return;
+                }
+
+                await requests
+                    .patchWithAuth(
+                        `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
+                        notification,
+                        this.props.auth
+                    )
+                    .then(() => this.setState({ errorMsg: 'Notification saved successfully.' }));
+            } else if (this.state.openCreate) {
+                const notification = {
+                    subject: this.state.subject,
+                    description: this.state.description,
+                    published: option,
+                };
+
+                let notId;
+
+                await requests
+                    .postWithAuth(
+                        `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`,
+                        notification,
+                        this.props.auth
+                    )
+                    .then(res => {
+                        notId = res.data.id;
+                        this.setState({ errorMsg: 'Notification created successfully.' });
+                    });
+
+                try {
+                    await this.handleMediaUpload(notId);
+                } catch (err) {
+                    console.error(err);
+                    this.setState({
+                        errorMsg: 'Error: could not upload the media! Check the console for more information.',
+                        errorOpen: true,
+                        updating: false,
+                        open: true,
+                        openCreate: false,
+                        openNotification: notId,
+                    });
+                    return;
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            this.setState({
+                errorMsg: 'Error: could not save your notification! Check the console for more information.',
+                errorOpen: true,
+                updating: false,
+            });
+            return;
         }
+
+        this.setState({
+            // errorMsg: 'Notification saved successfully.',
+            errorOpen: true,
+            errorSeverity: 'success',
+            open: false,
+            openCreate: false,
+        });
+
+        this.fetchData();
     }
 
     handleCancel() {
@@ -182,119 +222,190 @@ class NotificationPage extends Component {
 
     handleInputChange(event, opt) {
         event.preventDefault();
-        console.log(event.target.value);
-        console.log(opt);
         this.setState({
             [opt]: event.target.value,
         });
-        console.log(this.state);
     }
 
-    handleDelete() {
-        console.log(this.props.auth);
-        console.log(this.state.openNotification);
-        requests
-            .deleteWithAuth(
+    async handleDelete() {
+        try {
+            await requests.deleteWithAuth(
                 `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
                 this.props.auth
-            )
-            .then(() => {
-                console.log('Notification deleted!');
-                this.fetchData();
-            })
-            .catch(err => console.log(err.message));
+            );
+        } catch (err) {
+            console.error(err);
+            this.setState({
+                errorMsg: 'Error: could not save your notification! Check the console for more information.',
+                errorOpen: true,
+            });
+            return;
+        }
 
         this.setState({
-            openNotification: 1,
+            errorMsg: 'Notification draft deleted successfully.',
+            errorOpen: true,
+            errorSeverity: 'success',
             open: false,
             openCreate: false,
-            subject: '',
-            description: '',
         });
+        this.fetchData();
     }
 
     fetchData() {
         requests
-            .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
+            .getWithAuth(
+                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`,
+                this.props.auth
+            )
             .then(res => {
-                console.log('Found the truck!');
                 this.setState({
                     truck: res.data,
                     truckName: res.data.name,
                     truckID: res.data.id,
                 });
-                return requests.get(
-                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`
+                return requests.getWithAuth(
+                    `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications`,
+                    this.props.auth
                 );
             })
             .then(res2 => {
                 this.setState({
-                    notifications: res2.data,
+                    notifications: res2.data.map(not => ({
+                        not,
+                        id: not.id,
+                        subject: not.subject,
+                        // date: parseISO(not.postedTimestamp),
+                        date: not.postedTimestamp && parseISO(not.postedTimestamp),
+                        media: not.media !== undefined && not.media !== null,
+                    })),
                     truckFound: true,
+                    isLoading: false,
                 });
-                console.log(this.state);
             })
             .catch(err => {
-                console.log(err.message);
-                // eslint-disable-next-line quotes
-                console.log("Cant't get notifications");
+                console.error(err);
+                this.setState({
+                    errorMsg:
+                        'Error: could not fetch truck information! Check the console for more information. Try again later.',
+                    errorOpen: true,
+                });
+                return;
             });
+    }
+
+    componentDidMount() {
+        this.setState({
+            isLoading: false,
+            truckFound: false,
+        });
     }
 
     /**
      * Continuously updates the truck information on the page
      */
     componentDidUpdate() {
-        if (!this.state.truckFound && this.props.router.query.truck_id !== undefined) {
+        if (!this.state.truckFound && this.props.router.query.truck_id !== undefined && !this.state.isLoading) {
+            this.setState({
+                isLoading: true,
+            });
             this.fetchData();
         }
     }
 
     render() {
+        const { classes } = this.props;
+
+        const columns = [
+            {
+                id: 'subject',
+                align: 'left',
+                width: '600px',
+                disablePadding: false,
+                label: 'Subject',
+            },
+            {
+                id: 'date',
+                align: 'right',
+                width: '200px',
+                disablePadding: false,
+                label: 'Posted',
+                renderer: val => (val ? format(val, 'Pp') : <span style={{ color: 'red' }}>Not yet posted.</span>),
+            },
+            {
+                id: 'media',
+                align: 'right',
+                width: '50px',
+                disablePadding: false,
+                label: '',
+                renderer: val => val && <AttachmentIcon />,
+            },
+        ];
+
+        const rowActions = [
+            {
+                references: 'not',
+                color: 'primary',
+                label: 'Manage',
+                action: (event, not) => this.editNotification(not),
+            },
+        ];
+
+        const unselectedActions = [
+            { title: 'Create new notification', icon: <AddIcon />, action: () => this.editNotification(null) },
+        ];
+
         return (
-            <div>
+            <Container className={classes.root}>
+                <Breadcrumbs aria-label="breadcrumb">
+                    <Link href="/owner" passHref>
+                        <MuiLink color="inherit">My Trucks</MuiLink>
+                    </Link>
+                    {this.props.router?.query?.truck_id ? (
+                        <Link href={`/owner/trucks/${this.props.router.query.truck_id}`} passHref>
+                            <MuiLink color="inherit">Manage Truck</MuiLink>
+                        </Link>
+                    ) : (
+                        <Typography color="textPrimary">Truck</Typography>
+                    )}
+                    <Typography color="textPrimary">Notifications</Typography>
+                </Breadcrumbs>
                 <Head>
                     <title>{this.state.truckName} Notifications</title>
                 </Head>
-                <h2>Notifications for {this.state.truckName} </h2>
-                {this.state.notifications.map(n => (
-                    <Card key={n.id} variant="outlined">
-                        <CardContent>
-                            <CardHeader title={n.subject} />
-                            {n.published && (
-                                <CardHeader subheader={format(new Date(n.postedTimestamp), 'HH:mm, MM-dd-yyyy')} />
-                            )}
-                            <Typography align="left" variant="body2" component="p">
-                                {n.description}
-                            </Typography>
-                        </CardContent>
-                        <CardActions>
-                            <Button onClick={() => this.handleClick(n)} color="primary" variant="contained">
-                                {' '}
-                                Manage{' '}
-                            </Button>
-                        </CardActions>
-                    </Card>
-                ))}
+                <EnhancedTable
+                    disableSelection
+                    columns={columns}
+                    rowActions={rowActions}
+                    unselectedActions={unselectedActions}
+                    title={<span>Notifications {this.state.isLoading && <CircularProgress size={24} />}</span>}
+                    rows={this.state.notifications}
+                    order="desc"
+                    orderBy="date"
+                    onSelectionChange={data => {
+                        this.setState({ selected: data });
+                    }}
+                />
                 <Dialog open={this.state.open || this.state.openCreate} aria-labelledby="form-dialog-title">
                     <DialogTitle id="form-dialog-title">Manage Notification</DialogTitle>
                     <DialogContent>
                         {!this.state.published && (
                             <DialogContentText>
-                                Click &quot;Publish&quot; to publish or &quot;Save&quot; to save and publish later. If
-                                already published, you may only &quot;Delete&quot;.
+                                Click &quot;Publish&quot; to publish or &quot;Save&quot; to save and publish later. When
+                                published, you may not &quot;Delete&quot; the notification.
                             </DialogContentText>
                         )}
                         <TextField
+                            className={classes.textField}
                             autoFocus
-                            margin="dense"
                             id="subject"
                             label="Subject"
                             variant="outlined"
                             fullWidth={true}
                             disabled={this.state.published}
-                            defaultValue={this.state.subject}
+                            value={this.state.subject}
                             onChange={e => this.handleInputChange(e, 'subject')}
+                            onBlur={() => this.setState({ subject: this.state.subject.trim() })}
                         />
                         <TextField
                             id="description"
@@ -304,9 +415,14 @@ class NotificationPage extends Component {
                             variant="outlined"
                             fullWidth={true}
                             disabled={this.state.published}
-                            defaultValue={this.state.description}
+                            value={this.state.description}
                             onChange={e => this.handleInputChange(e, 'description')}
+                            onBlur={() => this.setState({ description: this.state.description.trim() })}
                         />
+                        <ReactMarkdown>
+                            The truck description supports **Markdown**! Learn more about it
+                            [here](https://commonmark.org/help/).
+                        </ReactMarkdown>
                         {!this.state.published && (
                             <div>
                                 <Button variant="contained" component="label" style={{ width: 'auto', height: 'auto' }}>
@@ -318,42 +434,73 @@ class NotificationPage extends Component {
                                         accept="image/jpeg,image/png,image/gif"
                                         onChange={e => this.setState({ media: e.target.files[0] })}
                                     />
-                                </Button>
+                                </Button>{' '}
                                 {this.state.media && `Selected file: ${this.state.media.name}`}
                             </div>
                         )}
-                        {this.state.openNotObj?.media && <img src={this.state.openNotObj.media.url}></img>}
+                        {this.state.openNotObj?.media && (
+                            <img style={{ width: '100%' }} src={this.state.openNotObj.media.url}></img>
+                        )}
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleCancel} color="primary" variant="contained">
-                            Cancel
+                            {this.state.published ? 'Close' : 'Cancel'}
                         </Button>
                         {!this.state.published && (
-                            <Button onClick={() => this.handleClose(false)} color="primary" variant="contained">
+                            <Button
+                                onClick={() => this.handleClose(false)}
+                                color="primary"
+                                variant="contained"
+                                disabled={this.state.subject.length < 3 || this.state.description.length < 3}
+                            >
                                 Save
                             </Button>
                         )}
                         {!this.state.published && (
-                            <Button onClick={() => this.handleClose(true)} color="primary" variant="contained">
+                            <Button
+                                onClick={() => this.handleClose(true)}
+                                color="primary"
+                                variant="contained"
+                                disabled={this.state.subject.length < 3 || this.state.description.length < 3}
+                            >
                                 Publish
                             </Button>
                         )}
-                        {!this.state.published && !this.state.openCreate && (
+                        {!this.state.published && !this.state.openCreate && this.state.open && (
                             <Button onClick={this.handleDelete} color="secondary" variant="contained">
                                 Delete
                             </Button>
                         )}
                     </DialogActions>
                 </Dialog>
-                <Button onClick={() => this.handleClick(null)} variant="contained">
-                    {' '}
-                    +{' '}
-                </Button>
-                <Button href={`/owner/trucks/${this.props.router.query.truck_id}`} variant="contained">
-                    {' '}
-                    Back{' '}
-                </Button>
-            </div>
+                <Snackbar
+                    open={this.state.errorOpen}
+                    autoHideDuration={5000}
+                    onClose={(_event, reason) => {
+                        if (reason === 'clickaway') {
+                            return;
+                        }
+
+                        this.setState({
+                            errorOpen: false,
+                        });
+                    }}
+                    onExited={() => this.setState({ errorSeverity: 'error' })}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                >
+                    <Alert
+                        variant="filled"
+                        severity={this.state.errorSeverity}
+                        onClose={() => {
+                            this.setState({
+                                errorOpen: false,
+                            });
+                        }}
+                    >
+                        {this.state.errorMsg}
+                    </Alert>
+                </Snackbar>
+            </Container>
         );
     }
 }
@@ -361,6 +508,7 @@ class NotificationPage extends Component {
 NotificationPage.propTypes = {
     router: PropTypes.any,
     auth: PropTypes.any,
+    classes: PropTypes.any,
 };
 
 const mapStateToProps = state => {
@@ -370,4 +518,6 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = {};
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(NotificationPage));
+export default withStyles(pageStyles, { withTheme: true })(
+    withRouter(connect(mapStateToProps, mapDispatchToProps)(NotificationPage))
+);

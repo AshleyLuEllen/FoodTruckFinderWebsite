@@ -49,16 +49,10 @@ public class MediaEndpoint {
         if (principal == null || principal.getName() == null) {
             throw new UnauthorizedException();
         }
-        System.out.println("here");
 
-        Optional<User> user = userService.findUserByEmailAddress(principal.getName());
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
 
-        if (user.isEmpty()) {
-            System.out.println("here");
-            throw new ResourceNotFoundException();
-        }
-
-        String url = this.amazonClient.uploadProfilePicture(file, user.get().getId());
+        String url = this.amazonClient.uploadProfilePicture(file, user.getId());
 
         Media newMedia = new Media();
 
@@ -68,9 +62,8 @@ public class MediaEndpoint {
 
         Media dbMedia = mediaService.createMedia(newMedia);
 
-        User meUser = user.get();
-        meUser.setAvatar(dbMedia);
-        userService.saveUser(meUser);
+        user.setAvatar(dbMedia);
+        userService.saveUser(user);
 
         return dbMedia;
     }
@@ -82,13 +75,7 @@ public class MediaEndpoint {
             throw new UnauthorizedException();
         }
 
-        Optional<User> userOpt = userService.findUserByEmailAddress(principal.getName());
-
-        if (userOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        User user = userOpt.get();
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
 
         if (user.getAvatar() == null) {
             throw new ResourceNotFoundException();
@@ -106,7 +93,16 @@ public class MediaEndpoint {
 
     @PutMapping("/trucks/{truckId}/menu")
     public Media uploadMenu(@RequestPart(value = "file") MultipartFile file, @PathVariable Long truckId, Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            throw new UnauthorizedException();
+        }
+
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
         Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
+
+        if (!user.equals(truck.getOwner())){
+            throw new UnauthorizedException();
+        }
 
         String url = this.amazonClient.uploadMenu(file, truck);
 
@@ -122,15 +118,25 @@ public class MediaEndpoint {
 
         Media dbMedia = mediaService.createMedia(newMedia);
 
+        log.info(truck.getMenu());
         truck.setMenu(dbMedia);
-        truckService.saveTruck(truck);
+        log.info(truckService.saveTruck(truck).getMenu());
 
         return dbMedia;
     }
 
     @DeleteMapping("/trucks/{truckId}/menu")
     public void deleteMenu(@PathVariable Long truckId, Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            throw new UnauthorizedException();
+        }
+
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
         Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
+
+        if (!user.equals(truck.getOwner())){
+            throw new UnauthorizedException();
+        }
 
         if (truck.getMenu() == null) {
             throw new ResourceNotFoundException();
@@ -148,7 +154,17 @@ public class MediaEndpoint {
 
     @PutMapping("/notifications/{notId}/media")
     public Media uploadNotificationMedia(@RequestPart(value = "file") MultipartFile file, @PathVariable Long notId, Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            throw new UnauthorizedException();
+        }
+
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+
         TruckNotification notification = notificationService.findTruckNotification(notId).orElseThrow(ResourceNotFoundException::new);
+
+        if (!user.equals(notification.getTruck().getOwner())){
+            throw new UnauthorizedException();
+        }
 
         String url = this.amazonClient.uploadNotificationMedia(file, notification);
 
@@ -168,7 +184,17 @@ public class MediaEndpoint {
 
     @DeleteMapping("/notifications/{notId}/media")
     public void deleteNotificationMedia(@PathVariable Long notId, Principal principal) {
+        if (principal == null || principal.getName() == null) {
+            throw new UnauthorizedException();
+        }
+
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+
         TruckNotification notification = notificationService.findTruckNotification(notId).orElseThrow(ResourceNotFoundException::new);
+
+        if (!user.equals(notification.getTruck().getOwner())){
+            throw new UnauthorizedException();
+        }
 
         if (notification.getMedia() == null) {
             throw new ResourceNotFoundException();

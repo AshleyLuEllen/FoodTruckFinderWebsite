@@ -30,6 +30,11 @@ public class TruckService {
         truckRepository.deleteById(truckid);
     }
 
+    public Truck changeOwner(Truck truck, User user) {
+        truck.setOwner(user);
+        return truckRepository.save(truck);
+    }
+
     public List<Truck> getTrucksOwnedByUser(User owner) {
         return truckRepository.findAllByOwner(owner);
     }

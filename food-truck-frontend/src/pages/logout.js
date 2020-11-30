@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { logout as authLogout } from '../redux/actions/auth';
 import { withRouter } from 'next/router';
-import Head from "next/dist/next-server/lib/head";
+import Head from 'next/dist/next-server/lib/head';
+import { Container } from '@material-ui/core';
 
 function Logout(props) {
     useEffect(() => {
@@ -11,11 +12,14 @@ function Logout(props) {
         props.router.push('/');
     }, []);
 
-    return <div>
-        <Head>
-            <title>Logout</title>
-        </Head>
-        Redirecting...</div>;
+    return (
+        <Container style={{ marginTop: '20px' }}>
+            <Head>
+                <title>Logout</title>
+            </Head>
+            <p>Redirecting...</p>
+        </Container>
+    );
 }
 
 Logout.propTypes = {

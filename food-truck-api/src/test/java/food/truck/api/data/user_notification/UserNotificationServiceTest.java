@@ -4,6 +4,7 @@ import food.truck.api.data.subscription.SubscriptionService;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckRepository;
 import food.truck.api.data.truck.TruckService;
+import food.truck.api.data.truck_notification.NotificationType;
 import food.truck.api.data.truck_notification.TruckNotification;
 import food.truck.api.data.truck_notification.TruckNotificationRepository;
 import food.truck.api.data.truck_notification.TruckNotificationService;
@@ -109,7 +110,7 @@ public class UserNotificationServiceTest {
         testTruck2.setDescription("Best comfort food ever!");
         testTruck2.setLicensePlate("COZY <3");
         final long truckID2 = truckService.createTruck(testTruck2, user).getId();
-        log.info("Created truck1");
+        log.info("Created truck2");
 
         Optional<Truck> truck2Opt = this.truckService.findTruck(truckID2);
         assertTrue(truck2Opt.isPresent());
@@ -144,47 +145,18 @@ public class UserNotificationServiceTest {
     }
 
     @Test
-    void findAllSavedNotifications() {
-        notification.setPublished(true);
-        UnreadSavedPatch patch = new UnreadSavedPatch();
-        patch.setSaved(true);
-        patch.setUnread(false);
-        userNotificationService.updateUserNotification(user, notification, patch);
-        assertArrayEquals(new TruckNotification[] {notification}, this.userNotificationService.findAllSavedNotifications(user).toArray());
-    }
-
-    @Test
-    void deleteUserSavedNotification() {
-        UnreadSavedPatch patch = new UnreadSavedPatch();
-        patch.setSaved(true);
-        patch.setUnread(false);
-        userNotificationService.updateUserNotification(user, notification, patch);
-        assertTrue(this.userNotificationService.findUserNotification(user, notification).isPresent());
-
-        patch.setSaved(false);
-        patch.setUnread(null);
-        userNotificationService.updateUserNotification(user, notification, patch);
-        assertTrue(this.userNotificationService.findUserNotification(user, notification).isEmpty());
-    }
-
-    @Test
     void findAllNotifications() {
-        UnreadSavedPatch patch = new UnreadSavedPatch();
-        patch.setSaved(true);
-        patch.setUnread(false);
-        userNotificationService.updateUserNotification(user, notification2, patch);
-        assertTrue(this.userNotificationService.findUserNotification(user, notification2).isPresent());
-
-        assertTrue(this.userNotificationService.findAllNotifications(user).isEmpty());
+        assertEquals(1, this.userNotificationService.findAllNotifications(user).size()); // check that there is only one of type subscription
+        assertEquals(NotificationType.SUBSCRIPTION, this.userNotificationService.findAllNotifications(user).get(0).getType());
+        TruckNotification subscription = this.userNotificationService.findAllNotifications(user).get(0);
         notification.setPublished(true);
         notification2.setPublished(true);
-        assertArrayEquals(List.of(notification, notification2).stream().mapToLong(TruckNotification::getId).sorted().toArray(),
+        assertArrayEquals(List.of(subscription, notification, notification2).stream().mapToLong(TruckNotification::getId).sorted().toArray(),
             this.userNotificationService.findAllNotifications(user).stream().mapToLong(TruckNotification::getId).sorted().toArray());
 
         TruckNotification tn = this.userNotificationService.findAllNotifications(user).stream()
             .filter(n -> n.getId().equals(notification2.getId()))
             .findFirst().get();
-        assertTrue(tn.isSaved());
         assertFalse(tn.isUnread());
     }
 
@@ -199,7 +171,6 @@ public class UserNotificationServiceTest {
         userNotOpt = this.userNotificationService.findUserNotification(user, notification2);
         assertTrue(userNotOpt.isPresent());
         UserNotification un1 = userNotOpt.get();
-        assertTrue(un1.getSaved());
         assertFalse(un1.getUnread());
 
         patch.setSaved(null);
@@ -208,7 +179,6 @@ public class UserNotificationServiceTest {
         userNotOpt = this.userNotificationService.findUserNotification(user, notification2);
         assertTrue(userNotOpt.isPresent());
         un1 = userNotOpt.get();
-        assertTrue(un1.getSaved());
         assertTrue(un1.getUnread());
 
         patch.setSaved(false);
@@ -217,13 +187,6 @@ public class UserNotificationServiceTest {
         userNotOpt = this.userNotificationService.findUserNotification(user, notification2);
         assertTrue(userNotOpt.isPresent());
         un1 = userNotOpt.get();
-        assertFalse(un1.getSaved());
         assertTrue(un1.getUnread());
-
-        patch.setSaved(false);
-        patch.setUnread(false);
-        userNotificationService.updateUserNotification(user, notification2, patch);
-        userNotOpt = this.userNotificationService.findUserNotification(user, notification2);
-        assertTrue(userNotOpt.isEmpty());
     }
 }

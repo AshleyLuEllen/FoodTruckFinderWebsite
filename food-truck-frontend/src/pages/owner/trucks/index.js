@@ -1,21 +1,24 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Link from '@material-ui/core/Link';
 import requests from '../../../util/requests';
 import { login as authLogin, logout as authLogout } from '../../../redux/actions/auth';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 
-import { Typography, Button, Box } from '@material-ui/core';
+import { Typography, Button, Container, Grid, Snackbar, CircularProgress } from '@material-ui/core';
 import { Add as AddIcon } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
+import { Alert } from '@material-ui/lab';
 
 import OwnerTruckCard from '../../../components/OwnerTruckCard';
-import Head from "next/dist/next-server/lib/head";
+import Head from 'next/dist/next-server/lib/head';
 
 const dashboardStyles = () => ({
+    root: {
+        marginTop: '20px',
+    },
     truckCard: {
-        marginBottom: '5px',
+        margin: '10px',
     },
     links: {
         marginLeft: '35px',
@@ -25,86 +28,98 @@ const dashboardStyles = () => ({
 class Dashboard extends Component {
     constructor(props) {
         super(props);
-        this.state = { truckData: [] };
+        this.state = {
+            truckData: [],
+            loading: true,
+        };
     }
 
     componentDidMount() {
         requests
-            .getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, this.props.auth)
-            .then(res => {
-                this.setState({
-                    owner: res.data.id,
-                });
-
-                let userID = this.state.owner;
-
-                //let userID = 1;
-                requests
-                    .get(`${process.env.FOOD_TRUCK_API_URL}/users/${userID}/trucks`)
-                    .then(res => {
-                        this.setState({
-                            truckData: res.data,
-                        });
-                    })
-                    .catch(err => {
-                        console.log(err.response?.status);
-                        console.log(err);
-                    });
-            })
-            .catch(err => {
-                console.log(err.response?.status);
-                console.log(err);
-            });
-    }
-
-    componentDidUpdate() {
-        console.log(this.props.router.query);
-        requests
-            .get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.props.router.query.user_id}/trucks`)
+            .get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.props.auth.userId}/trucks`)
             .then(res => {
                 this.setState({
                     truckData: res.data,
+                    loading: false,
                 });
             })
             .catch(err => {
-                console.log(err.response?.status);
-                console.log(err);
+                console.error(err);
+                this.setState({
+                    errorMsg: 'Error: could not load your trucks! Check the console for more information.',
+                    errorOpen: true,
+                    loading: false,
+                });
             });
     }
 
     render() {
         const { classes } = this.props;
         return (
-            <div>
+            <Container className={classes.root}>
                 <Head>
                     <title>My Trucks</title>
                 </Head>
-                <Typography variant={'h2'}>My Trucks</Typography>
-                <ol>
+                <Typography variant="h4" style={{ marginBottom: '0px' }}>
+                    My Trucks {this.state.loading && <CircularProgress size={30} />}
+                </Typography>
+                <Grid container>
                     {this.state.truckData.map((tr, i) => (
-                        <OwnerTruckCard
-                            key={i}
-                            className={classes.truckCard}
-                            truck={tr}
-                            tags={tr.tags.map(tag => tag.tag.name)}
-                            onClick={() => this.setState({ currentlySelected: i })}
-                            userId={this.state.userId}
-                        />
+                        <Grid item xs={12} md={6} key={i}>
+                            <OwnerTruckCard
+                                className={classes.truckCard}
+                                truck={tr}
+                                tags={tr.tags.map(tag => tag.tag.name)}
+                                onClick={() => this.setState({ currentlySelected: i })}
+                                userId={this.state.userId}
+                            />
+                        </Grid>
                     ))}
-                </ol>
-                {this.state.truckData.length > 0 && (
-                    <Box ml={5}>
-                        <Button variant={'contained'} href="/owner/trucks/create">
-                            <AddIcon />
+                    {this.state.truckData.length === 0 && (
+                        <Grid item xs={12}>
+                            <p>Click the button below to create a new truck.</p>
+                        </Grid>
+                    )}
+                    <Grid item xs={12}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            style={{ margin: '10px' }}
+                            href="/owner/trucks/create"
+                        >
+                            <AddIcon style={{ marginRight: '5px' }} />
+                            Create new truck
                         </Button>
-                    </Box>
-                )}
-                {this.state.truckData.length === 0 && (
-                    <Typography className={classes.links} variant={'button'}>
-                        Click <Link href="/owner/trucks/create">here</Link> to add your first Truck!
-                    </Typography>
-                )}
-            </div>
+                    </Grid>
+                </Grid>
+                <Snackbar
+                    open={this.state.errorOpen}
+                    autoHideDuration={5000}
+                    onClose={(_event, reason) => {
+                        if (reason === 'clickaway') {
+                            return;
+                        }
+
+                        this.setState({
+                            errorOpen: false,
+                        });
+                    }}
+                    onExited={() => this.setState({ errorSeverity: 'error' })}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                >
+                    <Alert
+                        variant="filled"
+                        severity={this.state.errorSeverity}
+                        onClose={() => {
+                            this.setState({
+                                errorOpen: false,
+                            });
+                        }}
+                    >
+                        {this.state.errorMsg}
+                    </Alert>
+                </Snackbar>
+            </Container>
         );
     }
 }

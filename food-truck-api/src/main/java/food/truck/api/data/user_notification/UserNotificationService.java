@@ -24,7 +24,7 @@ public class UserNotificationService {
     }
 
     public List<TruckNotification> findAllSavedNotifications(User user) {
-        return userNotificationRepository.findAllByUser(user).stream().map(UserNotification::getNotification)            .filter(truckNotification1 -> truckNotification1.getPublished() != null && truckNotification1.getPublished())
+        return userNotificationRepository.findAllByUser(user).stream().map(UserNotification::getNotification).filter(truckNotification1 -> truckNotification1.getPublished() != null && truckNotification1.getPublished())
             .collect(Collectors.toList());
     }
 
@@ -36,10 +36,8 @@ public class UserNotificationService {
             .peek(truckNotification -> {
                 Optional<UserNotification> userNotOpt = userNotificationRepository.findById(new UserNotificationId(user.getId(), truckNotification.getId()));
                 if (userNotOpt.isPresent()) {
-                    truckNotification.setSaved(userNotOpt.get().getSaved());
                     truckNotification.setUnread(userNotOpt.get().getUnread());
                 } else {
-                    truckNotification.setSaved(false);
                     truckNotification.setUnread(false);
                 }
             })
@@ -53,16 +51,9 @@ public class UserNotificationService {
             UserNotification not = new UserNotification();
             not.setUser(user);
             not.setNotification(notification);
-            not.setSaved(false);
             not.setUnread(false);
             return not;
         });
-
-        if (userNotification.getSaved() && patch.getSaved() != null && !patch.getSaved()) {
-            userNotification.setSaved(false);
-        } else if (!userNotification.getSaved() && patch.getSaved() != null && patch.getSaved()) {
-            userNotification.setSaved(true);
-        }
 
         if (userNotification.getUnread() && patch.getUnread() != null && !patch.getUnread()) {
             userNotification.setUnread(false);
@@ -70,12 +61,7 @@ public class UserNotificationService {
             userNotification.setUnread(true);
         }
 
-        if (!userNotification.getUnread() && !userNotification.getSaved()) {
-            userNotificationRepository.delete(userNotification);
-            return null;
-        } else {
-            return userNotificationRepository.save(userNotification);
-        }
+        return userNotificationRepository.save(userNotification);
     }
 }
 

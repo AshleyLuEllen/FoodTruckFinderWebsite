@@ -15,7 +15,7 @@ import TruckCard from '../components/TruckCard';
 import LocationInput from '../components/LocationInput';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import GoogleMap, { Marker } from '../components/GoogleMap';
-import Head from "next/dist/next-server/lib/head";
+import Head from 'next/dist/next-server/lib/head';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -120,10 +120,8 @@ function SearchPage(props) {
     useEffect(() => {
         if (router.query.tag && tagOptions) {
             let newSelection = [];
-            for (let tag of router.query.tag) {
-                const selectedTag = tagOptions.find(t => t.name === tag);
-                if (selectedTag) newSelection.push(selectedTag);
-            }
+            const selectedTag = tagOptions.find(t => t.name === router.query.tag);
+            if (selectedTag) newSelection.push(selectedTag);
             setSelectedTags(newSelection);
         }
     }, [router.query.tag, tagOptions]);
@@ -218,6 +216,7 @@ function SearchPage(props) {
                             variant="outlined"
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
+                            onBlur={() => this.setState({ reviewComment: this.state.reviewComment.trim() })}
                         />
                         <div className={classes.queryField}>
                             <ChipSelector

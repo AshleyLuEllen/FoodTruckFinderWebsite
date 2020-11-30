@@ -162,13 +162,13 @@ function Header(props) {
                 );
             })
             .then(res => {
-                console.log(res.data);
-                setNotificationCount(res.data.length);
+                setNotificationCount(parseInt(res.data));
             })
             .catch(err => {
+                console.error(err);
                 if (
-                    err.includes &&
-                    err.includes('Network Error') &&
+                    // err.includes &&
+                    // err.includes('Network Error') &&
                     !err.response?.status &&
                     !router.asPath.startsWith('/maintenance')
                 ) {
@@ -204,7 +204,7 @@ function Header(props) {
             <MuiLink className={classes.link} href="/owner/trucks" color="inherit">
                 <MenuItem onClick={handleMenuClose}>My Trucks</MenuItem>
             </MuiLink>
-            <MuiLink className={classes.link} href="/account" color="inherit">
+            <MuiLink className={classes.link} href={`/user/${props.auth.userId}`} color="inherit">
                 <MenuItem onClick={handleMenuClose}>My Profile</MenuItem>
             </MuiLink>
             <MuiLink className={classes.link} href="/logout" color="inherit">
@@ -245,29 +245,33 @@ function Header(props) {
                         </Tooltip>
                         {props.auth.isLoggedIn && (
                             <div className={classes.sectionDesktop}>
-                                <IconButton
-                                    aria-label={`show ${notificationCount} new notifications`}
-                                    color="inherit"
-                                    href="/account/notifications"
-                                >
-                                    {notificationCount > 0 ? (
-                                        <Badge badgeContent={notificationCount} color="secondary">
+                                <Tooltip title="Notifications">
+                                    <IconButton
+                                        aria-label={`show ${notificationCount} new notifications`}
+                                        color="inherit"
+                                        href="/account/notifications"
+                                    >
+                                        {notificationCount > 0 ? (
+                                            <Badge badgeContent={notificationCount} color="secondary">
+                                                <NotificationsIcon />
+                                            </Badge>
+                                        ) : (
                                             <NotificationsIcon />
-                                        </Badge>
-                                    ) : (
-                                        <NotificationsIcon />
-                                    )}
-                                </IconButton>
-                                <IconButton
-                                    edge="end"
-                                    aria-label="account of current user"
-                                    aria-controls={menuId}
-                                    aria-haspopup="true"
-                                    onClick={handleProfileMenuOpen}
-                                    color="inherit"
-                                >
-                                    <AccountCircle />
-                                </IconButton>
+                                        )}
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Account">
+                                    <IconButton
+                                        edge="end"
+                                        aria-label="account of current user"
+                                        aria-controls={menuId}
+                                        aria-haspopup="true"
+                                        onClick={handleProfileMenuOpen}
+                                        color="inherit"
+                                    >
+                                        <AccountCircle />
+                                    </IconButton>
+                                </Tooltip>
                             </div>
                         )}
                         {!props.auth.isLoggedIn && (

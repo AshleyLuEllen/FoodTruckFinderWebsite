@@ -7,10 +7,14 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import food.truck.api.data.media.Media;
+import food.truck.api.data.media.MediaService;
 import food.truck.api.data.truck.Truck;
+import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.truck_notification.TruckNotification;
 import food.truck.api.data.user.User;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +28,12 @@ import java.util.Date;
 @Log4j2
 @Service
 public class AmazonClient {
+
+    @Autowired
+    MediaService mediaService;
+
+    @Autowired
+    TruckService truckService;
 
     private AmazonS3 s3client;
 
@@ -130,6 +140,11 @@ public class AmazonClient {
         String fileName = truck.getMenu().getUrl().substring(truck.getMenu().getUrl().lastIndexOf('/') + 1);
         log.info(fileName);
         s3client.deleteObject(new DeleteObjectRequest(bucketName, "menus/" + fileName));
+
+        Media menu = truck.getMenu();
+        truck.setMenu(null);
+        truckService.saveTruck(truck);
+        mediaService.deleteMedia(menu);
     }
 
     public String uploadNotificationMedia(MultipartFile multipartFile, TruckNotification notification) {

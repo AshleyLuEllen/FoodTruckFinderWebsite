@@ -23,9 +23,6 @@ public class UserNotification {
     @ManyToOne
     TruckNotification notification;
 
-    @Column(name = "saved")
-    Boolean saved;
-
     @Column(name = "unread")
     Boolean unread;
 }
