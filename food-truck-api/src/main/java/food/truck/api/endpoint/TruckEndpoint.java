@@ -2,13 +2,18 @@ package food.truck.api.endpoint;
 
 import food.truck.api.data.review.Review;
 import food.truck.api.data.review.ReviewService;
+import food.truck.api.data.tag.Tag;
+import food.truck.api.data.tag.TagService;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckService;
+import food.truck.api.data.truck_tag.TruckTagRepository;
+import food.truck.api.data.truck_tag.TruckTagService;
 import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
 import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
+import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +22,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Log4j2
 @RestController
@@ -30,6 +37,12 @@ public class TruckEndpoint {
 
     @Autowired
     private ReviewService reviewService;
+
+    @Autowired
+    private TruckTagService truckTagService;
+
+    @Autowired
+    private TagService tagService;
 
     @DeleteMapping("/trucks/{id}")
     public ResponseEntity<String> deleteTruck(Principal principal, @PathVariable long id) {
@@ -89,13 +102,56 @@ public class TruckEndpoint {
         return truckService.findTruck(id).orElseThrow(ResourceNotFoundException::new);
     }
 
-    @PutMapping("/trucks/{id}")
-    public Truck saveTruck(@PathVariable Long id, @RequestBody Truck truck) {
+    @PatchMapping("/trucks/{id}")
+    public Truck editTruck(Principal principal, @PathVariable Long id, @RequestBody Truck truck) {
+        Truck dbTruck = truckService.findTruck(id).orElseThrow(ResourceNotFoundException::new);
+
+        // Get the owner email
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
+
+        // Get me user
+        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
+        if (meUser.isEmpty() || !Objects.equals(dbTruck.getOwner().getId(), meUser.get().getId())) {
+            throw new UnauthorizedException();
+        }
+
         if (!truck.getId().equals(id)) {
             throw new BadRequestException("IDs don't match");
         }
 
-        return truckService.saveTruck(truck);
+        dbTruck.setName(truck.getName());
+        dbTruck.setDescription(truck.getDescription());
+        dbTruck.setLicensePlate(truck.getLicensePlate());
+
+        return truckService.saveTruck(dbTruck);
+    }
+
+    @Data
+    static class TagList {
+        List<Long> tags;
+    }
+
+    @PutMapping("/trucks/{id}/tags")
+    public Truck editTruckTags(Principal principal, @PathVariable Long id, @RequestBody TagList tags) {
+        Truck dbTruck = truckService.findTruck(id).orElseThrow(ResourceNotFoundException::new);
+
+        // Get the owner email
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
+
+        // Get me user
+        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
+        if (meUser.isEmpty() || !Objects.equals(dbTruck.getOwner().getId(), meUser.get().getId())) {
+            throw new UnauthorizedException();
+        }
+
+        truckTagService.deleteAll(dbTruck);
+        truckTagService.addAllTruckTags(dbTruck, tags.tags.stream().map(tid -> tagService.findTag(tid).orElse(null)).filter(Objects::nonNull).collect(Collectors.toList()));
+
+        return truckService.saveTruck(dbTruck);
     }
 
     @GetMapping("/users/{userID}/trucks")

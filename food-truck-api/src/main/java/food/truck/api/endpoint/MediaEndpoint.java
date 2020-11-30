@@ -118,8 +118,9 @@ public class MediaEndpoint {
 
         Media dbMedia = mediaService.createMedia(newMedia);
 
+        log.info(truck.getMenu());
         truck.setMenu(dbMedia);
-        truckService.saveTruck(truck);
+        log.info(truckService.saveTruck(truck).getMenu());
 
         return dbMedia;
     }

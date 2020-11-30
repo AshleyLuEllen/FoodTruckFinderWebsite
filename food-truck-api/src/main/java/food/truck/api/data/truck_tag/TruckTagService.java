@@ -4,6 +4,7 @@ import food.truck.api.data.tag.Tag;
 import food.truck.api.data.truck.Truck;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +36,20 @@ public class TruckTagService {
 
     public void deleteTruckTag(Truck truck, Tag tag) {
         truckTagRepository.deleteById(new TruckTagId(truck.getId(), tag.getId()));
+    }
+
+    @Transactional
+    public void deleteAll(Truck dbTruck) {
+        truckTagRepository.deleteAllByTruck(dbTruck);
+    }
+
+    public void addAllTruckTags(Truck truck, List<Tag> tags) {
+        truckTagRepository.saveAll(tags.stream().map(tag -> {
+            TruckTag truckTag = new TruckTag();
+            truckTag.setTag(tag);
+            truckTag.setTruck(truck);
+            return truckTag;
+        }).collect(Collectors.toList()));
     }
 }
 
