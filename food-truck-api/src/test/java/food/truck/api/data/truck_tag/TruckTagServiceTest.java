@@ -66,7 +66,7 @@ class TruckTagServiceTest {
         for(int i = 0; i < 5; i++) {
             tags[i] = new Tag();
             tags[i].setName(tagNames[i]);
-            tags[i].setDescription(tagDesc[i]);
+            tags[i].setCategory(tagDesc[i]);
             tags[i] = tagService.createTag(tags[i]);
             tags[i] = truckTagService.addTruckTag(truck, tags[i]);
         }
@@ -76,7 +76,7 @@ class TruckTagServiceTest {
     void testFindTruckTag() {
         Optional<TruckTag> tt = truckTagService.findTruckTag(truck, tags[0]);
         assertTrue(tt.isPresent());
-        assertEquals("desc 1", tt.get().tag.getDescription(), tt.get().getTag().getDescription());
+        assertEquals("desc 1", tt.get().tag.getCategory(), tt.get().getTag().getCategory());
         assertEquals("food", tt.get().tag.getName());
     }
 
@@ -84,12 +84,12 @@ class TruckTagServiceTest {
     void testAddTruckTag() {
         Tag t = new Tag();
         t.setName("new tag");
-        t.setDescription("new desc");
+        t.setCategory("new desc");
         t = tagService.createTag(t);
         truckTagService.addTruckTag(truck, t);
 
         assertEquals("new tag", truckTagService.findTruckTag(truck, t).get().getTag().getName());
-        assertEquals("new desc", truckTagService.findTruckTag(truck, t).get().getTag().getDescription());
+        assertEquals("new desc", truckTagService.findTruckTag(truck, t).get().getTag().getCategory());
     }
 
     @Test

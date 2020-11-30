@@ -6,6 +6,7 @@ import food.truck.api.data.user.UserService;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
 import food.truck.api.util.SearchQuery;
+import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -69,15 +70,29 @@ public class UserEndpoint {
         return userService.createUser(user);
     }
 
+    @Data
+    static class FriendSearchQuery {
+        String firstName;
+        String lastName;
+        String email;
+    }
+
     @PostMapping("/users/search")
-    public List<User> searchForUsers(@RequestBody SearchQuery searchQuery) {
+    public List<User> searchForUsers(@RequestBody FriendSearchQuery searchQuery) {
         List<User> results = new ArrayList<>();
-        Optional<User> u = userService.findUserByEmailAddress(searchQuery.getQuery());
-        if(!u.isEmpty()) {
-            results.add(u.get());
+
+
+        log.info(searchQuery.email);
+        log.info(searchQuery.firstName);
+        log.info(searchQuery.lastName);
+        if (searchQuery.email != null) {
+            Optional<User> u = userService.findUserByEmailAddress(searchQuery.email);
+            if (!u.isEmpty()) {
+                results.add(u.get());
+            }
         }
 
-        List<User> users = userService.findUsersByName(searchQuery.getQuery());
+        List<User> users = userService.findUsersByName(searchQuery.firstName, searchQuery.lastName);
         if (users.size() > 0) {
             results.addAll(users);
         }

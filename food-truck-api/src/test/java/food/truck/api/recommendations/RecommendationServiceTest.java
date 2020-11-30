@@ -92,19 +92,19 @@ class RecommendationServiceTest {
         // Test tags
         Tag tagA = new Tag();
         tagA.setName("Tag A");
-        tagA.setDescription("Desc A");
+        tagA.setCategory("Desc A");
         final long tagAId = this.tagService.createTag(tagA).getId();
         log.info("Created tag A");
 
         Tag tagB = new Tag();
         tagB.setName("Tag B");
-        tagB.setDescription("Desc B");
+        tagB.setCategory("Desc B");
         final long tagBId = this.tagService.createTag(tagB).getId();
         log.info("Created tag B");
 
         Tag tagC = new Tag();
         tagC.setName("Tag C");
-        tagC.setDescription("Desc C");
+        tagC.setCategory("Desc C");
         final long tagCId = this.tagService.createTag(tagC).getId();
         log.info("Created tag C");
 
