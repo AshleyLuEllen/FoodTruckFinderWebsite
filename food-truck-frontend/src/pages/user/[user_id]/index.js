@@ -31,8 +31,7 @@ const styles = theme => ({
         marginBottom: '20px',
     },
     reviewCard: {
-        marginBottom: '20px',
-        marginRight: '20px',
+        marginBottom: '10px',
     },
     editButton: {
         width: 'auto',
@@ -181,7 +180,7 @@ class UserPage extends Component {
                         <Typography variant="h4" style={{ marginTop: '20px', marginBottom: '5px' }}>
                             Reviews
                         </Typography>
-                        <div align={'left'}>
+                        <div style={{ height: '400px', overflow: 'auto' }}>
                             {this.state.reviews.map((r, i) => (
                                 <ReviewCard className={classes.reviewCard} key={i} r={r} user={true} />
                             ))}

@@ -25,10 +25,15 @@ function FriendAvatarGroup(props) {
         childArray.push(<FriendAvatar name={`+${childCount - (props.max - 1)}`} url={props.extraURL} />);
     }
 
-    return <div className={classes.root}>{childArray}</div>;
+    return (
+        <div className={classes.root} style={props.style}>
+            {childArray}
+        </div>
+    );
 }
 
 FriendAvatarGroup.propTypes = {
+    style: PropTypes.any,
     children: PropTypes.array,
     max: PropTypes.number.isRequired,
     extraURL: PropTypes.string.isRequired,

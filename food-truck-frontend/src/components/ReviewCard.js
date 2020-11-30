@@ -12,6 +12,7 @@ import CardContent from '@material-ui/core/CardContent';
 const useStyles = makeStyles(() => ({
     root: {
         spacing: '10px',
+        textAlign: 'left',
     },
 }));
 
@@ -33,7 +34,11 @@ function ReviewCard(props) {
                     </div>
                 )}
 
-                {props.user === true && <MuiLink href={`/trucks/${props.r.truck.id}`}>{props.r.truck.name}</MuiLink>}
+                {props.user === true && (
+                    <div style={{ textAlign: 'right' }}>
+                        <MuiLink href={`/trucks/${props.r.truck.id}`}>{props.r.truck.name}</MuiLink>
+                    </div>
+                )}
 
                 {props.r.comment.trim().length > 0 &&
                     props.r.comment?.split('\n').map((line, i) => <p key={i}>{line}</p>)}

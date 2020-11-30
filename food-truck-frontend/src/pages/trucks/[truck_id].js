@@ -29,6 +29,8 @@ import ReactMarkdown from 'react-markdown';
 import ReviewCard from '../../components/ReviewCard';
 import Head from 'next/dist/next-server/lib/head';
 import ScheduleCard from '../../components/ScheduleCard';
+import FriendAvatar from '../../components/FriendAvatar';
+import FriendAvatarGroup from '../../components/FriendAvatarGroup';
 
 const truckPageStyles = theme => ({
     root: {
@@ -92,6 +94,7 @@ class TruckPage extends Component {
             schedules: [],
             avg_rating: -1,
             reviews: [],
+            subscriptions: [],
             openReview: false,
             subscribed: false,
             userId: false,
@@ -145,6 +148,13 @@ class TruckPage extends Component {
                         reviews: res.data,
                     });
                 }),
+            requests
+                .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/subscriptions`)
+                .then(res => {
+                    this.setState({
+                        subscriptions: res.data,
+                    });
+                }),
             this.props.auth.userId
                 ? requests
                       .get(
@@ -163,7 +173,10 @@ class TruckPage extends Component {
                 : Promise.resolve(0),
         ])
             .then(() => {
-                this.setState({ truckFound: true, loadingInfo: false });
+                this.setState({
+                    truckFound: true,
+                    loadingInfo: false,
+                });
             })
             .catch(err => {
                 console.error(err);
@@ -281,6 +294,15 @@ class TruckPage extends Component {
                             subscribed: true,
                             loadingSubscription: false,
                         });
+                        requests
+                            .get(
+                                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/subscriptions`
+                            )
+                            .then(res => {
+                                this.setState({
+                                    subscriptions: res.data,
+                                });
+                            });
                     })
                     .catch(err => {
                         console.error(err);
@@ -305,6 +327,15 @@ class TruckPage extends Component {
                             subscribed: false,
                             loadingSubscription: false,
                         });
+                        requests
+                            .get(
+                                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/subscriptions`
+                            )
+                            .then(res => {
+                                this.setState({
+                                    subscriptions: res.data,
+                                });
+                            });
                     })
                     .catch(err => {
                         console.error(err);
@@ -326,6 +357,14 @@ class TruckPage extends Component {
          */
         return (
             <Container className={classes.root}>
+                {!this.state.truckFound && (
+                    <div style={{ position: 'relative', marginTop: '50px' }}>
+                        <CircularProgress
+                            size={60}
+                            style={{ position: 'absolute', top: '50%', left: '50%', marginLeft: -30, marginTop: -30 }}
+                        />
+                    </div>
+                )}
                 {this.state.truckFound && (
                     <div>
                         {/**TRUCK NAME*/}
@@ -356,7 +395,7 @@ class TruckPage extends Component {
                         )}
 
                         {/**SUBSCRIBE BUTTON*/}
-                        {this.props.auth.isLoggedIn && (
+                        {(this.props.auth.isLoggedIn || this.state.truck.rating) !== null && (
                             <div
                                 style={{
                                     marginTop: '10px',
@@ -376,19 +415,21 @@ class TruckPage extends Component {
                                         readOnly
                                     />
                                 )}
-                                <span style={{ position: 'relative' }}>
-                                    <Button
-                                        color={this.state.subscribed ? 'secondary' : 'primary'}
-                                        variant="contained"
-                                        onClick={this.toggleSubscribe}
-                                        disabled={this.state.loadingSubscription}
-                                    >
-                                        {this.state.subscribed ? 'Unsubscribe' : 'Subscribe'}
-                                    </Button>
-                                    {this.state.loadingSubscription && (
-                                        <CircularProgress size={24} className={classes.buttonProgress} />
-                                    )}
-                                </span>
+                                {this.props.auth.isLoggedIn && (
+                                    <span style={{ position: 'relative' }}>
+                                        <Button
+                                            color={this.state.subscribed ? 'secondary' : 'primary'}
+                                            variant="contained"
+                                            onClick={this.toggleSubscribe}
+                                            disabled={this.state.loadingSubscription}
+                                        >
+                                            {this.state.subscribed ? 'Unsubscribe' : 'Subscribe'}
+                                        </Button>
+                                        {this.state.loadingSubscription && (
+                                            <CircularProgress size={24} className={classes.buttonProgress} />
+                                        )}
+                                    </span>
+                                )}
                             </div>
                         )}
                     </div>
@@ -401,6 +442,19 @@ class TruckPage extends Component {
                                 <ReactMarkdown>{this.state.truck?.description}</ReactMarkdown>
                             </div>
                             <Divider />
+                            <Typography variant="h5" style={{ marginBottom: '10px', marginTop: '10px' }}>
+                                Subscribers
+                            </Typography>
+                            <FriendAvatarGroup max={10} style={{ justifyContent: 'start' }}>
+                                {this.state.subscriptions.map((f, i) => (
+                                    <FriendAvatar key={i} user={f} />
+                                ))}
+                            </FriendAvatarGroup>
+                            {this.state.subscriptions.length === 0 && (
+                                <Paper elevation={2} style={{ textAlign: 'center', padding: '20px' }}>
+                                    <em>This truck has not been subscribed to yet. You can be the first!</em>
+                                </Paper>
+                            )}
                             <Typography variant="h5" style={{ marginBottom: '10px', marginTop: '10px' }}>
                                 Menu
                             </Typography>
