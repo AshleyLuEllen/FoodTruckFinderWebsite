@@ -146,7 +146,7 @@ class CreateAccount extends Component {
     render() {
         const { classes } = this.props;
         return (
-            <Paper className={classes.root} elevation={3} alignItems="center">
+            <Paper className={classes.root} elevation={3}>
                 <Head>
                     <title>Create Account</title>
                 </Head>

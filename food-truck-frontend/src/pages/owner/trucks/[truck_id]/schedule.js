@@ -139,10 +139,10 @@ function DraggableDialog(props) {
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button autoFocus onClick={handleClose} color="primary">
+                    <Button autoFocus onClick={handleClose} color="secondary" variant="contained">
                         Cancel
                     </Button>
-                    <Button onClick={handleSave} color="primary">
+                    <Button onClick={handleSave} color="primary" variant="contained">
                         {props.editing ? 'Save Changes' : 'Create New Schedule'}
                     </Button>
                 </DialogActions>

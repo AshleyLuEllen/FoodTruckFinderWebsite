@@ -2,6 +2,7 @@ package food.truck.api.endpoint;
 
 import food.truck.api.data.review.Review;
 import food.truck.api.data.review.ReviewService;
+import food.truck.api.data.subscription.SubscriptionService;
 import food.truck.api.data.tag.Tag;
 import food.truck.api.data.tag.TagService;
 import food.truck.api.data.truck.Truck;
@@ -41,6 +42,9 @@ public class TruckEndpoint {
 
     @Autowired
     private TruckTagService truckTagService;
+
+    @Autowired
+    private SubscriptionService subscriptionService;
 
     @Autowired
     private TagService tagService;
@@ -171,5 +175,12 @@ public class TruckEndpoint {
         }
 
         return truckService.changeOwner(truck, user);
+    }
+
+    @GetMapping("/trucks/{truckId}/subscriptions")
+    public List<User> findTruckSubscriptions(@PathVariable Long truckId) {
+        Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
+
+        return subscriptionService.findTruckSubscriptions(truck);
     }
 }
