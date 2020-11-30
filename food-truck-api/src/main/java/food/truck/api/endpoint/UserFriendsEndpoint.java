@@ -31,7 +31,7 @@ public class UserFriendsEndpoint {
     FriendService friendService;
 
     @GetMapping("/users/{userId}/friends")
-    List<User> getAllFriends(@PathVariable Long userId){
+    public List<User> getAllFriends(@PathVariable Long userId){
         Optional<User> userOpt = userService.findUser(userId);
         if (userOpt.isEmpty()) {
             throw new ResourceNotFoundException();
@@ -41,7 +41,7 @@ public class UserFriendsEndpoint {
     }
 
     @GetMapping("/users/{userId}/friends/{fuserId}")
-    boolean checkFriendship(@PathVariable Long userId, @PathVariable Long fuserId) {
+    public boolean checkFriendship(@PathVariable Long userId, @PathVariable Long fuserId) {
         if (Objects.equals(userId, fuserId)) {
             throw new BadRequestException("User ids are the same");
         }
@@ -52,65 +52,41 @@ public class UserFriendsEndpoint {
         );
     }
 
-    @PostMapping("/users/{userId}/friends/{fuserId}")
-    void addFriendship(@PathVariable Long userId, @PathVariable Long fuserId, Principal principal){
-        // Check if user exists
-        Optional<User> userOpt = userService.findUser(userId);
-        if (userOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        // Check if friend exists
-        Optional<User> friendOpt = userService.findUser(fuserId);
-        if (friendOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        // Check if user has same id
+    @PostMapping("/users/{userId}/friends/{friendId}")
+    public void addFriendship(Principal principal, @PathVariable Long userId, @PathVariable Long friendId){
         if (principal == null) {
             throw new UnauthorizedException();
         }
-        Optional<User> userPOpt = userService.findUserByEmailAddress(principal.getName());
-        if (userPOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-        if (!userOpt.get().equals(userPOpt.get())) {
+        // Check if user exists
+        User user = userService.findUser(userId).orElseThrow(ResourceNotFoundException::new);
+        User friend = userService.findUser(friendId).orElseThrow(ResourceNotFoundException::new);
+        User pUser = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+
+        if (!pUser.equals(user)) {
             throw new UnauthorizedException();
         }
 
-        friendService.becomeFriends(userOpt.get(), friendOpt.get());
+        friendService.becomeFriends(user, friend);
     }
 
-    @DeleteMapping("/users/{userId}/friends/{userId}")
-    void removeFriendship(@PathVariable Long userId, @PathVariable Long fuserId, Principal principal){
-        Optional<User> userOpt = userService.findUser(userId);
-        if (userOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        // Check if friend exists
-        Optional<User> friendOpt = userService.findUser(fuserId);
-        if (friendOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        // Check if user has same id
+    @DeleteMapping("/users/{userId}/friends/{friendId}")
+    public void removeFriendship(Principal principal, @PathVariable Long userId, @PathVariable Long friendId){
         if (principal == null) {
             throw new UnauthorizedException();
         }
-        Optional<User> userPOpt = userService.findUserByEmailAddress(principal.getName());
-        if (userPOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-        if (!userOpt.get().equals(userPOpt.get())) {
+        User user = userService.findUser(userId).orElseThrow(ResourceNotFoundException::new);
+        User friend = userService.findUser(friendId).orElseThrow(ResourceNotFoundException::new);
+        User pUser = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+
+        if (!pUser.equals(user)) {
             throw new UnauthorizedException();
         }
 
         // Check if truck tag association exists
-        if (!friendService.areFriends(userOpt.get(), friendOpt.get())) {
+        if (!friendService.areFriends(user, friend)) {
             throw new ResourceNotFoundException();
         }
 
-        friendService.removeFriends(userOpt.get(), friendOpt.get());
+        friendService.removeFriends(user, friend);
     }
 }

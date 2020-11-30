@@ -36,109 +36,71 @@ public class ReviewEndpoint {
     @PostMapping("/trucks/{truckID}/reviews")
     public Review createReview(Principal principal, @RequestBody Review review, @PathVariable long truckID) {
         // Get the associated Truck
-        Optional<Truck> truck = truckService.findTruck(truckID);
-        if(truck.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
+        Truck truck = truckService.findTruck(truckID).orElseThrow(ResourceNotFoundException::new);
 
         // Get the associated User
         if (principal == null) {
             throw new UnauthorizedException();
         }
+
         log.info(principal.getName());
         User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
         if (!Objects.equals(principal.getName(), user.getEmailAddress())) {
             throw new UnauthorizedException();
         }
 
-        return reviewService.createReview(review, user, truck.get());
+        return reviewService.createReview(review, user, truck);
     }
 
     // Checked
     @GetMapping("/trucks/{truckID}/reviews")
     public List<Review> findReviewsByTruck(@PathVariable Long truckID) {
-        Optional<Truck> truck = truckService.findTruck(truckID);
-
-        if(truck.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        return reviewService.getReviewsByTruck(truck.get());
+        Truck truck = truckService.findTruck(truckID).orElseThrow(ResourceNotFoundException::new);
+        return reviewService.getReviewsByTruck(truck);
     }
 
     // Checked
     @GetMapping("/trucks/{truckID}/reviews/{reviewID}")
     public Review findReviewById(@PathVariable Long reviewID, @PathVariable Long truckID) {
-        Review rev = reviewService.findReviewById(reviewID).orElseThrow(ResourceNotFoundException::new);
-
-        Optional<Truck> truck = truckService.findTruck(truckID);
+        Review review = reviewService.findReviewById(reviewID).orElseThrow(ResourceNotFoundException::new);
+        Truck truck = truckService.findTruck(truckID).orElseThrow(ResourceNotFoundException::new);
 
         // If the returned review doesn't match the truck provided
-        if(rev.getTruck().getId() != truck.get().getId()) {
+        if(!review.getTruck().getId().equals(truck.getId())) {
             throw new BadRequestException("Truck IDs don't match");
         }
 
-        return rev;
+        return review;
     }
 
     @GetMapping("/trucks/{truckID}/rating")
     public double getAverageReviewsByTruck(@PathVariable long truckID) {
-        Optional<Truck> truck = truckService.findTruck(truckID);
-        if(truck.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        return reviewService.getAverageReviewByTruckID(truckID);
+        Truck truck = truckService.findTruck(truckID).orElseThrow(ResourceNotFoundException::new);
+        return reviewService.getAverageReviewByTruckID(truck.getId());
     }
 
     /** User Reviews Endpoints **/
     // Checked
     @GetMapping("/users/{userID}/reviews")
     public List<Review> findReviewsByUser(@PathVariable Long userID) {
-        Optional<User> user = userService.findUser(userID);
-
-        if(user.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        return reviewService.getReviewsByUser(user.get());
+        User user = userService.findUser(userID).orElseThrow(ResourceNotFoundException::new);
+        return reviewService.getReviewsByUser(user);
     }
 
     // Checked
     @GetMapping("/users/{userID}/reviews/{reviewID}")
     public Review findReviewByUser(@PathVariable Long userID, @PathVariable long reviewID) {
-        Optional<Review> rev = reviewService.findReviewById(reviewID);
-        if (rev.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
+        Review review = reviewService.findReviewById(reviewID).orElseThrow(ResourceNotFoundException::new);
+        User user = userService.findUser(userID).orElseThrow(ResourceNotFoundException::new);
 
-        if (rev.get().getId() != reviewID) {
+        if (review.getId() != reviewID) {
             throw new BadRequestException("Review ID's don't match");
         }
 
-        return rev.get();
-    }
-
-    // Checked
-    @DeleteMapping("/users/{userID}/reviews/{reviewID}")
-    public ResponseEntity<String> deleteReviewByUser(Principal principal, @PathVariable Long userID, @PathVariable long reviewID) {
-        // Get the owner email
-        if (principal == null) {
-            throw new UnauthorizedException();
+        if (review.getUser().getId() != user.getId()){
+            throw new BadRequestException("User ID's don't match");
         }
 
-        // Get me user
-        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
-        if (meUser.isEmpty()) {
-            throw new UnauthorizedException();
-        }
-
-        try {
-            reviewService.deleteReview(reviewID);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Fail to delete!", HttpStatus.EXPECTATION_FAILED);
-        }
-
-        return new ResponseEntity<>("Review has been deleted!", HttpStatus.OK);
+        return review;
     }
 }

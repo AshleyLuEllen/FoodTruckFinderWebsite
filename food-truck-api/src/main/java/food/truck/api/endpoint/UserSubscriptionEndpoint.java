@@ -33,18 +33,14 @@ public class UserSubscriptionEndpoint {
     SubscriptionService subscriptionService;
 
     @GetMapping("/users/{userId}/subscriptions")
-    List<Truck> getUserSubscriptions(@PathVariable Long userId){
+    public List<Truck> getUserSubscriptions(@PathVariable Long userId){
         // check that the user exists
-        Optional<User> userOpt = userService.findUser(userId);
-        if (userOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
-        return subscriptionService.findUserSubscriptions(userOpt.get());
+        return subscriptionService.findUserSubscriptions(
+            userService.findUser(userId).orElseThrow(ResourceNotFoundException::new));
     }
 
     @GetMapping("/users/{userId}/subscriptions/{truckId}")
-    Subscription getUserSubscription(@PathVariable Long userId, @PathVariable Long truckId) {
+    public Subscription getUserSubscription(@PathVariable Long userId, @PathVariable Long truckId) {
         return subscriptionService.findSubscription(
             userService.findUser(userId).orElseThrow(ResourceNotFoundException::new),
             truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new)
@@ -52,64 +48,42 @@ public class UserSubscriptionEndpoint {
     }
 
     @PostMapping("/users/{userId}/subscriptions/{truckId}")
-    void addUserSubscription(@PathVariable Long userId, @PathVariable Long truckId, Principal principal){
+    public void addUserSubscription(Principal principal, @PathVariable Long userId, @PathVariable Long truckId){
         // Check if user exists
-        Optional<User> userOpt = userService.findUser(userId);
-        if (userOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
+        User user = userService.findUser(userId).orElseThrow(ResourceNotFoundException::new);
         // Check if truck exists
-        Optional<Truck> truckOpt = truckService.findTruck(truckId);
-        if (truckOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
+        Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
 
         // Check if user has same id
         if (principal == null) {
             throw new UnauthorizedException();
         }
-        Optional<User> userPOpt = userService.findUserByEmailAddress(principal.getName());
-        if (userPOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-        if (!userOpt.get().equals(userPOpt.get())) {
+        User pUser = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+        if (!pUser.equals(user)) {
             throw new UnauthorizedException();
         }
-
-        subscriptionService.addUserSubscription(userOpt.get(), truckOpt.get());
+        subscriptionService.addUserSubscription(user, truck);
     }
 
     @DeleteMapping("/users/{userId}/subscriptions/{truckId}")
-    void deleteUserSubscription(@PathVariable Long userId, @PathVariable Long truckId, Principal principal){
-        Optional<User> userOpt = userService.findUser(userId);
-        if (userOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-
+    public void deleteUserSubscription(Principal principal, @PathVariable Long userId, @PathVariable Long truckId){
+        User user = userService.findUser(userId).orElseThrow(ResourceNotFoundException::new);
         // Check if truck exists
-        Optional<Truck> truckOpt = truckService.findTruck(truckId);
-        if (truckOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
+        Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
 
         // Check if user has same id
         if (principal == null) {
             throw new UnauthorizedException();
         }
-        Optional<User> userPOpt = userService.findUserByEmailAddress(principal.getName());
-        if (userPOpt.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-        if (!userOpt.get().equals(userPOpt.get())) {
+        User pUser = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+        if (!pUser.equals(user)) {
             throw new UnauthorizedException();
         }
 
         // Check if subscription association exists
-        if (subscriptionService.findSubscription(userOpt.get(), truckOpt.get()).isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
+        subscriptionService.findSubscription(user, truck).orElseThrow(ResourceNotFoundException::new);
 
-        subscriptionService.deleteUserSubscription(userOpt.get(), truckOpt.get());
+
+        subscriptionService.deleteUserSubscription(user, truck);
     }
 }

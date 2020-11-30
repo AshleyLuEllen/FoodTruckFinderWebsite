@@ -28,7 +28,6 @@ public class RecommendationEndpoint {
     @GetMapping("/users/{userId}/recommendations")
     public List<Truck> getUserRecommendations(@PathVariable Long userId) {
         User user = userService.findUser(userId).orElseThrow(ResourceNotFoundException::new);
-
         return recommendationService.getRecommendationsForUser(user);
     }
 
