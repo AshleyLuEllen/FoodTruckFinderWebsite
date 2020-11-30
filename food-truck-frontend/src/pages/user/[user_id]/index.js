@@ -143,9 +143,8 @@ class UserPage extends Component {
     }
 
     fetchData() {
-        requests
-            .get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}`)
-            .then(res => {
+        Promise.all([
+            requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}`).then(res => {
                 this.setState({
                     user: res.data,
                     found: true,
@@ -160,30 +159,27 @@ class UserPage extends Component {
                         .get(
                             `${process.env.FOOD_TRUCK_API_URL}/users/${this.props.auth.userId}/friends/${this.state.userID}`
                         )
-                        .then(() => this.setState({ areFriends: true }))
+                        .then(res2 => this.setState({ areFriends: res2.data }))
                         .catch(() => this.setState({ areFriends: false }));
                 }
-                return requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/subscriptions`);
-            })
-            .then(res => {
+            }),
+            requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/subscriptions`).then(res => {
                 this.setState({
                     subscribedTrucks: res.data,
                 });
-                return requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/reviews`);
-            })
-            .then(res => {
+            }),
+            requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/reviews`).then(res => {
                 this.setState({
                     reviews: res.data,
                 });
-                return requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/friends`);
-            })
-            .then(res => {
+            }),
+            requests.get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userID}/friends`).then(res => {
                 this.setState({ friends: res.data });
-            })
-            .catch(err => {
-                console.error(err);
-                this.props.router.push('/404');
-            });
+            }),
+        ]).catch(err => {
+            console.error(err);
+            this.props.router.push('/404');
+        });
     }
 
     componentDidMount() {
@@ -246,10 +242,11 @@ class UserPage extends Component {
                                     variant="contained"
                                     color={this.state.areFriends ? 'secondary' : 'primary'}
                                     onClick={this.toggleFriendship}
+                                    disabled={this.state.loadingFriendship}
                                 >
                                     {this.state.areFriends ? 'Remove friend' : 'Add friend'}
                                 </Button>
-                                {this.state.loadingSubscription && (
+                                {this.state.loadingFriendship && (
                                     <CircularProgress size={24} className={classes.buttonProgress} />
                                 )}
                             </span>
