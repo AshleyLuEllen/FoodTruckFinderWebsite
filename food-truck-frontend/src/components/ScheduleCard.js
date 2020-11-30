@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 
-import { Card, CardHeader, CardMedia, CardContent, IconButton, Chip, Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { format } from 'date-fns';
-import Paper from '@material-ui/core/Paper';
-import { DataGrid, ColDef } from '@material-ui/data-grid';
+import { DataGrid } from '@material-ui/data-grid';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
     root: {
         '&:hover': {
             cursor: 'pointer',
@@ -63,8 +61,8 @@ function ScheduleCard(props) {
 
     console.log(rows);
     return (
-        <div style={{ height: 500, width: '100%' }}>
-            <DataGrid rows={rows} columns={columns} />
+        <div style={{ height: 250, width: '100%' }}>
+            <DataGrid rows={rows} columns={columns} pageSize={7} />
         </div>
     );
 }

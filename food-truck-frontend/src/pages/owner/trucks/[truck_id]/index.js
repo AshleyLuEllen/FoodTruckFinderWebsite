@@ -376,13 +376,35 @@ class Information extends Component {
                                 Schedules
                             </Typography>
                             {this.state.truck.currentLocation && (
-                                <Typography>
+                                <p>
                                     Current Location: <strong>{this.state.truck.currentLocation?.location}</strong>
-                                </Typography>
+                                </p>
                             )}
                             {this.state.schedules.length > 0 && <ScheduleCard schedules={this.state.schedules} />}
+                            <Typography variant="h5" style={{ marginBottom: '10px', marginTop: '10px' }}>
+                                Menu
+                            </Typography>
+                            <div style={{ width: '100%' }}>
+                                {this.state.truck?.menu &&
+                                    (this.state.truck.menu.dataType === 'MENU_PDF' ? (
+                                        <object
+                                            data={this.state.truck.menu.url}
+                                            type="application/pdf"
+                                            width="100%"
+                                            height="500px"
+                                        >
+                                            <embed
+                                                src={this.state.truck.menu.url}
+                                                type="application/pdf"
+                                                width="100%"
+                                                height="100%"
+                                            />
+                                        </object>
+                                    ) : (
+                                        <img src={this.state.truck.menu.url} />
+                                    ))}
+                            </div>
                         </Grid>
-                        <Grid item xs={3}></Grid>
                     </Grid>
                 )}
                 <Snackbar
@@ -412,7 +434,6 @@ class Information extends Component {
                         {this.state.errorMsg}
                     </Alert>
                 </Snackbar>
-                {this.state.schedules.length > 0 && <ScheduleCard schedules={this.state.schedules} />}
             </Container>
         );
     }
