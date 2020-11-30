@@ -14,6 +14,7 @@ import food.truck.api.data.user.UserService;
 import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
+import food.truck.api.util.UnreadSavedPatch;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,36 +49,29 @@ public class TruckEndpoint {
     @Autowired
     private TagService tagService;
 
-    @DeleteMapping("/trucks/{id}")
-    public ResponseEntity<String> deleteTruck(Principal principal, @PathVariable long id) {
+    @DeleteMapping("/trucks/{truckid}")
+    public ResponseEntity<String> deleteTruck(Principal principal, @PathVariable long truckid) {
         // Get the owner email
         if (principal == null) {
             throw new UnauthorizedException();
         }
 
-        Optional<Truck> thisTruck = truckService.findTruck(id);
+        Truck truck = truckService.findTruck(truckid).orElseThrow(ResourceNotFoundException::new);
 
-        if (thisTruck.isEmpty()){
-            throw new UnauthorizedException();
-        }
-
-        List<Review> reviews = reviewService.getReviewsByTruck(thisTruck.get());
+        List<Review> reviews = reviewService.getReviewsByTruck(truck);
         for(Review r : reviews) {
             reviewService.deleteReview(r.getId());
         }
 
         // Get me user
-        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
-        if (meUser.isEmpty()) {
-            throw new UnauthorizedException();
-        }
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(UnauthorizedException::new);
 
-        if (!meUser.get().getId().equals(thisTruck.get().getOwner().getId())) {
+        if (!user.getId().equals(truck.getOwner().getId())) {
             throw new UnauthorizedException();
         }
 
         try {
-            truckService.deleteTruck(id);
+            truckService.deleteTruck(truckid);
         } catch (Exception e) {
             return new ResponseEntity<>("Fail to delete: " + e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
@@ -93,12 +87,8 @@ public class TruckEndpoint {
         }
 
         // Get me user
-        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
-        if (meUser.isEmpty()) {
-            throw new UnauthorizedException();
-        }
-
-        return truckService.createTruck(truck, meUser.get());
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(UnauthorizedException::new);
+        return truckService.createTruck(truck, user);
     }
 
     @GetMapping("/trucks/{id}")
@@ -116,8 +106,8 @@ public class TruckEndpoint {
         }
 
         // Get me user
-        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
-        if (meUser.isEmpty() || !Objects.equals(dbTruck.getOwner().getId(), meUser.get().getId())) {
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(UnauthorizedException::new);
+        if (!Objects.equals(dbTruck.getOwner().getId(), user.getId())) {
             throw new UnauthorizedException();
         }
 
@@ -147,8 +137,8 @@ public class TruckEndpoint {
         }
 
         // Get me user
-        Optional<User> meUser = userService.findUserByEmailAddress(principal.getName());
-        if (meUser.isEmpty() || !Objects.equals(dbTruck.getOwner().getId(), meUser.get().getId())) {
+        User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(UnauthorizedException::new);
+        if (!Objects.equals(dbTruck.getOwner().getId(), user.getId())) {
             throw new UnauthorizedException();
         }
 
@@ -161,9 +151,30 @@ public class TruckEndpoint {
     @GetMapping("/users/{userID}/trucks")
     public List<Truck> findUserOwnedTrucks(@PathVariable Long userID) {
         User user = userService.findUser(userID).orElseThrow(ResourceNotFoundException::new);
-
-
         return truckService.getTrucksOwnedByUser(user);
+    }
+
+    @GetMapping("/users/{userID}/trucks/{truckid}")
+    public Truck changeTruckOwner(Principal principal, @PathVariable Long userID, @PathVariable Long truckid, @RequestBody Long newOwnerid) {
+        if (principal == null) {
+            throw new UnauthorizedException();
+        }
+        User puser = userService.findUserByEmailAddress(principal.getName()).orElseThrow(ResourceNotFoundException::new);
+        User user = userService.findUser(userID).orElseThrow(ResourceNotFoundException::new);
+        if (!puser.equals(user)){
+            throw new UnauthorizedException();
+        }
+
+        Truck truck = truckService.findTruck(truckid).orElseThrow(ResourceNotFoundException::new);
+        if (!truck.getOwner().equals(user)){
+            throw new UnauthorizedException();
+        }
+        User newOwner = userService.findUser(newOwnerid).orElseThrow(ResourceNotFoundException::new);
+        if (user.equals(newOwner)){
+            throw new BadRequestException("User and new owner are the same");
+        }
+
+        return truckService.changeOwner(truck, user);
     }
 
     @GetMapping("/trucks/{truckId}/subscriptions")
