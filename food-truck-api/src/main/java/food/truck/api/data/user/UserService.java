@@ -162,19 +162,21 @@ public class UserService {
 
         if (firstName != null && lastName != null) {
             temp = userRepository.findAllByFirstNameAndLastName(firstName, lastName);
+
+            List<User> first = userRepository.findAllByFirstName(firstName);
+            first.removeIf(temp::contains);
+            temp.addAll(first);
+
+            List<User> last = userRepository.findAllByLastName(lastName);
+            last.removeIf(temp::contains);
+            temp.addAll(last);
         }
-        else {
-            return temp;
+        else if(firstName != null && lastName == null) {
+            return userRepository.findAllByFirstName(firstName);
         }
-        List<User> first = userRepository.findAllByFirstName(firstName);
-        first.removeIf(temp::contains);
-        temp.addAll(first);
-
-        List<User> last = userRepository.findAllByLastName(lastName);
-        last.removeIf(temp::contains);
-        temp.addAll(last);
-
-
+        else if(firstName == null && lastName != null) {
+            return userRepository.findAllByLastName(lastName);
+        }
         return temp;
     }
 }

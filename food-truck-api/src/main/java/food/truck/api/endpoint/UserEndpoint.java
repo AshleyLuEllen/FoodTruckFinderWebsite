@@ -6,6 +6,7 @@ import food.truck.api.data.user.UserService;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
 import food.truck.api.util.SearchQuery;
+import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -63,6 +64,7 @@ public class UserEndpoint {
         return userService.createUser(user);
     }
 
+    @Data
     static class FriendSearchQuery {
         String firstName;
         String lastName;
@@ -72,6 +74,7 @@ public class UserEndpoint {
     @PostMapping("/users/search")
     public List<User> searchForUsers(@RequestBody FriendSearchQuery searchQuery) {
         List<User> results = new ArrayList<>();
+
 
         log.info(searchQuery.email);
         log.info(searchQuery.firstName);

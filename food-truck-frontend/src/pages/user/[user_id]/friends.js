@@ -21,6 +21,9 @@ const useFriendCardStyles = makeStyles(theme => ({
         height: theme.spacing(16),
         fontSize: theme.spacing(10),
         margin: '0 auto',
+        align: 'left',
+        marginLeft: '0',
+        marginRight: '0'
     },
 }));
 
@@ -29,15 +32,20 @@ function FriendCard(props) {
 
     return (
         <div className={classes.root}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'start' }}>
-                <FriendAvatar textAlign='left' className={classes.avatar} user={props.user} />
-                <div textAlign={'right'}>
-                    <Typography textAlign='left' variant={'h2'}>
-                        {props.user.firstName} {props.user.lastName}
-                    </Typography>
-                    <Typography textAlign='left' variant={'subcategory'}>
-                        {props.user.description}
-                    </Typography>
+            <div style={{ display: 'flex', justifyContent: 'start'}}>
+                <FriendAvatar className={classes.avatar} user={props.user} />
+                <div style={{marginLeft: '0'}}>
+                <Typography variant={'h2'}>
+                    {props.user.firstName} {props.user.lastName}
+                </Typography>
+                <br/>
+                <Typography variant={'subtitle1'}>
+                    {props.user.description}
+                </Typography>
+                <br/>
+                <Typography variant={'subtitle1'}>
+                    {props.user.emailAddress}
+                </Typography>
                 </div>
             </div>
         </div>
@@ -146,13 +154,14 @@ function FriendsPage() {
         console.log(first);
         console.log(last);
         console.log(email);
-        const body = {
+        const friendQuery = {
             firstName: first,
             lastName: last,
             email: email,
         };
 
-        requests.post(`${process.env.FOOD_TRUCK_API_URL}/users/search`, body)
+
+        requests.post(`${process.env.FOOD_TRUCK_API_URL}/users/search`, friendQuery)
             .then(res => {
                 console.log("Searched!");
                 setSearchResults(res.data);
@@ -172,64 +181,72 @@ function FriendsPage() {
             <Typography variant="h4" style={{ marginBottom: '10px', textAlign: 'center' }}>
                 {user?.firstName}'s Friends
             </Typography>
-            <ul>
-                {friends.map((user, i) => (
-                    <div>
-                    <FriendCard key={i} user={user} a={2} b={3} />
-                    <br/>
-                    </div>
-                ))}
-            </ul>
-            <Paper styles={{width: '100%'}}>
-                <div className={classes.search}>
-                    <InputBase
-                        variant={'outlined'}
-                        placeholder="Search (email)…"
-                        classes={{
-                            root: classes.inputRoot,
-                            input: classes.inputInput,
-                        }}
-                        onChange={e => {setEmail(e.target.value); console.log(e.target.value);} }
-                        inputProps={{ 'aria-label': 'search' }}
-                    />
-                    <InputBase
-                        variant={'outlined'}
-                        placeholder="Search (first name)…"
-                        classes={{
-                            root: classes.inputRoot,
-                            input: classes.inputInput,
-                        }}
-                        onChange={e => {setFirstName(e.target.value); console.log(e.target.value);}}
-                        inputProps={{ 'aria-label': 'search' }}
-                    />
-                    <InputBase
-                        variant={'outlined'}
-                        placeholder="Search (last name)…"
-                        classes={{
-                            root: classes.inputRoot,
-                            input: classes.inputInput,
-                        }}
-                        onChange={e => {setLastName(e.target.value); console.log(e.target.value);}}
-                        inputProps={{ 'aria-label': 'search' }}
-                    />
-                    <Button variant={'contained'} className={classes.searchButton} onClick={searchForFriend}>
-                        Search
-                    </Button>
-                </div>
-                <br/>
-                {searchResults &&
-                <div>
-                    {searchResults.map(f =>
-                        <FriendCard key={i} user={user} a={2} b={3} />
-                    )}
-                </div>}
-                {searchResults.length === 0 &&
-                <div>
-                    <Typography variant={'subtitle'}>
-                        No results
-                    </Typography>
-                </div>}
-            </Paper>
+            <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                    <ul>
+                        {friends.map((user, i) => (
+                            <div>
+                            <FriendCard key={i} user={user} a={2} b={3} />
+                            <br/>
+                            </div>
+                        ))}
+                    </ul>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                    <Grid item xs={6}>
+                        <Paper styles={{width: '100%'}}>
+                            <div className={classes.search}>
+                                <InputBase
+                                    variant={'outlined'}
+                                    placeholder="Search (email)…"
+                                    classes={{
+                                        root: classes.inputRoot,
+                                        input: classes.inputInput,
+                                    }}
+                                    onChange={e => {setEmail(e.target.value); console.log(e.target.value);} }
+                                    inputProps={{ 'aria-label': 'search' }}
+                                />
+                                <InputBase
+                                    variant={'outlined'}
+                                    placeholder="Search (first name)…"
+                                    classes={{
+                                        root: classes.inputRoot,
+                                        input: classes.inputInput,
+                                    }}
+                                    onChange={e => {setFirstName(e.target.value); console.log(e.target.value);}}
+                                    inputProps={{ 'aria-label': 'search' }}
+                                />
+                                <InputBase
+                                    variant={'outlined'}
+                                    placeholder="Search (last name)…"
+                                    classes={{
+                                        root: classes.inputRoot,
+                                        input: classes.inputInput,
+                                    }}
+                                    onChange={e => {setLastName(e.target.value); console.log(e.target.value);}}
+                                    inputProps={{ 'aria-label': 'search' }}
+                                />
+                                <Button variant={'contained'} className={classes.searchButton} onClick={searchForFriend}>
+                                    Search
+                                </Button>
+                            </div>
+                            <br/>
+                            {searchResults &&
+                            <div>
+                                {searchResults.map((user, i) =>
+                                    <FriendCard key={i} user={user} a={2} b={3} />
+                                )}
+                            </div>}
+                            {searchResults.length === 0 &&
+                            <div>
+                                <Typography variant={'subtitle1'}>
+                                    No results
+                                </Typography>
+                            </div>}
+                        </Paper>
+                    </Grid>
+                </Grid>
+            </Grid>
         </Container>
     );
 }
