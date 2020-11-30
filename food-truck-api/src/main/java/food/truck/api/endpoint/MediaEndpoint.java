@@ -108,6 +108,8 @@ public class MediaEndpoint {
     public Media uploadMenu(@RequestPart(value = "file") MultipartFile file, @PathVariable Long truckId, Principal principal) {
         Truck truck = truckService.findTruck(truckId).orElseThrow(ResourceNotFoundException::new);
 
+        log.info(file.isEmpty());
+
         String url = this.amazonClient.uploadMenu(file, truck);
 
         Media newMedia = new Media();
@@ -122,8 +124,9 @@ public class MediaEndpoint {
 
         Media dbMedia = mediaService.createMedia(newMedia);
 
+        log.info(truck.getMenu());
         truck.setMenu(dbMedia);
-        truckService.saveTruck(truck);
+        log.info(truckService.saveTruck(truck).getMenu());
 
         return dbMedia;
     }

@@ -4,19 +4,7 @@ import requests from '../../../../util/requests';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 
-import {
-    CardContent,
-    Grid,
-    TextField,
-    Card,
-    Button,
-    Box,
-    CardHeader,
-    Typography,
-    Container,
-    CircularProgress,
-    Snackbar,
-} from '@material-ui/core';
+import { Grid, TextField, Button, Typography, Container, CircularProgress, Snackbar } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import { Alert } from '@material-ui/lab';
 
@@ -35,9 +23,21 @@ const pageStyles = () => ({
     tagSelector: {
         marginBottom: '20px',
     },
+    buttonWrapper: {
+        position: 'relative',
+        marginBottom: '20px',
+        marginRight: '10px',
+    },
     button: {
         marginBottom: '20px',
         marginRight: '10px',
+    },
+    buttonProgress: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        marginTop: -12,
+        marginLeft: -12,
     },
 });
 
@@ -65,10 +65,16 @@ class Information extends Component {
             truckFound: false,
             loadingInfo: false,
             menu: undefined,
+            errorMsg: '',
+            errorOpen: false,
+            errorSeverity: 'error',
+            updating: false,
         };
 
         this.saveInfo = this.saveInfo.bind(this);
         this.removeTruck = this.removeTruck.bind(this);
+
+        this.menuInputRef = React.createRef();
     }
 
     fetchData() {
@@ -118,11 +124,16 @@ class Information extends Component {
                     ),
                     truckFound: true,
                     loadingInfo: false,
+                    updating: false,
                 });
-                console.log('Got all information!');
             })
             .catch(err => {
-                console.log(err.message);
+                console.error(err);
+                this.setState({
+                    errorMsg:
+                        'Error: could not fetch truck information! Check the console for more information. Try again later.',
+                    errorOpen: true,
+                });
             });
     }
 
@@ -152,15 +163,47 @@ class Information extends Component {
     /**
      * Saves the edited information from the form
      */
-    saveInfo() {
-        this.handleMenuUpload();
+    async saveInfo() {
+        this.setState({
+            updating: true,
+        });
 
-        if (this.state.licensePlate.length < 1) {
-            alert('Missing Information: License Plate Number');
+        if (this.state.name.length < 5) {
+            this.setState({
+                errorMsg: 'Invalid food truck name.',
+                errorOpen: true,
+                updating: false,
+            });
             return;
         }
-        if (this.state.name.length < 1) {
-            alert('Missing Information: Food Truck Name');
+
+        if (this.state.licensePlate.length < 3) {
+            this.setState({
+                errorMsg: 'Invalid license plate.',
+                errorOpen: true,
+                updating: false,
+            });
+            return;
+        }
+
+        if (this.state.description.length < 5) {
+            this.setState({
+                errorMsg: 'Description must not be blank.',
+                errorOpen: true,
+                updating: false,
+            });
+            return;
+        }
+
+        try {
+            await this.handleMenuUpload();
+        } catch (err) {
+            console.error(err);
+            this.setState({
+                errorMsg: 'Error: could not upload new menu! Check the console for more information.',
+                errorOpen: true,
+                updating: false,
+            });
             return;
         }
 
@@ -171,33 +214,66 @@ class Information extends Component {
             licensePlate: this.state.licensePlate,
             owner: this.state.owner,
         };
-        console.log(truck);
 
-        requests
-            .put(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`, truck)
-            .then(() => {
-                console.log('Truck Edited');
-            })
-            .catch(err => {
-                console.log(err.message);
+        try {
+            await requests.patchWithAuth(
+                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`,
+                truck,
+                this.props.auth
+            );
+
+            const tags = {
+                tags: [...this.state.truckTags.map(tag => tag.id), ...this.state.paymentTruckTags.map(tag => tag.id)],
+            };
+
+            await requests.putWithAuth(
+                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`,
+                tags,
+                this.props.auth
+            );
+        } catch (err) {
+            console.error(err);
+            this.setState({
+                errorMsg: 'Error: could not edit your truck! Check the console for more information.',
+                errorOpen: true,
+                updating: false,
             });
+            return;
+        }
+
+        this.setState({
+            errorMsg: 'Truck edited successfully.',
+            errorOpen: true,
+            errorSeverity: 'success',
+        });
+
+        this.fetchData();
     }
 
     /**
-     * Removes the truck that's currently being edited
+     * Remove the truck that's currently being edited
      */
     removeTruck() {
+        this.setState({
+            updating: true,
+        });
+
         requests
             .deleteWithAuth(
                 `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`,
                 this.props.auth
             )
-            .then(res => {
-                console.log(res.statusText);
-                this.props.router.push('/owner/trucks').then();
+            .then(() => {
+                this.setState({ updating: false });
+                this.props.router.push('/owner/trucks');
             })
             .catch(err => {
-                console.log(err.message);
+                console.error(err);
+                this.setState({
+                    errorMsg: 'Error: could not edit your truck! Check the console for more information.',
+                    errorOpen: true,
+                    updating: false,
+                });
             });
     }
 
@@ -213,13 +289,13 @@ class Information extends Component {
 
     handleMenuUpload() {
         if (!this.state.menu) {
-            return;
+            return Promise.resolve(0);
         }
 
         const formData = new FormData();
-        formData.append('file', this.state.menu);
+        formData.append('file', this.menuInputRef.current.files[0]);
 
-        requests
+        return requests
             .putWithAuth(
                 `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/menu`,
                 formData,
@@ -231,10 +307,13 @@ class Information extends Component {
                 }
             )
             .then(() => {
-                console.log('Success');
-            })
-            .catch(err => {
-                console.log(err);
+                this.setState({
+                    errorMsg: 'New menu uploaded.',
+                    errorOpen: true,
+                    errorSeverity: 'info',
+                    menu: undefined,
+                });
+                this.menuInputRef.current.value = '';
             });
     }
 
@@ -285,6 +364,7 @@ class Information extends Component {
                                 value={this.state.name}
                                 fullWidth
                                 onChange={e => this.handleInputChange(e, 'name')}
+                                onBlur={() => this.setState({ name: this.state.name.trim() })}
                             />
                             <TextField
                                 className={classes.textField}
@@ -294,6 +374,7 @@ class Information extends Component {
                                 value={this.state.licensePlate}
                                 fullWidth
                                 onChange={e => this.handleInputChange(e, 'licensePlate')}
+                                onBlur={() => this.setState({ licensePlate: this.state.licensePlate.trim() })}
                             />
                             <TextField
                                 // className={classes.textField}
@@ -305,6 +386,7 @@ class Information extends Component {
                                 fullWidth
                                 value={this.state.description}
                                 onChange={e => this.handleInputChange(e, 'description')}
+                                onBlur={() => this.setState({ description: this.state.description.trim() })}
                             />
                             <ReactMarkdown>
                                 The truck description supports **Markdown**! Learn more about it
@@ -345,7 +427,9 @@ class Information extends Component {
                                         style={{ display: 'none' }}
                                         ref={this.menuInputRef}
                                         accept="image/jpeg,image/png,image/gif,application/pdf"
-                                        onChange={e => this.setState({ menu: e.target.files[0] })}
+                                        onChange={e => {
+                                            this.setState({ menu: e.target.files[0] });
+                                        }}
                                     />
                                 </Button>
                                 {this.state.menu && (
@@ -354,22 +438,32 @@ class Information extends Component {
                                     >{`Selected file: ${this.state.menu.name}`}</span>
                                 )}
                             </div>
-                            <Button
-                                className={classes.button}
-                                variant="contained"
-                                color="primary"
-                                onClick={this.saveInfo}
-                            >
-                                Save Changes
-                            </Button>
-                            <Button
-                                className={classes.button}
-                                variant="contained"
-                                color="secondary"
-                                onClick={this.removeTruck}
-                            >
-                                Delete Truck (cannot be undone)
-                            </Button>
+                            <span className={classes.buttonWrapper}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={this.saveInfo}
+                                    disabled={this.state.updating}
+                                >
+                                    Save Changes
+                                </Button>
+                                {this.state.updating && (
+                                    <CircularProgress size={24} className={classes.buttonProgress} />
+                                )}
+                            </span>
+                            <span className={classes.buttonWrapper}>
+                                <Button
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={this.removeTruck}
+                                    disabled={this.state.updating}
+                                >
+                                    Delete Truck (cannot be undone)
+                                </Button>
+                                {this.state.updating && (
+                                    <CircularProgress size={24} className={classes.buttonProgress} />
+                                )}
+                            </span>
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <Typography variant="h5" style={{ marginBottom: '10px' }}>
@@ -401,7 +495,7 @@ class Information extends Component {
                                             />
                                         </object>
                                     ) : (
-                                        <img src={this.state.truck.menu.url} />
+                                        <img src={this.state.truck.menu.url} style={{ width: '100%' }} />
                                     ))}
                             </div>
                         </Grid>
