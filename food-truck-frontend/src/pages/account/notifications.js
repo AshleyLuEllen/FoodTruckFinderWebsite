@@ -47,7 +47,7 @@ class Notifications extends Component {
                 .map(id => this.state.rows.find(row => row.id === id))
                 .map(not => {
                     requests.patchWithAuth(
-                        `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${not.id}`,
+                        `${process.env.FOOD_TRUCK_API_URL}/users/${this.props.auth.userId}/notifications/${not.id}`,
                         {
                             unread: false,
                         },
@@ -72,7 +72,7 @@ class Notifications extends Component {
                 .filter(not => not !== undefined)
                 .map(not => {
                     requests.patchWithAuth(
-                        `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${not.id}`,
+                        `${process.env.FOOD_TRUCK_API_URL}/users/${this.props.auth.userId}/notifications/${not.id}`,
                         {
                             unread: true,
                         },
@@ -92,16 +92,10 @@ class Notifications extends Component {
 
     fetchData() {
         requests
-            .getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, this.props.auth)
-            .then(res => {
-                this.setState({
-                    userId: res.data.id,
-                });
-                return requests.getWithAuth(
-                    `${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/notifications`,
-                    this.props.auth
-                );
-            })
+            .getWithAuth(
+                `${process.env.FOOD_TRUCK_API_URL}/users/${this.props.auth.userId}/notifications`,
+                this.props.auth
+            )
             .then(res => {
                 this.setState({
                     rows: res.data.map(not => ({
@@ -143,7 +137,7 @@ class Notifications extends Component {
 
         requests
             .patchWithAuth(
-                `${process.env.FOOD_TRUCK_API_URL}/users/${this.state.userId}/notifications/${id}`,
+                `${process.env.FOOD_TRUCK_API_URL}/users/${this.props.auth.userId}/notifications/${id}`,
                 {
                     unread: false,
                 },

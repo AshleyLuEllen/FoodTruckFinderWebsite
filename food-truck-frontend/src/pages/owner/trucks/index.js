@@ -5,9 +5,10 @@ import { login as authLogin, logout as authLogout } from '../../../redux/actions
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 
-import { Typography, Button, Container, Grid } from '@material-ui/core';
+import { Typography, Button, Container, Grid, Snackbar, CircularProgress } from '@material-ui/core';
 import { Add as AddIcon } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
+import { Alert } from '@material-ui/lab';
 
 import OwnerTruckCard from '../../../components/OwnerTruckCard';
 import Head from 'next/dist/next-server/lib/head';
@@ -27,50 +28,27 @@ const dashboardStyles = () => ({
 class Dashboard extends Component {
     constructor(props) {
         super(props);
-        this.state = { truckData: [] };
+        this.state = {
+            truckData: [],
+            loading: true,
+        };
     }
 
     componentDidMount() {
         requests
-            .getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, this.props.auth)
-            .then(res => {
-                this.setState({
-                    owner: res.data.id,
-                });
-
-                let userID = this.state.owner;
-
-                //let userID = 1;
-                requests
-                    .get(`${process.env.FOOD_TRUCK_API_URL}/users/${userID}/trucks`)
-                    .then(res => {
-                        this.setState({
-                            truckData: res.data,
-                        });
-                    })
-                    .catch(err => {
-                        console.log(err.response?.status);
-                        console.log(err);
-                    });
-            })
-            .catch(err => {
-                console.log(err.response?.status);
-                console.log(err);
-            });
-    }
-
-    componentDidUpdate() {
-        console.log(this.props.router.query);
-        requests
-            .get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.props.router.query.user_id}/trucks`)
+            .get(`${process.env.FOOD_TRUCK_API_URL}/users/${this.props.auth.userId}/trucks`)
             .then(res => {
                 this.setState({
                     truckData: res.data,
+                    loading: false,
                 });
             })
             .catch(err => {
-                console.log(err.response?.status);
-                console.log(err);
+                console.error(err);
+                this.setState({
+                    errorMsg: 'Error: could not load your trucks! Check the console for more information.',
+                    errorOpen: true,
+                });
             });
     }
 
@@ -82,7 +60,7 @@ class Dashboard extends Component {
                     <title>My Trucks</title>
                 </Head>
                 <Typography variant="h4" style={{ marginBottom: '0px' }}>
-                    My Trucks
+                    My Trucks {this.state.loading && <CircularProgress size={30} />}
                 </Typography>
                 <Grid container>
                     {this.state.truckData.map((tr, i) => (
@@ -113,6 +91,33 @@ class Dashboard extends Component {
                         </Button>
                     </Grid>
                 </Grid>
+                <Snackbar
+                    open={this.state.errorOpen}
+                    autoHideDuration={5000}
+                    onClose={(_event, reason) => {
+                        if (reason === 'clickaway') {
+                            return;
+                        }
+
+                        this.setState({
+                            errorOpen: false,
+                        });
+                    }}
+                    onExited={() => this.setState({ errorSeverity: 'error' })}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                >
+                    <Alert
+                        variant="filled"
+                        severity={this.state.errorSeverity}
+                        onClose={() => {
+                            this.setState({
+                                errorOpen: false,
+                            });
+                        }}
+                    >
+                        {this.state.errorMsg}
+                    </Alert>
+                </Snackbar>
             </Container>
         );
     }

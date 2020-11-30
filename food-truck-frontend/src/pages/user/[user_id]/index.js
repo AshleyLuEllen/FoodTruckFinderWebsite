@@ -109,8 +109,8 @@ class UserPage extends Component {
                 });
             })
             .catch(err => {
-                console.log(err);
-                // this.props.router.push('/404');
+                console.error(err);
+                this.props.router.push('/404');
             });
     }
 

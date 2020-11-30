@@ -10,6 +10,7 @@ import { Card, CardHeader, CardMedia, CardContent, IconButton, Chip } from '@mat
 import { Rating } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import { Notifications, NotificationsOff } from '@material-ui/icons';
+import ReactMarkdown from 'react-markdown';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -106,7 +107,8 @@ function TruckCard(props) {
                         <a>{props.truck.name}</a>
                     </Link>
                 }
-                subheader={props.truck.description}
+                // eslint-disable-next-line react/no-children-prop
+                subheader={<ReactMarkdown children={props.truck.description} renderers={{ paragraph: 'span' }} />}
                 action={
                     props.userId ? (
                         <IconButton aria-label="settings" onClick={toggleSubscribe}>

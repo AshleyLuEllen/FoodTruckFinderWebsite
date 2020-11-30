@@ -120,10 +120,8 @@ function SearchPage(props) {
     useEffect(() => {
         if (router.query.tag && tagOptions) {
             let newSelection = [];
-            for (let tag of router.query.tag) {
-                const selectedTag = tagOptions.find(t => t.name === tag);
-                if (selectedTag) newSelection.push(selectedTag);
-            }
+            const selectedTag = tagOptions.find(t => t.name === router.query.tag);
+            if (selectedTag) newSelection.push(selectedTag);
             setSelectedTags(newSelection);
         }
     }, [router.query.tag, tagOptions]);

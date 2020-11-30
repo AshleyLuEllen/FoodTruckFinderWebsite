@@ -3,15 +3,14 @@ import PropTypes from 'prop-types';
 import requests from '../../../../util/requests';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
-import { format } from 'date-fns';
 
-import { Card, Button, Table, TableBody, TableRow, TableCell, Box } from '@material-ui/core';
-import { ScheduleRounded as ScheduleIconRounded, MyLocation as MyLocationIcon } from '@material-ui/icons';
+import { Card, Button, Box } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import { CardContent, Grid, TextField } from '@material-ui/core';
 import CardHeader from '@material-ui/core/CardHeader';
 
 import ChipSelector from '../../../../components/ChipSelector';
+import ScheduleCard from '../../../../components/ScheduleCard';
 import Head from 'next/dist/next-server/lib/head';
 
 /**
@@ -76,8 +75,8 @@ class Information extends Component {
             })
             .then(res5 => {
                 this.setState({
-                    allTags: res5.data.filter(t => t.description !== 'payment'),
-                    paymentTags: res5.data.filter(t => t.description === 'payment'),
+                    allTags: res5.data.filter(t => t.category !== 'payment'),
+                    paymentTags: res5.data.filter(t => t.category === 'payment'),
                 });
                 return requests.get(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags`
@@ -110,15 +109,11 @@ class Information extends Component {
     }
 
     handleTagChange(tag) {
-        if (this.state.truckTags.length < 6) {
-            this.setState({ truckTags: tag });
-        }
+        this.setState({ truckTags: tag });
     }
 
     handlePaymentTagChange(tag) {
-        if (this.state.truckTags.length < 3) {
-            this.setState({ paymentTruckTags: tag });
-        }
+        this.setState({ paymentTruckTags: tag });
     }
 
     handleSubmit(event) {
@@ -261,99 +256,7 @@ class Information extends Component {
                                 value={this.state.description}
                                 onChange={e => this.handleInputChange(e, 'description')}
                             />
-                        </Grid>
-                        <Grid item xs={6}>
-                            {/**Regular Tags**/}
-                            <ChipSelector
-                                maxCount={5}
-                                label="Tags (select at most 5)"
-                                options={this.state.allTags}
-                                selectedOptions={this.state.truckTags}
-                                onChange={(event, value) => {
-                                    this.handleTagChange(value);
-                                }}
-                                onSelectOption={t => {
-                                    if (this.state.truckTags.length < 5) {
-                                        requests
-                                            .postWithAuth(
-                                                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
-                                                {},
-                                                this.props.auth
-                                            )
-                                            .then()
-                                            .catch(error => {
-                                                console.log(error.message);
-                                            });
-                                    }
-                                }}
-                                onDeselectOption={t =>
-                                    requests
-                                        .deleteWithAuth(
-                                            `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
-                                            this.props.auth
-                                        )
-                                        .then()
-                                        .catch(error => {
-                                            console.log(error.message);
-                                        })
-                                }
-                            />
                             <br />
-                            {/**Payment Tags**/}
-                            <ChipSelector
-                                maxCount={2}
-                                label="Payment Types (select at most 2)"
-                                options={this.state.paymentTags}
-                                selectedOptions={this.state.paymentTruckTags}
-                                onChange={(event, value) => {
-                                    this.handlePaymentTagChange(value);
-                                }}
-                                onSelectOption={t => {
-                                    if (this.state.paymentTruckTags.length < 2) {
-                                        requests
-                                            .postWithAuth(
-                                                `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
-                                                {},
-                                                this.props.auth
-                                            )
-                                            .then()
-                                            .catch(error => {
-                                                console.log(error.message);
-                                            });
-                                    }
-                                }}
-                                onDeselectOption={t =>
-                                    requests
-                                        .deleteWithAuth(
-                                            `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
-                                            this.props.auth
-                                        )
-                                        .then()
-                                        .catch(error => {
-                                            console.log(error.message);
-                                        })
-                                }
-                            />
-                            <div>
-                                <Button variant="contained" component="label" style={{ width: 'auto', height: 'auto' }}>
-                                    Upload Menu
-                                    <input
-                                        type="file"
-                                        style={{ display: 'none' }}
-                                        ref={this.menuInputRef}
-                                        accept="image/jpeg,image/png,image/gif,application/pdf"
-                                        onChange={e => this.setState({ menu: e.target.files[0] })}
-                                    />
-                                </Button>
-                                {this.state.menu && `Selected file: ${this.state.menu.name}`}
-                            </div>
-                            <Box mt={1} ml={1} mr={1} mb={1}>
-                                <Button variant="contained" pt={10} pl={10} onClick={this.saveInfo}>
-                                    Save
-                                </Button>
-                            </Box>
-                        </Grid>
-                        <Grid item xs={3}>
                             <Box mt={1} ml={1} mr={1} mb={1}>
                                 <Button
                                     variant="contained"
@@ -398,34 +301,104 @@ class Information extends Component {
                                 </Button>
                             </Box>
                         </Grid>
-                        <Grid item xs={9}>
-                            {/**CURRENT LOCATION*/}
-                            {this.state.truck.currentLocation && (
-                                <div>
-                                    <CardHeader title={'Current Location'} />
-                                    <MyLocationIcon /> <strong>{this.state.truck.currentLocation?.location}</strong>
-                                </div>
-                            )}
-                            {/**SCHEDULE*/}
+                        <Grid item xs={6}>
+                            {/**Regular Tags**/}
+                            <ChipSelector
+                                maxCount={5}
+                                label="Tags (select at most 5)"
+                                options={this.state.allTags}
+                                selectedOptions={this.state.truckTags}
+                                onChange={(event, value) => {
+                                    this.handleTagChange(value);
+                                }}
+                                onSelectOption={t => {
+                                    requests
+                                        .postWithAuth(
+                                            `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
+                                            {},
+                                            this.props.auth
+                                        )
+                                        .then()
+                                        .catch(error => {
+                                            console.log(error.message);
+                                        });
+                                }}
+                                onDeselectOption={t =>
+                                    requests
+                                        .deleteWithAuth(
+                                            `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
+                                            this.props.auth
+                                        )
+                                        .then()
+                                        .catch(error => {
+                                            console.log(error.message);
+                                        })
+                                }
+                            />
+                            <br />
+                            {/**Payment Tags**/}
+                            <ChipSelector
+                                maxCount={3}
+                                label="Payment Types (select at most 3)"
+                                options={this.state.paymentTags}
+                                selectedOptions={this.state.paymentTruckTags}
+                                onChange={(event, value) => {
+                                    this.handlePaymentTagChange(value);
+                                }}
+                                onSelectOption={t => {
+                                    requests
+                                        .postWithAuth(
+                                            `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
+                                            {},
+                                            this.props.auth
+                                        )
+                                        .then()
+                                        .catch(error => {
+                                            console.log(error.message);
+                                        });
+                                }}
+                                onDeselectOption={t =>
+                                    requests
+                                        .deleteWithAuth(
+                                            `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/tags/${t.id}`,
+                                            this.props.auth
+                                        )
+                                        .then()
+                                        .catch(error => {
+                                            console.log(error.message);
+                                        })
+                                }
+                            />
+                            <Box mt={1} ml={1} mr={1} mb={1}>
+                                <Button variant="contained" component="label" style={{ width: 'auto', height: 'auto' }}>
+                                    Upload Menu
+                                    <input
+                                        type="file"
+                                        style={{ display: 'none' }}
+                                        ref={this.menuInputRef}
+                                        accept="image/jpeg,image/png,image/gif,application/pdf"
+                                        onChange={e => this.setState({ menu: e.target.files[0] })}
+                                    />
+                                </Button>
+                                {this.state.menu && `Selected file: ${this.state.menu.name}`}
+                            </Box>
+                            <Box mt={1} ml={1} mr={1} mb={1}>
+                                <Button variant="contained" pt={10} pl={10} onClick={this.saveInfo}>
+                                    Save
+                                </Button>
+                            </Box>
+                            <br />
                             <Card>
                                 <CardHeader title={'Schedule'} />
-                                <CardContent>
+                                <CardContent width={'900px'}>
+                                    {this.state.truck.currentLocation && (
+                                        <Typography variant={'contained'}>
+                                            Current Location:{' '}
+                                            <strong>{this.state.truck.currentLocation?.location}</strong>
+                                        </Typography>
+                                    )}
                                     {this.state.schedules.length > 0 && (
-                                        <Table size="small">
-                                            <TableBody>
-                                                {this.state.schedules.map((s, i) => (
-                                                    <TableRow key={i}>
-                                                        <TableCell>
-                                                            <Typography variant="body1">
-                                                                <ScheduleIconRounded /> {s.location}:{' '}
-                                                                {format(new Date(s.timeFrom), 'MM/dd/yyyy HH:mm')} to{' '}
-                                                                {format(new Date(s.timeTo), 'MM/dd/yyyy HH:mm')}
-                                                            </Typography>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
+                                        <ScheduleCard schedules={this.state.schedules} />
                                     )}
                                     <br />
                                     <Box mt={1} ml={1} mr={1} mb={1}>
