@@ -8,10 +8,11 @@ import { Container, Typography, CircularProgress, Avatar } from '@material-ui/co
 import { makeStyles } from '@material-ui/core/styles';
 
 import FriendAvatar from '../../../components/FriendAvatar';
+import Grid from "@material-ui/core/Grid";
 
 const useFriendCardStyles = makeStyles(theme => ({
     root: {
-        background: 'red',
+        background: 'white',
     },
     avatar: {
         width: theme.spacing(16),
@@ -26,8 +27,16 @@ function FriendCard(props) {
 
     return (
         <div className={classes.root}>
-            <FriendAvatar className={classes.avatar} user={props.user} />
-            {props.user.firstName} {props.user.lastName}
+            <Grid align={'left'}>
+                <Grid align={'right'} item xs={6}>
+                    <Typography>
+                        {props.user.firstName} {props.user.lastName}
+                    </Typography>
+                </Grid>
+                <Grid align={'left'} item xs={6}>
+                    <FriendAvatar className={classes.avatar} user={props.user} />
+                </Grid>
+            </Grid>
         </div>
     );
 }
@@ -74,6 +83,7 @@ function FriendsPage() {
                     setLoading(false);
                 })
                 .catch(error => {
+                    console.log(error.message);
                     router.push('/');
                 });
         }
