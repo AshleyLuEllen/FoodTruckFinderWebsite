@@ -310,7 +310,7 @@ EnhancedTable.propTypes = {
     orderBy: PropTypes.string.isRequired,
     rows: PropTypes.array.isRequired,
     columns: PropTypes.array.isRequired,
-    title: PropTypes.string.isRequired,
+    title: PropTypes.any.isRequired,
     selectedActions: PropTypes.array,
     unselectedActions: PropTypes.array,
     rowActions: PropTypes.array,

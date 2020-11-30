@@ -1,10 +1,20 @@
 export function descendingComparator(a, b, orderBy) {
+    if (a[orderBy] === undefined || a[orderBy] === null) {
+        return -1;
+    }
+
+    if (b[orderBy] === undefined || b[orderBy] === null) {
+        return 1;
+    }
+
     if (b[orderBy] < a[orderBy]) {
         return -1;
     }
+
     if (b[orderBy] > a[orderBy]) {
         return 1;
     }
+
     return 0;
 }
 
