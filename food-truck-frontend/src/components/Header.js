@@ -154,21 +154,18 @@ function Header(props) {
 
     React.useEffect(() => {
         requests
-            .getWithAuth(`${process.env.FOOD_TRUCK_API_URL}/users/me`, props.auth)
-            .then(res => {
-                return requests.getWithAuth(
-                    `${process.env.FOOD_TRUCK_API_URL}/users/${res.data.id}/notifications/unread`,
-                    props.auth
-                );
-            })
+            .getWithAuth(
+                `${process.env.FOOD_TRUCK_API_URL}/users/${props.auth.userId || 0}/notifications/unread`,
+                props.auth
+            )
             .then(res => {
                 setNotificationCount(parseInt(res.data));
             })
             .catch(err => {
                 console.error(err);
                 if (
-                    // err.includes &&
-                    // err.includes('Network Error') &&
+                    err.message &&
+                    err.message.includes('Network Error') &&
                     !err.response?.status &&
                     !router.asPath.startsWith('/maintenance')
                 ) {
@@ -201,11 +198,11 @@ function Header(props) {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MuiLink className={classes.link} href="/owner/trucks" color="inherit">
-                <MenuItem onClick={handleMenuClose}>My Trucks</MenuItem>
-            </MuiLink>
             <MuiLink className={classes.link} href={`/user/${props.auth.userId}`} color="inherit">
                 <MenuItem onClick={handleMenuClose}>My Profile</MenuItem>
+            </MuiLink>
+            <MuiLink className={classes.link} href="/owner/trucks" color="inherit">
+                <MenuItem onClick={handleMenuClose}>My Trucks</MenuItem>
             </MuiLink>
             <MuiLink className={classes.link} href="/logout" color="inherit">
                 <MenuItem onClick={handleMenuClose}>Logout</MenuItem>

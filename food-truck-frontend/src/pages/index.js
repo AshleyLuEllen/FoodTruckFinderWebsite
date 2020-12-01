@@ -8,7 +8,8 @@ import { connect } from 'react-redux';
 import { logout as authLogout } from '../redux/actions/auth';
 
 import { withStyles } from '@material-ui/core/styles';
-import { Container, Grid, Typography, Box, CircularProgress, Divider } from '@material-ui/core';
+import { Container, Grid, Typography, Box, CircularProgress, Divider, Snackbar } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 
 import GoogleMap, { Marker } from '../components/GoogleMap';
 import TruckCard from '../components/TruckCard';
@@ -47,6 +48,9 @@ class DashboardPage extends Component {
             recommendations: [],
             currentlySelected: undefined,
             positionUpdated: false,
+            errorMsg: '',
+            errorOpen: false,
+            errorSeverity: 'error',
         };
     }
 
@@ -64,7 +68,12 @@ class DashboardPage extends Component {
                 });
             })
             .catch(err => {
-                console.log(err);
+                console.error(err);
+                this.setState({
+                    errorMsg: 'Error: could not fetch recommendations! Try again later.',
+                    errorOpen: true,
+                    loading: false,
+                });
             });
     }
 
@@ -224,6 +233,33 @@ class DashboardPage extends Component {
                         </Grid>
                     )}
                 </Grid>
+                <Snackbar
+                    open={this.state.errorOpen}
+                    autoHideDuration={5000}
+                    onClose={(_event, reason) => {
+                        if (reason === 'clickaway') {
+                            return;
+                        }
+
+                        this.setState({
+                            errorOpen: false,
+                        });
+                    }}
+                    onExited={() => this.setState({ errorSeverity: 'error' })}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                >
+                    <Alert
+                        variant="filled"
+                        severity={this.state.errorSeverity}
+                        onClose={() => {
+                            this.setState({
+                                errorOpen: false,
+                            });
+                        }}
+                    >
+                        {this.state.errorMsg}
+                    </Alert>
+                </Snackbar>
             </Container>
         ) : (
             <SearchPage {...this.props} />

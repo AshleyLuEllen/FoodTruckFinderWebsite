@@ -38,7 +38,6 @@ class Login extends React.Component {
         this.state = { email: '', password: '', loginFailed: false };
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
-        this.createAccount = this.createAccount.bind(this);
     }
 
     componentDidMount() {
@@ -78,12 +77,8 @@ class Login extends React.Component {
                     loginFailed: true,
                 });
                 this.props.authLogout();
-                console.log(err);
+                console.error(err);
             });
-    }
-
-    createAccount() {
-        this.props.router.push('/create-account');
     }
 
     render() {
@@ -121,7 +116,7 @@ class Login extends React.Component {
                     <Button className={classes.button} variant="contained" color="primary" type="submit">
                         Sign In
                     </Button>
-                    <Button className={classes.button} variant="contained" color="primary" onClick={this.createAccount}>
+                    <Button className={classes.button} variant="contained" color="primary" href="/create-account">
                         Create Account
                     </Button>
                 </form>

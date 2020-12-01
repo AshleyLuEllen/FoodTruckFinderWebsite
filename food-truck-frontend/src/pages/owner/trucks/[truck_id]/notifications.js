@@ -46,7 +46,7 @@ class NotificationPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            truck: '',
+            truck: undefined,
             truckName: '',
             truckID: 1,
             notifications: [],
@@ -314,6 +314,14 @@ class NotificationPage extends Component {
     }
 
     render() {
+        if (!this.props.auth.isLoggedIn) {
+            this.props.router.push('/');
+            return null;
+        } else if (this.state.truck !== undefined && this.props.auth.userId != this.state.truck.owner.id) {
+            this.props.router.push('/owner/trucks');
+            return null;
+        }
+
         const { classes } = this.props;
 
         const columns = [
