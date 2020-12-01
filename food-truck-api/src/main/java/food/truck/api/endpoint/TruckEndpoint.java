@@ -110,7 +110,9 @@ public class TruckEndpoint {
             userNotificationService.deleteNotification(not);
 
             if(not.getMedia() != null) {
-                mediaService.deleteMedia(not.getMedia());
+                Media temp = not.getMedia();
+                not.setMedia(null);
+                mediaService.deleteMedia(temp);
             }
             truckNotificationService.deleteById(not.getId());
         }
