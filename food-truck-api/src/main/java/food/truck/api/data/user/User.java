@@ -64,4 +64,8 @@ public class User {
 
     @Column(name = "user_since", columnDefinition = "TIMESTAMP")
     ZonedDateTime sinceTime;
+
+    public String toString() {
+        return this.getFirstName() + " " + this.getLastName() + " (" + this.getEmailAddress() + ")\n";
+    }
 }

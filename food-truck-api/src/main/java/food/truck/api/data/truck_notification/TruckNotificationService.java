@@ -194,8 +194,16 @@ public class TruckNotificationService {
         truckNotificationRepository.deleteById(truckNotificationId);
     }
 
+    public void deleteById(long id) {
+        truckNotificationRepository.deleteById(id);
+    }
+
     public List<TruckNotification> getNotificationsOwnedByTruck(Truck truck) {
         return truckNotificationRepository.findAllByTruckAndType(truck, NotificationType.TRUCK);
+    }
+
+    public List<TruckNotification> getAllNotificationsByTruck(Truck truck) {
+        return truckNotificationRepository.findAllByTruckAndType(truck, NotificationType.SUBSCRIPTION);
     }
 
 }

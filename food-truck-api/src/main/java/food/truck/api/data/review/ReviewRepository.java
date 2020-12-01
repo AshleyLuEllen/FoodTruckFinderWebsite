@@ -17,4 +17,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query (value = "SELECT COALESCE(AVG(review_rating), 0) FROM " + Review.TABLE_NAME + " WHERE truck_id = ?1",
         nativeQuery = true)
     double getAverageReviewByTruckID(long truckID);
+
+    void deleteAllByTruck(Truck truck);
 }

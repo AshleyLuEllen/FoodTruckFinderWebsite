@@ -89,5 +89,9 @@ public class Truck {
     public int hashCode() {
         return Objects.hash(id, name, description, licensePlate, paymentTypes, owner);
     }
+
+    public String toString() {
+        return this.getName() + ": " + this.getDescription();
+    }
 }
 

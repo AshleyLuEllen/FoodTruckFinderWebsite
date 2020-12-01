@@ -13,4 +13,6 @@ import java.util.Optional;
 public interface SubscriptionRepository extends JpaRepository<Subscription, SubscriptionId> {
         List<Subscription> findByUser(User user);
         List<Subscription> findAllByTruck(Truck truck);
+
+        void deleteAllByTruck(Truck truck);
 }
