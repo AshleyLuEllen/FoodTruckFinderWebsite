@@ -13,7 +13,7 @@ function ScheduleCard(props) {
     ];
     const tempRows = props.schedules.sort((a, b) => (a.timeFrom > b.timeFrom ? 1 : -1));
     const rows = tempRows
-        .filter(s => new Date(s.timeFrom) >= Date.now())
+        .filter(s => new Date(s.timeTo) >= Date.now())
         .map(s => ({
             id: s.id,
             location: s.location,
