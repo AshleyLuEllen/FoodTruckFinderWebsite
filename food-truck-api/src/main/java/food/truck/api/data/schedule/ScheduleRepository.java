@@ -1,7 +1,6 @@
 package food.truck.api.data.schedule;
 
 import food.truck.api.data.truck.Truck;
-import food.truck.api.util.Location;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

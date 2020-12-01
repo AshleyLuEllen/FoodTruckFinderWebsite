@@ -1,5 +1,6 @@
 package food.truck.api.data.media;
 
+import food.truck.api.data.truck.Truck;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,5 +26,6 @@ public class MediaService {
     public void deleteMedia(Media media) {
         mediaRepository.delete(media);
     }
+
 }
 

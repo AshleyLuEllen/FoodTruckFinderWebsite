@@ -4,13 +4,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck_notification.TruckNotification;
 import food.truck.api.data.truck_notification.TruckNotificationRepository;
 import food.truck.api.data.user.User;
 import food.truck.api.util.UnreadSavedPatch;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Log4j2
 @Service
 public class UserNotificationService {
     @Autowired
@@ -62,6 +65,14 @@ public class UserNotificationService {
         }
 
         return userNotificationRepository.save(userNotification);
+    }
+
+    public void deleteNotification(TruckNotification notif) {
+        List<UserNotification> notifs = userNotificationRepository.findAllByNotification(notif);
+        for(UserNotification n : notifs) {
+            log.info("User notif: " + n.getNotification().getId());
+            userNotificationRepository.delete(n);
+        }
     }
 }
 

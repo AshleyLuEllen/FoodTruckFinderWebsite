@@ -1,16 +1,25 @@
 package food.truck.api.endpoint;
 
+import food.truck.api.data.media.Media;
+import food.truck.api.data.media.MediaService;
 import food.truck.api.data.review.Review;
 import food.truck.api.data.review.ReviewService;
+import food.truck.api.data.schedule.Schedule;
+import food.truck.api.data.schedule.ScheduleService;
+import food.truck.api.data.subscription.Subscription;
 import food.truck.api.data.subscription.SubscriptionService;
 import food.truck.api.data.tag.Tag;
 import food.truck.api.data.tag.TagService;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckService;
+import food.truck.api.data.truck_notification.TruckNotification;
+import food.truck.api.data.truck_notification.TruckNotificationService;
+import food.truck.api.data.truck_tag.TruckTag;
 import food.truck.api.data.truck_tag.TruckTagRepository;
 import food.truck.api.data.truck_tag.TruckTagService;
 import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
+import food.truck.api.data.user_notification.UserNotificationService;
 import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
 import food.truck.api.endpoint.error.UnauthorizedException;
@@ -41,10 +50,22 @@ public class TruckEndpoint {
     private ReviewService reviewService;
 
     @Autowired
-    private TruckTagService truckTagService;
+    private TruckNotificationService truckNotificationService;
+
+    @Autowired
+    private MediaService mediaService;
+
+    @Autowired
+    private UserNotificationService userNotificationService;
+
+    @Autowired
+    private ScheduleService scheduleService;
 
     @Autowired
     private SubscriptionService subscriptionService;
+
+    @Autowired
+    private TruckTagService truckTagService;
 
     @Autowired
     private TagService tagService;
@@ -58,11 +79,6 @@ public class TruckEndpoint {
 
         Truck truck = truckService.findTruck(truckid).orElseThrow(ResourceNotFoundException::new);
 
-        List<Review> reviews = reviewService.getReviewsByTruck(truck);
-        for(Review r : reviews) {
-            reviewService.deleteReview(r.getId());
-        }
-
         // Get me user
         User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(UnauthorizedException::new);
 
@@ -70,8 +86,70 @@ public class TruckEndpoint {
             throw new UnauthorizedException();
         }
 
+        List<Review> reviews = reviewService.getReviewsByTruck(truck);
+        log.info("Deleting " + reviews.size() + " reviews");
+        for(Review r : reviews) {
+            reviewService.deleteReview(r.getId());
+        }
+        log.info("Deleted reviews");
+
+        List<TruckNotification> notifs = truckNotificationService.getNotificationsOwnedByTruck(truck);
+        log.info("Deleting " + notifs.size() + " truck notifications");
+        for(TruckNotification not : notifs) {
+            if(not.getMedia() != null) {
+                mediaService.deleteMedia(not.getMedia());
+            }
+            log.info("ID = " + not.getId());
+            truckNotificationService.deleteById(not.getId());
+        }
+
+        notifs = truckNotificationService.getAllNotificationsByTruck(truck);
+        log.info("Deleting " + notifs.size() + " user notifications");
+        for(TruckNotification not : notifs) {
+            log.info("ID = " + not.getId());
+            userNotificationService.deleteNotification(not);
+
+            if(not.getMedia() != null) {
+                mediaService.deleteMedia(not.getMedia());
+            }
+            truckNotificationService.deleteById(not.getId());
+        }
+
+        log.info("Deleted Notifications");
+
+        List<Tag> tags = truckTagService.findTruckTags(truck);
+        log.info("Deleting " + tags.size() + " truck tags");
+        for(Tag t: tags) {
+            truckTagService.deleteTruckTag(truck, t);
+        }
+        log.info("Deleted tags");
+
+        if(truck.getMenu() != null) {
+            Media temp = truck.getMenu();
+            truck.setMenu(null);
+            mediaService.deleteMedia(temp);
+            log.info("Deleted menu");
+        }else {
+            log.info("no media");
+        }
+
+        List<Schedule> schedules = scheduleService.findSchedulesOfTruck(truck);
+        log.info("Deleting " + schedules.size() + " schedules");
+        for(Schedule s : schedules) {
+            scheduleService.deleteSchedule(s.getId());
+        }
+        log.info("Deleted schedules");
+
+        List<User> subscriptions = subscriptionService.findTruckSubscriptions(truck);
+        log.info("Deleting " + subscriptions.size() + " subs");
+        for(User u : subscriptions) {
+            subscriptionService.deleteUserSubscription(u, truck);
+        }
+        log.info("Deleted subscriptions");
+
         try {
             truckService.deleteTruck(truckid);
+            log.info("Deleted truck!!!!");
         } catch (Exception e) {
             return new ResponseEntity<>("Fail to delete: " + e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
