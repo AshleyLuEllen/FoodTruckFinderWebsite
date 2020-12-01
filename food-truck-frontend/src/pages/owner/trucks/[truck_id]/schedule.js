@@ -48,6 +48,13 @@ const useStyles = makeStyles(() => ({
             height: 'auto',
         },
     },
+    buttonProgress: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        marginTop: -12,
+        marginLeft: -12,
+    },
 }));
 
 function DraggableDialog(props) {
@@ -139,12 +146,21 @@ function DraggableDialog(props) {
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button autoFocus onClick={handleClose} color="secondary" variant="contained">
+                    <Button
+                        autoFocus
+                        onClick={handleClose}
+                        color="secondary"
+                        variant="contained"
+                        disabled={props.updating}
+                    >
                         Cancel
                     </Button>
-                    <Button onClick={handleSave} color="primary" variant="contained">
-                        {props.editing ? 'Save Changes' : 'Create New Schedule'}
-                    </Button>
+                    <div style={{ position: 'relative' }}>
+                        <Button onClick={handleSave} color="primary" variant="contained" disabled={props.updating}>
+                            {props.editing ? 'Save Changes' : 'Create New Schedule'}
+                        </Button>
+                        {props.updating && <CircularProgress className={classes.buttonProgress} size={24} />}
+                    </div>
                 </DialogActions>
             </Dialog>
         </div>
@@ -162,6 +178,7 @@ DraggableDialog.propTypes = {
     editing: PropTypes.bool,
     onClose: PropTypes.func,
     onSave: PropTypes.func,
+    updating: PropTypes.bool,
 };
 
 const scheduleStyles = () => ({
@@ -198,6 +215,7 @@ class ScheduleManagementPage extends Component {
             upcomingSelected: [],
             pastSelected: [],
             errorOpen: false,
+            updating: false,
             errorMsg: '',
             errorSeverity: 'error',
         };
@@ -292,7 +310,6 @@ class ScheduleManagementPage extends Component {
             editing: true,
             initialData: this.state.upcoming.find(s => s.id === id),
         });
-        console.log(this.state.initialData);
     }
 
     deleteAll(table) {
@@ -322,6 +339,8 @@ class ScheduleManagementPage extends Component {
     }
 
     handleSave(savedData) {
+        this.setState({ updating: true });
+
         if (this.state.editing) {
             let schedule = {
                 id: savedData.id,
@@ -329,44 +348,65 @@ class ScheduleManagementPage extends Component {
                 timeTo: savedData.timeTo,
             };
 
+            if (new Date(schedule.timeFrom) > new Date(schedule.timeTo)) {
+                this.setState({
+                    errorOpen: true,
+                    errorMsg: 'Schedule end date is before start date',
+                    updating: false,
+                });
+                return;
+            }
+
             if (savedData.placeId) {
                 schedule.placeId = savedData.placeId;
                 schedule.location = savedData.location;
             }
 
-            console.log(this.state);
-            console.log(schedule.timeTo);
             let i;
             for (i = 0; i < this.state.upcoming.length; i++) {
                 /** End time overlap */
-                if (this.state.upcoming[i].id !== schedule.id &&
+                if (
+                    this.state.upcoming[i].id !== schedule.id &&
                     new Date(schedule.timeTo) > new Date(this.state.upcoming[i].timeFrom) &&
-                    new Date(schedule.timeFrom) < new Date(this.state.upcoming[i].timeFrom)) {
+                    new Date(schedule.timeFrom) < new Date(this.state.upcoming[i].timeFrom)
+                ) {
                     this.setState({
                         errorOpen: true,
-                        errorMsg: 'Schedule end date exceeds start date of another schedule beginning at ' + format(new Date(this.state.upcoming[i].timeFrom), "hh:mm a 'on' MM-dd-yyyy"),
+                        errorMsg:
+                            'Schedule end date exceeds start date of another schedule beginning at ' +
+                            format(new Date(this.state.upcoming[i].timeFrom), "hh:mm a 'on' MM-dd-yyyy"),
+                        updating: false,
                     });
                     return;
-
-                }
-                /** Start time overlap */
-                else if (this.state.upcoming[i].id !== schedule.id &&
+                } else if (
+                    /** Start time overlap */
+                    this.state.upcoming[i].id !== schedule.id &&
                     new Date(this.state.upcoming[i].timeTo) > new Date(schedule.timeFrom) &&
-                    new Date(this.state.upcoming[i].timeTo) < new Date(schedule.timeTo)) {
+                    new Date(this.state.upcoming[i].timeTo) < new Date(schedule.timeTo)
+                ) {
                     this.setState({
                         errorOpen: true,
-                        errorMsg: 'Schedule start date is before the end of another schedule ending at ' + format(new Date(this.state.upcoming[i].timeTo), "MM-dd-yyyy 'at' hh:mm a"),
+                        errorMsg:
+                            'Schedule start date is before the end of another schedule ending at ' +
+                            format(new Date(this.state.upcoming[i].timeTo), "MM-dd-yyyy 'at' hh:mm a"),
+                        updating: false,
                     });
                     return;
-                }
-                /** Schedule within another schedule */
-                else if (this.state.upcoming[i].id !== schedule.id &&
+                } else if (
+                    /** Schedule within another schedule */
+                    this.state.upcoming[i].id !== schedule.id &&
                     new Date(this.state.upcoming[i].timeFrom) < new Date(schedule.timeFrom) &&
-                    new Date(this.state.upcoming[i].timeTo) > new Date(schedule.timeTo)) {
+                    new Date(this.state.upcoming[i].timeTo) > new Date(schedule.timeTo)
+                ) {
                     this.setState({
                         errorOpen: true,
-                        errorMsg: 'Schedule start date is after the start of another schedule starting at ' + format(new Date(this.state.upcoming[i].timeFrom), "MM-dd-yyyy 'at' hh:mm a") + '\n'
-                        + 'Schedule end date is before the end of another schedule ending at ' + format(new Date(this.state.upcoming[i].timeTo),  "MM-dd-yyyy 'at' hh:mm a")
+                        errorMsg:
+                            'Schedule start date is after the start of another schedule starting at ' +
+                            format(new Date(this.state.upcoming[i].timeFrom), "MM-dd-yyyy 'at' hh:mm a") +
+                            ' AND ' +
+                            'Schedule end date is before the end of another schedule ending at ' +
+                            format(new Date(this.state.upcoming[i].timeTo), "MM-dd-yyyy 'at' hh:mm a"),
+                        updating: false,
                     });
                     return;
                 }
@@ -381,6 +421,7 @@ class ScheduleManagementPage extends Component {
                 .then(() => {
                     this.setState({
                         open: false,
+                        updating: false,
                     });
                     this.fetchData();
                 })
@@ -390,6 +431,7 @@ class ScheduleManagementPage extends Component {
                         errorMsg: 'Error: could not save schedule data! Check the console for more information.',
                         errorOpen: true,
                         loading: false,
+                        updating: false,
                     });
                 });
         } else {
@@ -400,6 +442,65 @@ class ScheduleManagementPage extends Component {
                 location: savedData.location,
             };
 
+            if (new Date(schedule.timeFrom) > new Date(schedule.timeTo)) {
+                this.setState({
+                    errorOpen: true,
+                    errorMsg: 'Schedule end date is before start date',
+                    updating: false,
+                });
+                return;
+            }
+
+            let i;
+            for (i = 0; i < this.state.upcoming.length; i++) {
+                /** End time overlap */
+                if (
+                    this.state.upcoming[i].id !== schedule.id &&
+                    new Date(schedule.timeTo) > new Date(this.state.upcoming[i].timeFrom) &&
+                    new Date(schedule.timeFrom) < new Date(this.state.upcoming[i].timeFrom)
+                ) {
+                    this.setState({
+                        errorOpen: true,
+                        errorMsg:
+                            'Schedule end date exceeds start date of another schedule beginning at ' +
+                            format(new Date(this.state.upcoming[i].timeFrom), "hh:mm a 'on' MM-dd-yyyy"),
+                        updating: false,
+                    });
+                    return;
+                } else if (
+                    /** Start time overlap */
+                    this.state.upcoming[i].id !== schedule.id &&
+                    new Date(this.state.upcoming[i].timeTo) > new Date(schedule.timeFrom) &&
+                    new Date(this.state.upcoming[i].timeTo) < new Date(schedule.timeTo)
+                ) {
+                    this.setState({
+                        errorOpen: true,
+                        errorMsg:
+                            'Schedule start date is before the end of another schedule ending at ' +
+                            format(new Date(this.state.upcoming[i].timeTo), "MM-dd-yyyy 'at' hh:mm a"),
+                        updating: false,
+                    });
+                    return;
+                } else if (
+                    /** Schedule within another schedule */
+                    this.state.upcoming[i].id !== schedule.id &&
+                    new Date(this.state.upcoming[i].timeFrom) < new Date(schedule.timeFrom) &&
+                    new Date(this.state.upcoming[i].timeTo) > new Date(schedule.timeTo)
+                ) {
+                    this.setState({
+                        errorOpen: true,
+                        errorMsg:
+                            'Schedule start date is after the start of another schedule starting at ' +
+                            format(new Date(this.state.upcoming[i].timeFrom), "MM-dd-yyyy 'at' hh:mm a") +
+                            ' AND ' +
+                            'Schedule end date is before the end of another schedule ending at ' +
+                            format(new Date(this.state.upcoming[i].timeTo), "MM-dd-yyyy 'at' hh:mm a"),
+                        updating: false,
+                    });
+                    return;
+                }
+            }
+
             requests
                 .postWithAuth(
                     `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`,
@@ -409,6 +510,7 @@ class ScheduleManagementPage extends Component {
                 .then(() => {
                     this.setState({
                         open: false,
+                        updating: false,
                     });
                     this.fetchData();
                 })
@@ -418,6 +520,7 @@ class ScheduleManagementPage extends Component {
                         errorMsg: 'Error: could not create schedule! Check the console for more information.',
                         errorOpen: true,
                         loading: false,
+                        updating: false,
                     });
                 });
         }
@@ -518,6 +621,7 @@ class ScheduleManagementPage extends Component {
                 </Container>
                 <DraggableDialog
                     open={this.state.open}
+                    updating={this.state.updating}
                     editing={this.state.editing}
                     initialData={this.state.initialData}
                     onClose={() => this.setState({ open: false })}
