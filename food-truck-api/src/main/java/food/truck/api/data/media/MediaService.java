@@ -27,8 +27,5 @@ public class MediaService {
         mediaRepository.delete(media);
     }
 
-    public void deleteAllByTruck(Truck truck) {
-        mediaRepository.deleteAllByTruck(truck);
-    }
 }
 

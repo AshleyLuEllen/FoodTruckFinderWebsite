@@ -14,9 +14,4 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
     List<UserNotification> findAllByUser(User user);
 
     List<UserNotification> findAllByNotification(TruckNotification notifID);
-
-
-    void deleteByNotification(UserNotification notif);
-
-    void deleteAllByNotification(TruckNotification notif);
 }

@@ -42,8 +42,4 @@ public class ScheduleService {
         return scheduleRepository.findAllSchedulesNearLocationAfterDate(location.getLatitude(), location.getLongitude(), maxDistance, ZonedDateTime.now()).stream()
             .map(Schedule::getTruck).distinct().collect(Collectors.toList());
     }
-
-    public void deleteAllByTruck(Truck truck) {
-        scheduleRepository.deleteAllByTruck(truck);
-    }
 }

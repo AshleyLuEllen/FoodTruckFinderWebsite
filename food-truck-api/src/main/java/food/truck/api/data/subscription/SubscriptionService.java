@@ -48,9 +48,5 @@ public class SubscriptionService {
     public List<User> findTruckSubscriptions(Truck truck) {
         return subscriptionRepository.findAllByTruck(truck).stream().map(Subscription::getUser).collect(Collectors.toList());
     }
-
-    public void deleteAllByTruck(Truck truck) {
-        subscriptionRepository.deleteAllByTruck(truck);
-    }
 }
 

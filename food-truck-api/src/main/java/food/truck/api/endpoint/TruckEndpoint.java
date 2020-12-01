@@ -79,11 +79,6 @@ public class TruckEndpoint {
 
         Truck truck = truckService.findTruck(truckid).orElseThrow(ResourceNotFoundException::new);
 
-//        List<Review> reviews = reviewService.getReviewsByTruck(truck);
-//        for(Review r : reviews) {
-//            reviewService.deleteReview(r.getId());
-//        }
-
         // Get me user
         User user = userService.findUserByEmailAddress(principal.getName()).orElseThrow(UnauthorizedException::new);
 
@@ -98,7 +93,6 @@ public class TruckEndpoint {
         }
         log.info("Deleted reviews");
 
-//        reviewService.deleteAllByTruck(truck);
         List<TruckNotification> notifs = truckNotificationService.getNotificationsOwnedByTruck(truck);
         log.info("Deleting " + notifs.size() + " truck notifications");
         for(TruckNotification not : notifs) {
