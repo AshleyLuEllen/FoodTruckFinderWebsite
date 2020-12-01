@@ -36,6 +36,22 @@ const pageStyles = () => ({
     textField: {
         marginBottom: '20px',
     },
+    buttonProgress: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        marginTop: -12,
+        marginLeft: -12,
+    },
+    buttonWrapper: {
+        position: 'relative',
+        marginBottom: '20px',
+        marginRight: '10px',
+    },
+    button: {
+        marginBottom: '20px',
+        marginRight: '10px',
+    },
 });
 
 /**
@@ -52,6 +68,7 @@ class NotificationPage extends Component {
             notifications: [],
             truckFound: false,
             isLoading: false,
+            updating: false,
 
             openNotification: 1,
             openNotObj: undefined,
@@ -105,6 +122,10 @@ class NotificationPage extends Component {
             return Promise.resolve(0);
         }
 
+        this.setState({
+            updating: true,
+        })
+
         const formData = new FormData();
         formData.append('file', this.state.media);
 
@@ -124,6 +145,7 @@ class NotificationPage extends Component {
         this.setState({
             subject: this.state.subject.trim(),
             description: this.state.description.trim(),
+            updating: true,
         });
 
         try {
@@ -141,6 +163,7 @@ class NotificationPage extends Component {
                             errorOpen: true,
                             errorSeverity: 'info',
                             media: undefined,
+                            updating: false,
                         });
                     });
                 } catch (err) {
@@ -168,6 +191,7 @@ class NotificationPage extends Component {
                 };
 
                 let notId;
+                this.setState({updating:true});
 
                 await requests
                     .postWithAuth(
@@ -177,7 +201,7 @@ class NotificationPage extends Component {
                     )
                     .then(res => {
                         notId = res.data.id;
-                        this.setState({ errorMsg: 'Notification created successfully.' });
+                        this.setState({ errorMsg: 'Notification created successfully.', updating:false });
                     });
 
                 try {
@@ -228,16 +252,18 @@ class NotificationPage extends Component {
     }
 
     async handleDelete() {
+        this.setState({updating:true});
         try {
             await requests.deleteWithAuth(
                 `${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/notifications/${this.state.openNotification}`,
                 this.props.auth
-            );
+            ).then(this.setState({updating:false}));
         } catch (err) {
             console.error(err);
             this.setState({
                 errorMsg: 'Error: could not save your notification! Check the console for more information.',
                 errorOpen: true,
+                updating: false,
             });
             return;
         }
@@ -451,33 +477,53 @@ class NotificationPage extends Component {
                         )}
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.handleCancel} color="primary" variant="contained">
-                            {this.state.published ? 'Close' : 'Cancel'}
-                        </Button>
-                        {!this.state.published && (
-                            <Button
-                                onClick={() => this.handleClose(false)}
-                                color="primary"
-                                variant="contained"
-                                disabled={this.state.subject.length < 3 || this.state.description.length < 3}
-                            >
-                                Save
+                        <span className={classes.buttonWrapper}>
+                            <Button disabled={this.state.updating} onClick={this.handleCancel} color="primary" variant="contained">
+                                {this.state.published ? 'Close' : 'Cancel'}
                             </Button>
+                            {this.state.updating && (
+                                <CircularProgress size={24} className={classes.buttonProgress} />
+                            )}
+                        </span>
+                        {!this.state.published && (
+                            <span className={classes.buttonWrapper}>
+                                <Button
+                                    onClick={() => this.handleClose(false)}
+                                    color="primary"
+                                    variant="contained"
+                                    disabled={this.state.subject.length < 3 || this.state.description.length < 3 || this.state.updating}
+                                >
+                                    Save
+                                </Button>
+                                {this.state.updating && (
+                                    <CircularProgress size={24} className={classes.buttonProgress} />
+                                )}
+                            </span>
                         )}
                         {!this.state.published && (
-                            <Button
-                                onClick={() => this.handleClose(true)}
-                                color="primary"
-                                variant="contained"
-                                disabled={this.state.subject.length < 3 || this.state.description.length < 3}
-                            >
-                                Publish
-                            </Button>
+                            <span className={classes.buttonWrapper}>
+                                <Button
+                                    onClick={() => this.handleClose(true)}
+                                    color="primary"
+                                    variant="contained"
+                                    disabled={this.state.subject.length < 3 || this.state.description.length < 3 || this.state.updating}
+                                >
+                                    Publish
+                                </Button>
+                                {this.state.updating && (
+                                    <CircularProgress size={24} className={classes.buttonProgress} />
+                                )}
+                            </span>
                         )}
                         {!this.state.published && !this.state.openCreate && this.state.open && (
-                            <Button onClick={this.handleDelete} color="secondary" variant="contained">
-                                Delete
-                            </Button>
+                            <span className={classes.buttonWrapper}>
+                                <Button onClick={this.handleDelete} color="secondary" variant="contained" disabled={this.state.updating}>
+                                    Delete
+                                </Button>
+                                {this.state.updating && (
+                                    <CircularProgress size={24} className={classes.buttonProgress} />
+                                )}
+                            </span>
                         )}
                     </DialogActions>
                 </Dialog>
