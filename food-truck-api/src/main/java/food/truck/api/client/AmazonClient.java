@@ -12,7 +12,9 @@ import food.truck.api.data.media.MediaService;
 import food.truck.api.data.truck.Truck;
 import food.truck.api.data.truck.TruckService;
 import food.truck.api.data.truck_notification.TruckNotification;
+import food.truck.api.data.truck_notification.TruckNotificationService;
 import food.truck.api.data.user.User;
+import food.truck.api.data.user.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +36,12 @@ public class AmazonClient {
 
     @Autowired
     TruckService truckService;
+
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    TruckNotificationService truckNotificationService;
 
     private AmazonS3 s3client;
 
@@ -112,6 +120,11 @@ public class AmazonClient {
     public void deleteProfilePicture(User user) {
         String fileName = user.getAvatar().getUrl().substring(user.getAvatar().getUrl().lastIndexOf('/') + 1);
         s3client.deleteObject(new DeleteObjectRequest(bucketName, "profiles/" + fileName));
+
+        Media avatar = user.getAvatar();
+        user.setAvatar(null);
+        userService.saveUser(user);
+        mediaService.deleteMedia(avatar);
     }
 
     public String uploadMenu(MultipartFile multipartFile, Truck truck) {
@@ -173,5 +186,10 @@ public class AmazonClient {
         String fileName = notification.getMedia().getUrl().substring(notification.getMedia().getUrl().lastIndexOf('/') + 1);
         log.info(fileName);
         s3client.deleteObject(new DeleteObjectRequest(bucketName, "notifications/" + fileName));
+
+        Media media = notification.getMedia();
+        notification.setMedia(null);
+        truckNotificationService.saveTruckNotification(notification);
+        mediaService.deleteMedia(media);
     }
 }

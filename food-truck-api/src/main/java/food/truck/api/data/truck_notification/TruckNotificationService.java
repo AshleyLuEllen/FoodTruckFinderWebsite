@@ -52,7 +52,7 @@ public class TruckNotificationService {
     public TruckNotification saveTruckNotification(TruckNotification truckNotification) {
         boolean notifySubscribers = false;
 
-        if (truckNotification.published && truckNotification.postedTimestamp == null) {
+        if (truckNotification.published != null && truckNotification.getPublished()) {
             truckNotification.setPostedTimestamp(ZonedDateTime.now());
             notifySubscribers = true;
 
@@ -100,6 +100,8 @@ public class TruckNotificationService {
         if (truckNotification.published != null && truckNotification.getPublished()) {
             truckNotification.setPostedTimestamp(ZonedDateTime.now());
             notifySubscribers = true;
+        } else {
+            truckNotification.setPostedTimestamp(null);
         }
 
         var tn = truckNotificationRepository.save(truckNotification);

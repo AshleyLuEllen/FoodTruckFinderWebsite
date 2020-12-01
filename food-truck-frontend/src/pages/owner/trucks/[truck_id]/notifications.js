@@ -276,7 +276,7 @@ class NotificationPage extends Component {
                         id: not.id,
                         subject: not.subject,
                         // date: parseISO(not.postedTimestamp),
-                        date: not.postedTimestamp && parseISO(not.postedTimestamp),
+                        date: not.published ? not.postedTimestamp && parseISO(not.postedTimestamp) : undefined,
                         media: not.media !== undefined && not.media !== null,
                     })),
                     truckFound: true,
