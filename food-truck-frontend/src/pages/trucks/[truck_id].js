@@ -557,7 +557,7 @@ class TruckPage extends Component {
                             rows={4}
                             fullWidth={true}
                             value={this.state.reviewComment}
-                            onChange={e => this.handleInputChange(e, null)}
+                            onChange={this.handleInputChange}
                             onBlur={() => this.setState({ reviewComment: this.state.reviewComment.trim() })}
                         />
                     </DialogContent>
