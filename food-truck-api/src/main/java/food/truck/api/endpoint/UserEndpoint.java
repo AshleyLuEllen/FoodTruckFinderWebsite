@@ -79,22 +79,15 @@ public class UserEndpoint {
 
     @PostMapping("/users/search")
     public List<User> searchForUsers(@RequestBody FriendSearchQuery searchQuery) {
-        List<User> results = new ArrayList<>();
+        List<User> results = new ArrayList<>(userService.findUsersByName(searchQuery.firstName, searchQuery.lastName));
 
-
-        log.info(searchQuery.email);
-        log.info(searchQuery.firstName);
-        log.info(searchQuery.lastName);
         if (searchQuery.email != null) {
             Optional<User> u = userService.findUserByEmailAddress(searchQuery.email);
-            if (!u.isEmpty()) {
-                results.add(u.get());
+            if (u.isPresent()) {
+                if (results.stream().mapToLong(User::getId).filter(id -> id == u.get().getId()).count() == 0) {
+                    results.add(u.get());
+                }
             }
-        }
-
-        List<User> users = userService.findUsersByName(searchQuery.firstName, searchQuery.lastName);
-        if (users.size() > 0) {
-            results.addAll(users);
         }
 
         return results;

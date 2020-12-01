@@ -6,6 +6,7 @@ import requests from '../../util/requests';
 import { logout as authLogout } from '../../redux/actions/auth';
 import { connect } from 'react-redux';
 import Head from 'next/dist/next-server/lib/head';
+import { withRouter } from 'next/router';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Dialog, DialogActions, DialogTitle, DialogContent, Button, Snackbar } from '@material-ui/core';
@@ -45,6 +46,8 @@ class Notifications extends Component {
         Promise.all(
             this.state.selected
                 .map(id => this.state.rows.find(row => row.id === id))
+                .filter(not => not !== undefined)
+                .filter(not => not.unread === true)
                 .map(not => {
                     requests.patchWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/users/${this.props.auth.userId}/notifications/${not.id}`,
@@ -70,6 +73,7 @@ class Notifications extends Component {
             this.state.selected
                 .map(id => this.state.rows.find(row => row.id == id))
                 .filter(not => not !== undefined)
+                .filter(not => not.unread === false)
                 .map(not => {
                     requests.patchWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/users/${this.props.auth.userId}/notifications/${not.id}`,
@@ -166,6 +170,11 @@ class Notifications extends Component {
     }
 
     render() {
+        if (!this.props.auth.isLoggedIn) {
+            this.props.router.push('/');
+            return null;
+        }
+
         const { classes } = this.props;
 
         const columns = [
@@ -296,6 +305,7 @@ class Notifications extends Component {
 Notifications.propTypes = {
     auth: PropTypes.any,
     classes: PropTypes.any,
+    router: PropTypes.any,
 };
 
 function mapStateToProps(state) {
@@ -308,5 +318,5 @@ const mapDispatchToProps = {
 };
 
 export default withStyles(notificationStyles, { withTheme: true })(
-    connect(mapStateToProps, mapDispatchToProps)(Notifications)
+    withRouter(connect(mapStateToProps, mapDispatchToProps)(Notifications))
 );

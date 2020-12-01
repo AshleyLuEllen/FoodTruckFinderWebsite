@@ -4,7 +4,7 @@ import requests from '../../../../util/requests';
 import { withRouter } from 'next/router';
 import { connect } from 'react-redux';
 
-import { Grid, TextField, Button, Typography, Container, CircularProgress, Snackbar } from '@material-ui/core';
+import { Grid, TextField, Button, Typography, Container, CircularProgress, Snackbar, Paper } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import { Alert } from '@material-ui/lab';
 
@@ -53,7 +53,7 @@ class Information extends Component {
             name: '',
             description: '',
             licensePlate: '',
-            truck: '',
+            truck: undefined,
             owner: '',
             schedules: [],
             avg_rating: -1,
@@ -318,12 +318,20 @@ class Information extends Component {
     }
 
     render() {
+        if (!this.props.auth.isLoggedIn) {
+            this.props.router.push('/');
+            return null;
+        } else if (this.state.truck !== undefined && this.props.auth.userId != this.state.truck.owner.id) {
+            this.props.router.push('/owner/trucks');
+            return null;
+        }
+
         const { classes } = this.props;
 
         return (
             <Container className={classes.root}>
                 <Head>
-                    <title>Manage {this.state.truck.name}</title>
+                    <title>Manage {this.state.truck?.name}</title>
                 </Head>
                 <Typography variant="h4" style={{ marginBottom: '20px' }}>
                     Manage Truck {this.state.truck && `- ${this.state.truck.name}`}{' '}
@@ -474,13 +482,19 @@ class Information extends Component {
                                     Current Location: <strong>{this.state.truck.currentLocation?.location}</strong>
                                 </p>
                             )}
-                            {this.state.schedules.length > 0 && <ScheduleCard schedules={this.state.schedules} />}
+                            {this.state.schedules.length > 0 ? (
+                                <ScheduleCard schedules={this.state.schedules} />
+                            ) : (
+                                <Paper elevation={2} style={{ textAlign: 'center', padding: '20px' }}>
+                                    <em>You have not posted a schedule.</em>
+                                </Paper>
+                            )}
                             <Typography variant="h5" style={{ marginBottom: '10px', marginTop: '10px' }}>
                                 Menu
                             </Typography>
                             <div style={{ width: '100%' }}>
-                                {this.state.truck?.menu &&
-                                    (this.state.truck.menu.dataType === 'MENU_PDF' ? (
+                                {this.state.truck?.menu ? (
+                                    this.state.truck.menu.dataType === 'MENU_PDF' ? (
                                         <object
                                             data={this.state.truck.menu.url}
                                             type="application/pdf"
@@ -496,7 +510,12 @@ class Information extends Component {
                                         </object>
                                     ) : (
                                         <img src={this.state.truck.menu.url} style={{ width: '100%' }} />
-                                    ))}
+                                    )
+                                ) : (
+                                    <Paper elevation={2} style={{ textAlign: 'center', padding: '20px' }}>
+                                        <em>You have not posted a menu.</em>
+                                    </Paper>
+                                )}
                             </div>
                         </Grid>
                     </Grid>

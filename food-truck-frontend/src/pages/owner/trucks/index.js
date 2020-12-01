@@ -54,6 +54,11 @@ class Dashboard extends Component {
     }
 
     render() {
+        if (!this.props.auth.isLoggedIn) {
+            this.props.router.push('/');
+            return null;
+        }
+
         const { classes } = this.props;
         return (
             <Container className={classes.root}>

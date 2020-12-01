@@ -22,8 +22,9 @@ const pageStyles = () => ({
         marginBottom: '20px',
     },
     button: {
-        marginRight: '20px',
+        marginLeft: '20px',
     },
+    progress: { position: 'absolute', top: '50%', left: '50%', marginTop: -12, marginLeft: -12 },
 });
 
 class CreateNewTruck extends Component {
@@ -96,10 +97,15 @@ class CreateNewTruck extends Component {
     }
 
     createNewTruck() {
+        this.setState({
+            attemptingCreation: true,
+        });
+
         if (this.state.name.length < 5) {
             this.setState({
                 errorMsg: 'Invalid food truck name.',
                 errorOpen: true,
+                attemptingCreation: false,
             });
             return;
         }
@@ -108,6 +114,7 @@ class CreateNewTruck extends Component {
             this.setState({
                 errorMsg: 'Invalid license plate.',
                 errorOpen: true,
+                attemptingCreation: false,
             });
             return;
         }
@@ -116,6 +123,7 @@ class CreateNewTruck extends Component {
             this.setState({
                 errorMsg: 'Description must not be blank.',
                 errorOpen: true,
+                attemptingCreation: false,
             });
             return;
         }
@@ -154,6 +162,7 @@ class CreateNewTruck extends Component {
                             errorMsg:
                                 'Error: could not add the specified truck tags! Check the console for more information.',
                             errorOpen: true,
+                            attemptingCreation: false,
                         });
                     });
             })
@@ -162,11 +171,17 @@ class CreateNewTruck extends Component {
                 this.setState({
                     errorMsg: 'Error: could not create your truck! Check the console for more information.',
                     errorOpen: true,
+                    attemptingCreation: false,
                 });
             });
     }
 
     render() {
+        if (!this.props.auth.isLoggedIn) {
+            this.props.router.push('/');
+            return null;
+        }
+
         const { classes } = this.props;
 
         return (
@@ -239,15 +254,24 @@ class CreateNewTruck extends Component {
                         }}
                     />
                 </div>
-                <Button className={classes.button} variant="contained" color="primary" onClick={this.createNewTruck}>
-                    Create
-                </Button>
+                <span style={{ position: 'relative' }}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={this.createNewTruck}
+                        disabled={this.state.attemptingCreation}
+                    >
+                        Create
+                    </Button>
+                    {this.state.attemptingCreation && <CircularProgress className={classes.progress} size={24} />}
+                </span>
                 <Button
                     className={classes.button}
                     variant="contained"
                     color="secondary"
                     onClick={this.handleCancel}
                     href="/owner/trucks"
+                    disabled={this.state.attemptingCreation}
                 >
                     Cancel
                 </Button>

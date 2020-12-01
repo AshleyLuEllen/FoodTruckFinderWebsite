@@ -275,6 +275,11 @@ function ManageAccountPage(props) {
         });
     }
 
+    if (!props.auth.isLoggedIn) {
+        router.push('/');
+        return null;
+    }
+
     return (
         <Container className={classes.root}>
             <Head>
