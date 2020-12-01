@@ -468,7 +468,7 @@ class ScheduleManagementPage extends Component {
                 )}
                 <Container className={classes.root}>
                     <Breadcrumbs aria-label="breadcrumb">
-                        <Link href="/owner" passHref>
+                        <Link href="/owner/trucks" passHref>
                             <MuiLink color="inherit">My Trucks</MuiLink>
                         </Link>
                         {this.props.router?.query?.truck_id ? (
