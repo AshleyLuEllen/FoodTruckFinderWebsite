@@ -45,6 +45,8 @@ class Notifications extends Component {
         Promise.all(
             this.state.selected
                 .map(id => this.state.rows.find(row => row.id === id))
+                .filter(not => not !== undefined)
+                .filter(not => not.unread === true)
                 .map(not => {
                     requests.patchWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/users/${this.props.auth.userId}/notifications/${not.id}`,
@@ -70,6 +72,7 @@ class Notifications extends Component {
             this.state.selected
                 .map(id => this.state.rows.find(row => row.id == id))
                 .filter(not => not !== undefined)
+                .filter(not => not.unread === false)
                 .map(not => {
                     requests.patchWithAuth(
                         `${process.env.FOOD_TRUCK_API_URL}/users/${this.props.auth.userId}/notifications/${not.id}`,
