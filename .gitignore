@@ -8,3 +8,5 @@
 
 # IntelliJ Gradle Auto-Import
 *.iml
+
+*/Dockerfile

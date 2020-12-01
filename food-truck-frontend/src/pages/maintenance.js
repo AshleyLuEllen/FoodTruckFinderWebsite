@@ -32,7 +32,7 @@ export default function MaintenancePage() {
                 })
                 .catch(err => {
                     console.log(err);
-                    dispatch(logout());
+                    // dispatch(logout());
                 });
         }
     }, [router.query.next]);
