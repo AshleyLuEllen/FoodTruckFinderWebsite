@@ -155,7 +155,7 @@ public class TruckNotificationService {
         TruckNotification notification2 = new TruckNotification();
         notification2.setType(NotificationType.FRIEND);
         notification2.setSubject("You have a new friend following you.");
-        notification2.setDescription("**" + user.getFirstName() + ' ' + user.getLastName() + "** just started following you. If you are not friends with them already, you can follow them by clicking [here](/users/" + user.getId() + ").");
+        notification2.setDescription("**" + user.getFirstName() + ' ' + user.getLastName() + "** just started following you. If you are not friends with them already, you can follow them by clicking [here](/user/" + user.getId() + ").");
         notification2.setMedia(null);
         notification2.setUser(newFriend);
         notification2.setPublished(true);

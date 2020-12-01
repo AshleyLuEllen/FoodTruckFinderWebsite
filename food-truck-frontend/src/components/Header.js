@@ -167,8 +167,8 @@ function Header(props) {
             .catch(err => {
                 console.error(err);
                 if (
-                    // err.includes &&
-                    // err.includes('Network Error') &&
+                    err.includes &&
+                    err.includes('Network Error') &&
                     !err.response?.status &&
                     !router.asPath.startsWith('/maintenance')
                 ) {
