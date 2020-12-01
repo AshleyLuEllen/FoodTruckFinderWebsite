@@ -239,15 +239,18 @@ class TruckPage extends Component {
     }
 
     handleInputChange(e, value) {
-        if (value == null) {
-            this.setState({
-                reviewComment: e.target.value,
-            });
-        } else {
-            this.setState({
-                rating: value,
-            });
-        }
+        this.setState({
+            [e.target.name]: e.target.value
+        });
+        // if (value == null) {
+        //     this.setState({
+        //         reviewComment: e.target.value,
+        //     });
+        // } else {
+        //     this.setState({
+        //         rating: value,
+        //     });
+        // }
     }
 
     /**
@@ -539,24 +542,22 @@ class TruckPage extends Component {
                             <span style={{ fontSize: '16px', marginRight: '10px' }}>Rating</span>
                             <Rating
                                 align="left"
-                                name="preferredRating"
+                                name="rating"
                                 precision={0.5}
                                 value={this.state.rating}
-                                onChange={(event, newValue) => {
-                                    this.handleInputChange(event, newValue);
-                                }}
+                                onChange={this.handleInputChange}
                                 size="medium"
                             />
                         </div>
                         <TextField
                             variant="outlined"
-                            id="reviewComment"
+                            name="reviewComment"
                             label="Review Comment (optional)"
                             multiline
                             rows={4}
                             fullWidth={true}
                             value={this.state.reviewComment}
-                            onChange={e => this.handleInputChange(e, null)}
+                            onChange={this.handleInputChange}
                             onBlur={() => this.setState({ reviewComment: this.state.reviewComment.trim() })}
                         />
                     </DialogContent>
