@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 import React, { Component, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';

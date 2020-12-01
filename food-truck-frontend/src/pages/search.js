@@ -172,8 +172,8 @@ function SearchPage(props) {
                         query: searchQuery,
                         tags: selectedTags,
                         location: {
-                            latitude: props.coords.latitude,
-                            longitude: props.coords.longitude,
+                            latitude: props.coords?.latitude || 31.5489,
+                            longitude: props.coords?.longitude || -97.1131,
                         },
                         preferredRating,
                     };
@@ -309,8 +309,14 @@ function SearchPage(props) {
                     <div className={classes.mapWrapper}>
                         <GoogleMap
                             center={{
-                                lat: props?.coords?.latitude || 31.5489,
-                                lng: props?.coords?.longitude || -97.1131,
+                                lat:
+                                    showingResults && truckResults.length > 0
+                                        ? truckResults[0].currentLocation.latitude
+                                        : props?.coords?.latitude || 31.5489,
+                                lng:
+                                    showingResults && truckResults.length > 0
+                                        ? truckResults[0].currentLocation.longitude
+                                        : props?.coords?.longitude || -97.1131,
                             }}
                             withInfoWindow
                         >
@@ -334,7 +340,14 @@ function SearchPage(props) {
                                             </Marker>
                                         )
                                 )}
-                            <Marker variant="circle" disableInfoWindow></Marker>
+                            <Marker
+                                variant="circle"
+                                disableInfoWindow
+                                position={{
+                                    lat: props?.coords?.latitude || 31.5489,
+                                    lng: props?.coords?.longitude || -97.1131,
+                                }}
+                            ></Marker>
                         </GoogleMap>
                     </div>
                 </Grid>
