@@ -158,25 +158,27 @@ public class UserService {
     }
 
     public List<User> findUsersByName(String firstName, String lastName) {
-        List<User> temp = new ArrayList<>();
+        return userRepository.findAllByFirstNameAndLastName(firstName, lastName);
 
-        if (firstName != null && lastName != null) {
-            temp = userRepository.findAllByFirstNameAndLastName(firstName, lastName);
-
-            List<User> first = userRepository.findAllByFirstName(firstName);
-            first.removeIf(temp::contains);
-            temp.addAll(first);
-
-            List<User> last = userRepository.findAllByLastName(lastName);
-            last.removeIf(temp::contains);
-            temp.addAll(last);
-        }
-        else if(firstName != null && lastName == null) {
-            return userRepository.findAllByFirstName(firstName);
-        }
-        else if(firstName == null && lastName != null) {
-            return userRepository.findAllByLastName(lastName);
-        }
-        return temp;
+//        List<User> temp = new ArrayList<>();
+//
+//        if (firstName != null && lastName != null) {
+//            temp = userRepository.findAllByFirstNameAndLastName(firstName, lastName);
+//
+//            List<User> first = userRepository.findAllByFirstName(firstName);
+//            first.removeIf(temp::contains);
+//            temp.addAll(first);
+//
+//            List<User> last = userRepository.findAllByLastName(lastName);
+//            last.removeIf(temp::contains);
+//            temp.addAll(last);
+//        }
+//        else if(firstName != null && lastName == null) {
+//            return userRepository.findAllByFirstName(firstName);
+//        }
+//        else if(firstName == null && lastName != null) {
+//            return userRepository.findAllByLastName(lastName);
+//        }
+//        return temp;
     }
 }
