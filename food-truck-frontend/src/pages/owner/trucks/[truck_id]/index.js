@@ -53,7 +53,7 @@ class Information extends Component {
             name: '',
             description: '',
             licensePlate: '',
-            truck: '',
+            truck: undefined,
             owner: '',
             schedules: [],
             avg_rating: -1,
@@ -318,12 +318,20 @@ class Information extends Component {
     }
 
     render() {
+        if (!this.props.auth.isLoggedIn) {
+            this.props.router.push('/');
+            return null;
+        } else if (this.state.truck !== undefined && this.props.auth.userId != this.state.truck.owner.id) {
+            this.props.router.push('/owner/trucks');
+            return null;
+        }
+
         const { classes } = this.props;
 
         return (
             <Container className={classes.root}>
                 <Head>
-                    <title>Manage {this.state.truck.name}</title>
+                    <title>Manage {this.state.truck?.name}</title>
                 </Head>
                 <Typography variant="h4" style={{ marginBottom: '20px' }}>
                     Manage Truck {this.state.truck && `- ${this.state.truck.name}`}{' '}

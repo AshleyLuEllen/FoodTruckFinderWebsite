@@ -236,6 +236,20 @@ class ScheduleManagementPage extends Component {
         }
 
         requests
+            .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}`)
+            .then(res => {
+                this.setState({ truck: res.data });
+            })
+            .catch(err => {
+                console.error(err);
+                this.setState({
+                    errorMsg: 'Error: could not fetch schedule data! Check the console for more information.',
+                    errorOpen: true,
+                    loading: false,
+                });
+            });
+
+        requests
             .get(`${process.env.FOOD_TRUCK_API_URL}/trucks/${this.props.router.query.truck_id}/schedules`)
             .then(res => {
                 const schedules = res.data.map(schedule => ({
@@ -528,6 +542,14 @@ class ScheduleManagementPage extends Component {
     }
 
     render() {
+        if (!this.props.auth.isLoggedIn) {
+            this.props.router.push('/');
+            return null;
+        } else if (this.state.truck !== undefined && this.props.auth.userId != this.state.truck.owner.id) {
+            this.props.router.push('/owner/trucks');
+            return null;
+        }
+
         const { classes } = this.props;
 
         const columns = [
