@@ -103,6 +103,7 @@ class NotificationPage extends Component {
                 published: notification.published,
                 postedTimestamp: notification.postedTimestamp,
                 media: undefined,
+                updating: false,
             });
         } else {
             this.setState({
@@ -113,6 +114,7 @@ class NotificationPage extends Component {
                 description: '',
                 published: false,
                 media: undefined,
+                updating: false,
             });
         }
     }
