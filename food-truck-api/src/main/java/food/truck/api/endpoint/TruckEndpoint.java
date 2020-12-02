@@ -1,5 +1,6 @@
 package food.truck.api.endpoint;
 
+import food.truck.api.client.AmazonClient;
 import food.truck.api.data.media.Media;
 import food.truck.api.data.media.MediaService;
 import food.truck.api.data.review.Review;
@@ -19,6 +20,7 @@ import food.truck.api.data.truck_tag.TruckTagRepository;
 import food.truck.api.data.truck_tag.TruckTagService;
 import food.truck.api.data.user.User;
 import food.truck.api.data.user.UserService;
+import food.truck.api.data.user_notification.UserNotification;
 import food.truck.api.data.user_notification.UserNotificationService;
 import food.truck.api.endpoint.error.BadRequestException;
 import food.truck.api.endpoint.error.ResourceNotFoundException;
@@ -54,6 +56,9 @@ public class TruckEndpoint {
 
     @Autowired
     private MediaService mediaService;
+
+    @Autowired
+    private AmazonClient amazonClient;
 
     @Autowired
     private UserNotificationService userNotificationService;
@@ -96,9 +101,10 @@ public class TruckEndpoint {
         List<TruckNotification> notifs = truckNotificationService.getNotificationsOwnedByTruck(truck);
         log.info("Deleting " + notifs.size() + " truck notifications");
         for(TruckNotification not : notifs) {
-            if(not.getMedia() != null) {
-                mediaService.deleteMedia(not.getMedia());
-            }
+            userNotificationService.deleteNotification(not);
+
+            this.amazonClient.deleteNotificationMedia(not);
+
             log.info("ID = " + not.getId());
             truckNotificationService.deleteById(not.getId());
         }
@@ -109,9 +115,8 @@ public class TruckEndpoint {
             log.info("ID = " + not.getId());
             userNotificationService.deleteNotification(not);
 
-            if(not.getMedia() != null) {
-                mediaService.deleteMedia(not.getMedia());
-            }
+                this.amazonClient.deleteNotificationMedia(not);
+
             truckNotificationService.deleteById(not.getId());
         }
 
@@ -124,14 +129,7 @@ public class TruckEndpoint {
         }
         log.info("Deleted tags");
 
-        if(truck.getMenu() != null) {
-            Media temp = truck.getMenu();
-            truck.setMenu(null);
-            mediaService.deleteMedia(temp);
-            log.info("Deleted menu");
-        }else {
-            log.info("no media");
-        }
+        this.amazonClient.deleteMenu(truck);
 
         List<Schedule> schedules = scheduleService.findSchedulesOfTruck(truck);
         log.info("Deleting " + schedules.size() + " schedules");
