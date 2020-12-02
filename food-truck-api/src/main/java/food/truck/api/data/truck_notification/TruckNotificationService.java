@@ -50,9 +50,13 @@ public class TruckNotificationService {
     }
 
     public TruckNotification saveTruckNotification(TruckNotification truckNotification) {
+        return saveTruckNotification(truckNotification, true);
+    }
+
+    public TruckNotification saveTruckNotification(TruckNotification truckNotification, boolean shouldAttemptToPost) {
         boolean notifySubscribers = false;
 
-        if (truckNotification.published != null && truckNotification.getPublished()) {
+        if (shouldAttemptToPost && truckNotification.published != null && truckNotification.getPublished()) {
             truckNotification.setPostedTimestamp(ZonedDateTime.now());
             notifySubscribers = true;
 

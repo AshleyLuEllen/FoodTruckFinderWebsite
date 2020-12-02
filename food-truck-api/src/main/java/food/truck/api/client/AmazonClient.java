@@ -189,7 +189,7 @@ public class AmazonClient {
 
         Media media = notification.getMedia();
         notification.setMedia(null);
-        truckNotificationService.saveTruckNotification(notification);
+        truckNotificationService.saveTruckNotification(notification, false);
         mediaService.deleteMedia(media);
     }
 }
