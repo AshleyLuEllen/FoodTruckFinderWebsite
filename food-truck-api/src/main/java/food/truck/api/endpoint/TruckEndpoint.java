@@ -149,6 +149,7 @@ public class TruckEndpoint {
             truckService.deleteTruck(truckid);
             log.info("Deleted truck!!!!");
         } catch (Exception e) {
+            log.error("Failed to delete", e);
             return new ResponseEntity<>("Fail to delete: " + e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
 
