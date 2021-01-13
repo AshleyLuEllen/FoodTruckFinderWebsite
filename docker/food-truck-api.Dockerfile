@@ -1,8 +1,8 @@
 FROM openjdk:14 AS build
 
-ENV AMAZON_S3_ACCESS_KEY=AKIASMPQTUATZZVNUIH2
-ENV AMAZON_S3_SECRET_KEY=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
-ENV GOOGLE_API_KEY=AIzaSyDSDFlqV9UDWh6V0D6STb7JU0-niCSb91U
+ENV AMAZON_S3_ACCESS_KEY=<access-key>
+ENV AMAZON_S3_SECRET_KEY=<secret-key>
+ENV GOOGLE_API_KEY=<api-key>
 
 # Possible to execute the mave bom build here? Would need to dowload maven...
 
